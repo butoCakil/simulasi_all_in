@@ -5,6 +5,22 @@ function (PRATINJAU) {
       Object.prototype.hasOwnProperty.call(modeInfo, d.mode) && Array.isArray(d.rounds) && d.rounds.length === 5 &&
       d.rounds.every(function (r) { return r && r.fixture && typeof r.fixture === 'object' && r.answer && typeof r.answer === 'object'; });
   }
+  // Siswa di Super APP tidak melihat acuan dan jumlah tepat sebelum guru merilis nilai.
+  if (!PRATINJAU) {
+    var aslinya = updateJob;
+    updateJob = function () {
+      aslinya();
+      if (state.report && !state.report.review) {
+        $('exerciseTitle').textContent = 'Job selesai';
+        $('exerciseText').textContent =
+          'Tekan Kirim di halaman tugas. Nilai dan acuan tampil setelah guru merilis nilai.';
+      }
+    };
+    var gaya = document.createElement('style');
+    gaya.textContent = 'html.sematan:not(.pratinjau) #results{display:none}';
+    document.head.append(gaya);
+    updateJob();
+  }
   return {
     versi: 'osiloskop-tmg+sematan1',
     ambil: function () {
