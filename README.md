@@ -23,6 +23,24 @@ repo ini bisa langsung disalin ke sana.
   Di luar host `iprime-bansari.online` tombol *Kirim Tugas* dan tautan *Daftar Tugas* disembunyikan
   (penjaga kecil di awal `<head>` tiap berkas), karena backend iprime tidak ada di sana.
 
+## Mode sematan Super APP
+
+Di Super APP tiap simulator (selain Lab Fisika SD) juga dipakai sebagai **alat tugas**: dibuka di
+iframe dengan `?sematan=1`, hasil kerja siswa tersimpan otomatis dan terkirim ke guru, dan guru
+melihatnya dengan `?pratinjau=1`. Bagian ini ada di akhir tiap berkas di antara penanda
+`SEMATAN-SUPERAPP:MULAI` dan `SEMATAN-SUPERAPP:SELESAI`, dan hanya aktif di dalam iframe Super APP;
+dibuka biasa (termasuk di iprime) simulator berjalan seperti semula.
+
+- Sumbernya di folder `sematan/` (`inti.js` untuk protokol, satu berkas adaptor per simulator).
+  Setelah mengubahnya jalankan `python3 sematan/pasang.py` dari akar repo; skrip itu mengganti
+  blok lama di tiap simulator.
+- Isi berkas yang dikirim sama dengan data *Kirim Tugas* bawaan: laporan lima ronde (Osiloskop,
+  Multimeter), proyek rangkaian (Instalasi Listrik, IC Digital), dan gabungan proyek keempat tab
+  (RAM & Dot Matrix).
+- Logika simulator tidak diubah. Instalasi Listrik dan IC Digital mendapat satu baris
+  `window.tugasRangkaian = …` dan RAM & Dot Matrix satu blok `window.simTugasRam = …` (bertanda
+  `SEMATAN-SUPERAPP`) supaya fungsi simpan/muat yang ada bisa dipanggil dari luar.
+
 ## Perapian dari berkas kiriman awal
 
 Berkas awal adalah hasil *Simpan halaman* dari peramban, sehingga memuat salinan elemen yang juga
