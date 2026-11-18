@@ -863,6 +863,122 @@ async function openSubmittedProject() {
       : (error.message || 'Kiriman gagal dimuat.');
   }
 }
+// SEMATAN-SUPERAPP: akses proyek keempat tab untuk sematan Super APP (sematan/ram.js).
+window.simTugasRam = {
+  ambil() {
+    const aktif = document.querySelector('.tab[aria-selected="true"]')?.dataset.tab || 'ram';
+    const p = { format: 'RAM-DOT-SUPERAPP-1', aktif };
+    try { p.ram = ramProject(); } catch {}
+    try {
+      const d = dotProject();
+      try {
+        if ($('hex-input').value !== formatHex(d.bytes.slice(0, d.filled))) {
+          const b = parseHex($('hex-input').value);
+          d.filled = b.length;
+          d.bytes = Array.from({ length: d.capacity }, (_, i) => b[i] ?? 0);
+          d.offset = 0;
+        }
+      } catch {}
+      p.dot = d;
+    } catch {}
+    try { p.rgb = rgbProject(); } catch {}
+    try { p.seg = segProject(); } catch {}
+    return p;
+  },
+  async muat(p) {
+    const f = (o) => new File([JSON.stringify(o)], 'proyek.json', { type: 'application/json' });
+    if (p.ram) await importRamProject(f(p.ram));
+    if (p.dot) await importDotProject(f(p.dot));
+    if (p.rgb) await importRgbProject(f(p.rgb));
+    if (p.seg) await importSegProject(f(p.seg));
+    const t = $('tab-' + p.aktif);
+    if (t) t.click();
+    if (p.aktif === 'dot') { pause(); fitMatrix(); }
+  },
+};
 openSubmittedProject();
 })();
-</script></body></html>
+</script><!-- SEMATAN-SUPERAPP:MULAI -->
+<style>html.sematan :is(#ram-save,#ram-import,#dot-save,#dot-import,#rgb-save,#rgb-import){display:none!important}</style>
+<script>
+/* ==========================================================================
+   SEMATAN SUPER APP — ditambahkan untuk Super APP Jurusan TE (SIMBioTE).
+   Logika simulator tidak diubah. Bagian ini dibuat oleh sematan/pasang.py dari
+   sematan/inti.js + sematan/<simulator>.js; ubah di sana, jangan di sini.
+   Aktif hanya dengan ?sematan=1 di dalam iframe. Pesan {alat, v:1, tipe, ...}:
+     induk → alat   muat {berkas}   minta   soal {soal}
+     alat → induk   siap {versiApp, versiBerkas}   dimuat {galat}   berkas {berkas}
+                    berubah {berkas} (ditunda 0,6 dtk setelah pengguna mengubah isi)
+   ?pratinjau=1: guru melihat hasil siswa; tidak ada pesan "berubah".
+   ========================================================================== */
+(function () {
+  var prm = new URLSearchParams(location.search);
+  if (prm.get('sematan') !== '1' || window.parent === window) return;
+  var PRATINJAU = prm.get('pratinjau') === '1';
+  var ALAT = 'simram';
+  var A = (function (PRATINJAU) {
+  // Berkas = gabungan proyek keempat tab (RAM, Dot Matrix, TV LED RGB, 7/14 Segmen) + tab aktif.
+  // window.simTugasRam diisi di dalam skrip simulator (baris SEMATAN-SUPERAPP).
+  return {
+    versi: 'ram-dotmatrix+sematan1',
+    ambil: function () { return window.simTugasRam ? JSON.stringify(window.simTugasRam.ambil()) : ''; },
+    muat: function (teks) {
+      var p = JSON.parse(teks);
+      if (!p || p.format !== 'RAM-DOT-SUPERAPP-1') throw new Error('Format proyek tidak sesuai.');
+      return window.simTugasRam.muat(p);
+    },
+  };
+})(PRATINJAU);
+  document.documentElement.classList.add('sematan');
+  if (PRATINJAU) document.documentElement.classList.add('pratinjau');
+  var asal = location.origin;
+  try { if (document.referrer) asal = new URL(document.referrer).origin; } catch (e) {}
+  var izin = [location.origin, asal];
+  function kirim(tipe, isi) {
+    try { parent.postMessage(Object.assign({ alat: ALAT, v: 1, tipe: tipe }, isi || {}), asal); } catch (e) {}
+  }
+  function isi() {
+    try { return A.ambil() || ''; } catch (e) { return ''; }
+  }
+  var terakhir = '', jam = null;
+  function periksa() {
+    if (PRATINJAU) return;
+    var b = isi();
+    if (b && b !== terakhir) { terakhir = b; kirim('berubah', { berkas: b }); }
+  }
+  function tunda() { clearTimeout(jam); jam = setTimeout(periksa, 600); }
+  ['input', 'change', 'pointerup', 'keyup', 'click', 'drop'].forEach(function (t) {
+    document.addEventListener(t, tunda, true);
+  });
+  setInterval(periksa, 3000);
+  addEventListener('message', function (e) {
+    var m = e.data;
+    if (e.source !== parent || izin.indexOf(e.origin) < 0) return;
+    if (!m || m.alat !== ALAT || m.v !== 1) return;
+    if (m.tipe === 'muat') {
+      if (typeof m.berkas !== 'string') { kirim('dimuat', { galat: 'Isi berkas tidak ada' }); return; }
+      clearTimeout(jam);
+      Promise.resolve()
+        .then(function () { return m.berkas.trim() ? A.muat(m.berkas) : null; })
+        .then(
+          function () { terakhir = isi(); kirim('dimuat', { galat: null }); },
+          function (err) {
+            kirim('dimuat', { galat: err instanceof SyntaxError ? 'Berkas bukan JSON yang sah' : String((err && err.message) || err) });
+          }
+        );
+    } else if (m.tipe === 'minta') {
+      clearTimeout(jam);
+      var b = isi();
+      if (b) terakhir = b;
+      kirim('berkas', { berkas: b });
+    } else if (m.tipe === 'soal' && A.soal) {
+      try { A.soal(m.soal); } catch (err) {}
+      terakhir = isi();
+    }
+  });
+  terakhir = isi();
+  kirim('siap', { versiApp: A.versi, versiBerkas: 1 });
+})();
+</script>
+<!-- SEMATAN-SUPERAPP:SELESAI -->
+</body></html>
