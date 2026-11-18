@@ -3,6 +3,9 @@
    ([role=slider]) membuka jendela berisi kenop yang sama dalam ukuran besar.
    Memutar di jendela itu mengirim tombol panah ke kenop asli, jadi logika
    simulator tidak berubah. Ketuk di luar jendela (atau Selesai) untuk menutup.
+   Bila halaman menyediakan window.kenopBesarLayar = {rasio, pasang(canvas),
+   lepas(canvas)}, jendela juga menampilkan layar alat (mis. layar CRO) supaya
+   hasil putaran langsung terlihat.
    Sumber: sematan/kenop-besar.js (simulasi_all_in); salinan di simulator_cro.
    ========================================================================== */
 (function () {
@@ -21,8 +24,9 @@
       'background:radial-gradient(circle,rgba(255,255,255,0) 58%,rgba(15,108,96,.10) 59%,rgba(15,108,96,.10) 70%,rgba(255,255,255,0) 71%)}' +
     '.kb-tiruan{position:absolute;left:50%;top:50%;pointer-events:none}' +
     '.kb-tiruan *{pointer-events:none}' +
-    '.kb-jejak{position:absolute;inset:0;border-radius:50%;pointer-events:none}' +
-    '.kb-jejak i{position:absolute;left:50%;top:3%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#0f6c60;box-shadow:0 0 0 3px rgba(15,108,96,.25)}' +
+    '.kb-layar{display:block;width:100%;border-radius:10px;background:#0b2427;box-shadow:0 0 0 3px #0c0e0f;margin:0 0 8px}' +
+    '.kb-kartu.ada-layar .kb-putar{width:min(190px,46vw);height:min(190px,46vw)}' +
+    '.kb-kartu.ada-layar .kb-petunjuk{display:none}' +
     '.kb-baris{display:flex;gap:10px;justify-content:center;margin-top:12px}' +
     '.kb-baris button{font:800 20px/1 system-ui,sans-serif;min-width:64px;height:48px;border-radius:12px;border:1px solid #c8d1d6;background:#fff;color:#14202a}' +
     '.kb-baris button.kb-selesai{font-size:15px;background:#0f6c60;border-color:#0f6c60;color:#fff;min-width:96px}' +
@@ -95,7 +99,8 @@
     var nama = (k.getAttribute('aria-label') || 'Kenop').replace(/\s+/g, ' ').trim();
     latar.innerHTML =
       '<div class="kb-kartu"><div class="kb-pilih"></div><p class="kb-judul"></p><p class="kb-nilai"></p>' +
-      '<div class="kb-putar" aria-hidden="true"><div class="kb-tiruan"></div><div class="kb-jejak"><i></i></div></div>' +
+      '<canvas class="kb-layar" hidden></canvas>' +
+      '<div class="kb-putar" aria-hidden="true"><div class="kb-tiruan"></div></div>' +
       '<div class="kb-baris"><button type="button" data-n="-1" aria-label="Kurangi">−</button>' +
       '<button type="button" class="kb-selesai">Selesai</button>' +
       '<button type="button" data-n="1" aria-label="Tambah">+</button></div>' +
@@ -106,8 +111,18 @@
     var nilai = latar.querySelector('.kb-nilai');
     var putar = latar.querySelector('.kb-putar');
     var tiruan = latar.querySelector('.kb-tiruan');
-    var jejak = latar.querySelector('.kb-jejak');
+    // Layar alat di dalam jendela (bila halaman menyediakannya).
+    var layar = window.kenopBesarLayar;
+    var kanvasLayar = latar.querySelector('.kb-layar');
+    if (layar && typeof layar.pasang === 'function') {
+      kartu.classList.add('ada-layar');
+      kanvasLayar.hidden = false;
+    } else layar = null;
     document.body.appendChild(latar);
+    if (layar) {
+      kanvasLayar.style.height = kanvasLayar.clientWidth * (layar.rasio || 0.8) + 'px';
+      try { layar.pasang(kanvasLayar); } catch (_) { layar = null; }
+    }
     // Kartu diletakkan di sekitar titik ketuk: di dalam iframe yang lebih tinggi dari layar,
     // tengah iframe bisa saja di luar layar, tetapi titik ketuk pasti terlihat.
     var tinggi = kartu.offsetHeight;
@@ -144,7 +159,6 @@
       });
     }
 
-    var sudutJejak = 0;
     function gambar() {
       var c = k.cloneNode(true);
       c.removeAttribute('id');
@@ -158,7 +172,6 @@
       tiruan.style.transform = 'translate(-50%,-50%) scale(' + skala + ')';
       tiruan.replaceChildren(c);
       nilai.textContent = k.getAttribute('aria-valuetext') || k.getAttribute('aria-valuenow') || '';
-      jejak.style.transform = 'rotate(' + sudutJejak + 'deg)';
     }
     function langkah(n) {
       for (var i = 0; i < Math.abs(n); i++) tekan(k, n);
@@ -181,8 +194,6 @@
       var a = sudut(e), d = ((a - seret.a + 540) % 360) - 180;
       seret.a = a;
       seret.sisa += d;
-      sudutJejak += d;
-      jejak.style.transform = 'rotate(' + sudutJejak + 'deg)';
       var n = Math.trunc(seret.sisa / derajat);
       if (n) { seret.sisa -= n * derajat; langkah(n); }
     });
@@ -192,12 +203,11 @@
 
     latar.querySelectorAll('[data-n]').forEach(function (b) {
       b.addEventListener('click', function () {
-        var n = Number(b.dataset.n);
-        sudutJejak += n * derajat;
-        langkah(n);
+        langkah(Number(b.dataset.n));
       });
     });
     function tutup() {
+      if (layar) try { layar.lepas(kanvasLayar); } catch (_) {}
       latar.remove();
       document.removeEventListener('keydown', esc, true);
       // Beri tahu simulator/induk bahwa ada perubahan (sematan memantau event ini).
