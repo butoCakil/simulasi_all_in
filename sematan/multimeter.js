@@ -1,6 +1,24 @@
 function (PRATINJAU) {
   // Berkas = data kiriman tugas bawaan (format MULTIMETER-1 versi 4 + penilaian lima ronde);
   // kosong sebelum job selesai.
+  // Data ronde dari server ({mode: pool}) menggantikan pengacak bawaan saat job dimulai.
+  var RONDE = null;
+  var mulaiAsli = startAssessment;
+  startAssessment = function () {
+    var p = RONDE && RONDE[state.mode];
+    if (!Array.isArray(p) || !p.length) return mulaiAsli();
+    if (exam || reviewing) return;
+    recordError();
+    exam = {
+      rounds: [],
+      errors: practiceErrors.splice(0),
+      pool: JSON.parse(JSON.stringify(p)).slice(0, 5),
+      previous: practiceSnapshot(),
+      done: false,
+      sent: false,
+    };
+    nextFixture();
+  };
   return {
     versi: 'multimeter-tmg+sematan1',
     ambil: function () {
@@ -35,8 +53,10 @@ function (PRATINJAU) {
           previous: practiceSnapshot(), done: true, sent: false, target: a.rounds[4] };
       drawRack(); drawBoard(); refresh();
     },
-    // Pengaturan tugas dari guru: {mode} = praktikum yang wajib dikerjakan; mode lain disembunyikan.
+    // Pengaturan tugas dari guru: {mode, ronde}. mode = praktikum yang wajib dikerjakan (mode lain
+    // disembunyikan); ronde = isi lima pengukuran tiap praktikum dari server.
     soal: function (s) {
+      if (s && s.ronde && typeof s.ronde === 'object') RONDE = s.ronde;
       var mode = s && s.mode;
       if (!mode || !Object.prototype.hasOwnProperty.call(modes, mode)) return;
       document.querySelectorAll('[data-mode]').forEach(function (b) { b.hidden = b.dataset.mode !== mode; });
