@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<!-- saved from url=(0069)https://belajar.iprime-bansari.online/simulasi/sim_ram_dotmatrix.html -->
+<html lang="id"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RAM &amp; Dot Matrix Simulator</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#182338;background:#eff4fb;--blue:#1769ea;--line:#dce5f2;--muted:#61708a}*{box-sizing:border-box}body{margin:0}.shell{max-width:1450px;margin:auto;padding:20px}.header,.panel{background:#fff;border:1px solid #e3eaf6;border-radius:18px;box-shadow:0 7px 25px #183d7510}.header{padding:18px 22px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center}.brand{display:flex;gap:14px;align-items:center;font-size:clamp(19px,2.4vw,28px);font-weight:800;letter-spacing:-.7px}.logo{display:grid;place-items:center;width:48px;height:48px;background:linear-gradient(135deg,#2d83f8,#0753cd);color:white;border-radius:13px;font-size:26px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.tab{border:1px solid #d7e2f2;background:#fff;color:#344663;font-weight:700;padding:12px 20px;border-radius:11px;cursor:pointer}.tab.active{background:var(--blue);color:white;border-color:var(--blue)}.tabpane{display:none}.tabpane.active{display:block}.columns{display:grid;grid-template-columns:310px minmax(0,1fr);gap:16px}.panel{padding:20px;min-width:0}.stack{display:grid;gap:16px}.panel h2{font-size:18px;margin:0 0 16px}.panel h3{font-size:15px;margin:0 0 12px}.subtitle{color:var(--muted);font-size:13px;line-height:1.55}.ram-art{margin:12px auto 26px;max-width:260px;height:106px;background:linear-gradient(145deg,#009860,#037f56);border:4px solid #027550;border-radius:11px;display:flex;align-items:center;justify-content:space-evenly;position:relative;box-shadow:0 13px 20px #002a3424}.ram-art:after{content:"";position:absolute;bottom:-4px;left:8px;right:8px;height:12px;background:repeating-linear-gradient(90deg,#e9bd38 0 8px,transparent 8px 12px)}.chip{width:18%;height:54px;border-radius:5px;background:#172e37;box-shadow:inset 0 1px 3px #a5b5bd55}.chip:first-child{display:grid;place-items:center;color:white;font-weight:800;font-size:12px}.memory-sizes,.buttonrow{display:flex;gap:8px;flex-wrap:wrap}.memory-sizes button,.button,.smallbtn{font:inherit;font-size:13px;font-weight:700;cursor:pointer;border-radius:9px;border:1px solid #cbd8e8;background:white;padding:10px 13px;color:#314461}.memory-sizes button.selected,.button.primary{background:var(--blue);color:white;border-color:var(--blue)}.button:hover,.memory-sizes button:hover,.smallbtn:hover{filter:brightness(.97)}.memory-sizes button{min-width:76px}.stats{margin-top:16px;display:grid;gap:9px}.stat{display:flex;justify-content:space-between;gap:8px;align-items:center;background:#f6f9ff;border:1px solid #e2e9f5;border-radius:10px;padding:12px}.stat strong{color:#1763d0}.track{height:13px;border-radius:99px;background:#dfe7f2;overflow:hidden;margin-top:12px}.track span{display:block;background:#19a65a;height:100%;width:0;transition:width .2s}.toolbar{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:14px;align-items:center}.toolbar .spacer{flex:1}.control{display:grid;gap:5px;font-size:12px;color:#53627b;font-weight:700}.control select,.control input,.control textarea,textarea,input[type=text],input[type=number],select{border-radius:9px;border:1px solid #cbd7e8;padding:9px 11px;background:#fff;color:#192d48;font:inherit;min-width:0}.control select{min-width:115px}.scrolltable{max-height:450px;overflow:auto;border:1px solid var(--line);border-radius:12px}table{border-collapse:collapse;width:100%;font-size:13px}th{background:#dceafd;color:#183049;text-align:left;position:sticky;top:0;z-index:2}td,th{border-bottom:1px solid var(--line);padding:9px 12px}td:first-child{font-weight:700}td input{width:100%;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px}.status{font-weight:700;font-size:12px;border-radius:7px;padding:5px 8px;background:#edf0f5;color:#6e7788}.status.ok{background:#dcf9e7;color:#0e7844}.status.bad{background:#ffe5e5;color:#b12323}.output{display:block;width:100%;min-height:280px;resize:vertical;background:#eaf2ff;border:1px solid #bcd2f5;border-radius:12px;padding:16px;font-family:inherit;font-size:13px;line-height:1.65;white-space:pre-wrap;color:#16263e}.note{color:var(--muted);font-size:12px;margin:10px 0 0}.dot-layout{display:grid;grid-template-columns:minmax(0,1fr) 345px;gap:16px}.matrix-shell{background:#121d2f;border-radius:16px;padding:22px;display:flex;justify-content:center;overflow:auto;min-height:252px;align-items:center}.matrix{display:grid;gap:5px;width:max-content;--dot-size:15px}.led{width:var(--dot-size);height:var(--dot-size);border-radius:50%;background:#283746;box-shadow:inset 0 1px 2px #101a2c}.led.on{background:var(--led-on,#ff5144);box-shadow:0 0 8px var(--led-glow,#ff5144aa)}.dot-config{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.dot-config label{display:grid;gap:5px;font-size:12px;font-weight:700;color:#566783}.dot-config select,.dot-config input{width:100%}.hextext{width:100%;min-height:130px;resize:vertical;font-family:ui-monospace,monospace;font-size:14px;line-height:1.65}.error{color:#c12929;font-size:12px;min-height:16px}.legend{display:flex;gap:16px;align-items:center;margin-top:12px;color:#5c6a80;font-size:12px}.legend i{display:inline-block;width:12px;height:12px;background:#ff5144;border-radius:50%;vertical-align:middle;margin-right:5px}.legend i.off{background:#283746}.info{background:#f3f7ff;border:1px solid #e2ebf9;border-radius:10px;padding:12px;color:#4d607c;font-size:13px;line-height:1.6}.footer{color:#697990;text-align:center;font-size:12px;margin:24px 0}label.check{display:flex;align-items:center;gap:7px;font-size:13px;color:#40516b}.range{width:100%}@media(max-width:950px){.columns,.dot-layout{grid-template-columns:1fr}.dot-config{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.shell{padding:10px}.header{padding:14px}.panel{padding:14px}.dot-config{grid-template-columns:1fr 1fr}.matrix{gap:3px}.matrix-shell{padding:12px}td,th{padding:7px}table{font-size:11px}.logo{width:40px;height:40px}}
+
+/* Responsive layout and touch-first refinements */
+:root{--shadow:0 7px 24px rgba(24,61,117,.06)}body{min-width:0}button,input,select,textarea{touch-action:manipulation}button{transition:background .15s,border-color .15s,transform .15s}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #77b5ff;outline-offset:2px}button:disabled{opacity:.45;cursor:not-allowed}.header,.panel{box-shadow:var(--shadow)}.tabs{position:sticky;top:0;z-index:10;background:#eff4fb;padding:9px 0;margin:8px 0 14px}.tab{flex:1;min-width:180px}.columns{grid-template-columns:minmax(240px,280px) minmax(0,1fr)}.dot-layout{grid-template-columns:minmax(0,1fr) minmax(280px,330px)}.button,.smallbtn,.tab,.memory-sizes button,.mode-button{min-height:42px}.toolbar{align-items:center}.scrolltable{max-height:420px;overscroll-behavior:contain}.scrolltable table{min-width:430px}td input{min-width:112px}.output{height:clamp(300px,38vh,520px);min-height:280px}.matrix-shell{min-height:250px;overflow:hidden;padding:18px;contain:layout}.matrix{gap:var(--dot-gap,4px);--dot-size:16px;justify-content:center;align-content:center}.led{width:var(--dot-size);height:var(--dot-size);transition:background .08s}.legend{flex-wrap:wrap}.mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}.mode-button{border:1px solid #cbd8e8;background:#f5f8fd;border-radius:10px;color:#344663;font-weight:750;cursor:pointer;padding:10px 8px}.mode-button.active{background:#1769ea;border-color:#1769ea;color:white}.action-row{margin-top:14px}.action-row .button{flex:1}#manual-actions[hidden],#auto-actions[hidden]{display:none}.controls-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.controls-grid label:last-child{grid-column:span 2}.stats{grid-template-columns:1fr}.hextext{font-size:14px}.note{line-height:1.6}
+@media(max-width:1080px){.columns,.dot-layout{grid-template-columns:1fr}.columns>aside{display:grid;grid-template-columns:180px minmax(0,1fr);column-gap:16px;align-items:center}.columns>aside .ram-art{grid-row:span 4;width:170px;height:95px;margin:0}.columns>aside .stats{grid-template-columns:repeat(3,minmax(0,1fr))}.columns>aside .stat{flex-direction:column;align-items:flex-start}.columns>aside .track{grid-column:2}.dot-layout>aside{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.dot-layout>aside article:nth-child(2){grid-row:span 2}}
+@media(max-width:720px){.shell{padding:10px}.header{padding:14px;border-radius:14px}.brand{font-size:19px;gap:10px}.logo{flex:none;width:39px;height:39px}.tabs{gap:6px}.tab{min-width:0;padding:10px 6px;font-size:12px;white-space:normal}.panel{padding:14px;border-radius:14px}.columns>aside{grid-template-columns:1fr}.columns>aside .ram-art{grid-row:auto;width:min(240px,100%);margin:4px auto 16px;height:90px}.columns>aside .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.columns>aside .track{grid-column:auto}.columns>aside .stat{padding:10px}.toolbar .button{flex:1 1 auto}.scrolltable{max-height:340px}.scrolltable table{min-width:420px}.output{height:330px;font-size:12px}.dot-layout>aside{grid-template-columns:1fr}.dot-layout>aside article:nth-child(2){grid-row:auto}.matrix-shell{min-height:200px;padding:12px}.dot-config{grid-template-columns:repeat(2,minmax(0,1fr))}.hextext{min-height:110px}.legend{gap:8px}.footer{font-size:11px}}
+@media(max-width:380px){.dot-config{grid-template-columns:1fr}.controls-grid label:last-child{grid-column:auto}.memory-sizes button{min-width:70px}.tab{font-size:11px}.panel{padding:12px}.button{font-size:12px;padding:9px 10px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+
+/* Mobile Dot Matrix drawer + content-first layout */
+.dot-mobile-top,.dot-mobile-drawer-head,.dot-menu-button{display:none}
+#dot-help[hidden],#dot-backdrop[hidden]{display:none!important}
+#dot-help p{margin:0 0 9px}#dot-help p:last-child{margin-bottom:0}
+#dot-memory{font-weight:750;color:#1769ea}.dot-workspace{min-width:0}.dot-settings{min-width:0}
+@media(max-width:767px){
+ .dot-mobile-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;background:white;border:1px solid #e3eaf6;padding:10px 12px;border-radius:14px}
+ .dot-menu-button{display:inline-flex;align-items:center;justify-content:center;min-height:44px}
+ .dot-layout{grid-template-columns:minmax(0,1fr)}
+ .dot-settings{position:fixed;z-index:102;top:0;right:0;bottom:0;width:min(360px,90vw);max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;background:#eff4fb;padding:12px;padding-bottom:calc(20px + env(safe-area-inset-bottom));box-shadow:-12px 0 45px #071b3d4d;transform:translateX(110%);visibility:hidden;transition:transform .2s ease,visibility .2s}
+ .dot-settings.open{transform:translateX(0);visibility:visible}
+ .dot-mobile-drawer-head{display:flex;position:sticky;top:-12px;z-index:4;align-items:center;justify-content:space-between;background:#eff4fb;padding:12px 0;gap:7px}
+ .dot-backdrop:not([hidden]){display:block;position:fixed;inset:0;background:#06162991;z-index:101;border:0;width:100%;height:100%;cursor:pointer}
+ body.dot-lock{overflow:hidden}
+ .dot-settings .panel{padding:14px}.dot-settings .dot-config{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .dot-settings .dot-config label:last-child{grid-column:span 2}
+ .dot-workspace>.panel{padding:12px}
+ .dot-workspace .toolbar{gap:7px}.dot-workspace h2{font-size:16px}
+ .hextext{min-height:165px;font-size:13px}.matrix-shell{min-height:185px}
+}
+@media(prefers-reduced-motion:reduce){.dot-settings{transition:none}}
+
+/* V3: display controls, eight-byte HEX rows and mobile-sized touch targets */
+.matrix-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0 0 14px}
+.matrix-actions .button{min-width:0;min-height:46px;padding:9px 6px;white-space:normal}
+.matrix-actions .button.is-active{background:#1769ea;border-color:#1769ea;color:#fff}
+.hextext{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre;overflow-x:auto;tab-size:3;font-variant-numeric:tabular-nums;min-height:210px}
+.hex-row-note{font-size:12px;color:#53627b;margin:6px 0 10px}
+#dot-animate-length{width:100%;min-width:0}
+@media(max-width:560px){.matrix-actions{gap:6px}.matrix-actions .button{font-size:12px;padding:9px 4px}.hextext{font-size:13px;min-height:210px}}
+
+/* V5: RAM settings drawer, wide workspace, and ASCII help modal */
+.ram-mobile-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;background:#fff;border:1px solid #e3eaf6;padding:11px 14px;border-radius:14px}
+.ram-layout{position:relative;min-width:0}.ram-workspace{min-width:0}.ram-settings{position:fixed;z-index:202;right:0;top:0;bottom:0;width:min(390px,94vw);overflow-y:auto;overscroll-behavior:contain;background:#eff4fb;padding:12px;padding-bottom:calc(18px + env(safe-area-inset-bottom));box-shadow:-10px 0 40px #06162945;visibility:hidden;transform:translateX(110%);transition:transform .2s ease,visibility .2s}
+.ram-settings.open{transform:translateX(0);visibility:visible}.ram-drawer-head{display:flex;position:sticky;top:-12px;z-index:4;justify-content:space-between;align-items:center;gap:8px;background:#eff4fb;padding:12px 0}
+.ram-backdrop:not([hidden]){position:fixed;inset:0;z-index:201;background:#06162991;border:0;width:100%;height:100%;cursor:pointer}
+body.ram-lock{overflow:hidden}.ram-settings .panel{padding:16px}.ram-workspace .scrolltable{max-height:460px}
+.ascii-modal:not([hidden]){position:fixed;inset:0;z-index:300;display:flex;justify-content:center;align-items:center;padding:16px}.ascii-shade{position:absolute;inset:0;background:#081b35b8}.ascii-dialog{position:relative;z-index:1;width:min(650px,100%);max-height:min(85dvh,850px);display:flex;flex-direction:column;gap:12px;padding:20px}.ascii-dialog-heading{display:flex;gap:12px;justify-content:space-between;align-items:start}.ascii-dialog-heading h2{margin:0 0 5px}.ascii-dialog-heading p{margin:0}.ascii-dialog-heading button{flex:none}.ascii-scroll{overflow:auto;border:1px solid var(--line);border-radius:12px;min-height:0}.ascii-scroll th,.ascii-scroll td{padding:9px 14px}.ascii-scroll td:first-child{font-family:ui-monospace,Consolas,monospace;font-weight:800;color:#1f63b5;white-space:nowrap}.ascii-scroll tr:nth-child(even){background:#f7faff}
+@media(max-width:560px){.ram-mobile-top{padding:10px;gap:6px}.ram-mobile-top strong{font-size:13px}.ram-mobile-top .button{white-space:nowrap}.ram-workspace .scrolltable{max-height:370px}.ascii-modal:not([hidden]){padding:8px}.ascii-dialog{padding:12px;max-height:92dvh}.ascii-dialog-heading h2{font-size:16px}.ascii-dialog-heading .subtitle{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.ram-settings{transition:none}}
+#task-dialog{width:min(440px,calc(100% - 24px));max-height:calc(100% - 24px);color:inherit}
+#task-dialog::backdrop{background:#081b35b8}
+#task-form{display:grid;gap:12px}
+#task-form .toolbar,#task-status{margin:0}
+#task-status[data-error="true"]{color:#a52222}
+#task-links{display:flex;flex-wrap:wrap;gap:12px;font-size:13px}
+#task-links[hidden]{display:none}
+.review-pending .tabs,.review-pending .tabpane{display:none}
+#review-panel{margin:14px 0}
+#review-panel .note{margin:0 0 8px}
+.rgb-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(265px,325px);gap:16px;align-items:start}
+.rgb-stage{display:flex;align-items:center;justify-content:center;gap:16px}
+.rgb-stage>[hidden]{display:none}
+.rgb-tv,.rgb-zoom{flex:1;min-width:0;margin:0}
+.rgb-tv figcaption,.rgb-zoom figcaption{font-weight:700;margin-bottom:10px}
+.rgb-tv canvas{display:block;width:100%;background:#192638;border:7px solid #192638;border-radius:10px;image-rendering:pixelated}
+.rgb-stand{width:28%;height:12px;margin:auto;background:#192638;border-radius:0 0 8px 8px}
+.rgb-connector{flex:0 0 26px;text-align:center;font-size:24px;color:var(--blue)}
+.rgb-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:3px;padding:8px;border-radius:12px;background:#192638;max-width:420px;margin:auto}
+.rgb-pixel{min-width:0;aspect-ratio:1;padding:0;border:1px solid #66758b70;border-radius:3px;cursor:pointer}
+.rgb-pixel[aria-pressed="true"]{outline:2px solid white;outline-offset:-3px;box-shadow:0 0 0 2px #388cff;z-index:1}
+.rgb-channels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rgb-channels input{width:100%;text-align:center;text-transform:uppercase;font-family:monospace}
+.rgb-channel-strip{display:block;height:5px;border-radius:3px;background:#dce5f2}
+.rgb-preview{display:block;border-radius:9px;border:1px solid var(--line);text-align:center;padding:10px;margin:12px 0;font-weight:800}
+.rgb-swatches{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.rgb-swatches button{width:32px;height:32px;border:1px solid #8a99ac;border-radius:7px;cursor:pointer}
+.rgb-actions{margin-top:12px;margin-bottom:0}
+.rgb-color-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.rgb-color-actions .rgb-swatches{margin:0}
+.rgb-color-guide{margin-top:10px}
+.rgb-color-guide summary{font-size:13px;font-weight:700;cursor:pointer;color:var(--blue)}
+.rgb-color-guide table{margin-top:8px}
+.rgb-color-guide th{position:static}
+.rgb-guide-swatch{display:inline-block;width:14px;height:14px;border:1px solid #8a99ac;border-radius:3px;vertical-align:middle;margin-right:7px}
+#rgb-status{margin:8px 0 0}
+#rgb-status:empty{display:none}
+@media(max-width:860px){.rgb-layout{grid-template-columns:1fr}}
+@media(max-width:600px){
+  .rgb-layout,.rgb-layout>.stack{gap:8px}
+  .rgb-layout .panel{padding:10px}
+  .rgb-layout .panel h2{font-size:15px;margin-bottom:6px}
+  .rgb-layout .toolbar{gap:6px;margin-bottom:6px}
+  #rgb .rgb-heading .button{flex:none;min-height:36px;padding:5px 9px}
+  .rgb-stage{gap:6px}
+  .rgb-tv{flex:0 1 108px}
+  .rgb-tv figcaption,.rgb-zoom figcaption{font-size:12px;margin-bottom:5px}
+  .rgb-tv canvas{border-width:4px}
+  .rgb-tv .note{display:none}
+  .rgb-stand{height:7px}
+  .rgb-connector{flex-basis:14px;font-size:17px}
+  .rgb-grid{max-width:196px;gap:2px;padding:5px}
+  #rgb-position{margin-top:4px}
+  .rgb-channels{gap:5px}
+  .rgb-channels .control{gap:3px}
+  .rgb-channels input{padding:5px 4px;min-height:40px;font-size:16px}
+  .rgb-preview{padding:5px;margin:6px 0}
+  .rgb-color-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+  .rgb-swatches{gap:4px;margin:0}
+  .rgb-swatches button{width:27px;height:30px}
+  #rgb-status:empty{display:none}
+}
+.seg-screen{display:flex;justify-content:center;gap:clamp(4px,2vw,18px);background:#121d2f;border-radius:14px;padding:12px;min-height:100px}
+.seg-screen svg{width:min(19%,100px);height:auto}
+.seg-screen line{stroke:#2e4057;stroke-width:6;stroke-linecap:round}
+.seg-screen line.is-on{stroke:#ff6257}
+.seg-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:10px;margin-top:10px}
+.seg-inputs input{width:100%;font-family:monospace;font-size:16px}
+.seg-inputs input[aria-invalid="true"]{border-color:#c12929}
+.seg-guide{margin-top:16px;padding:14px;border:1px solid var(--line);background:#f3f7ff;border-radius:12px}
+.seg-guide svg{display:block;width:min(100%,210px);height:auto;margin:auto}
+.seg-guide line{stroke:#b8d2f5;stroke-width:5;stroke-linecap:round}
+.seg-guide text{font:bold 9px system-ui,sans-serif;fill:#172b48;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:#f3f7ff;stroke-width:2px}
+</style>
+</head>
+<body><div class="shell">
+<header class="header"><div class="brand"><div class="logo">▦</div><span>RAM &amp; Dot Matrix Simulator</span></div></header>
+<section id="review-panel" class="panel" hidden="">
+  <h2>Periksa Tugas Siswa</h2>
+  <p class="note" id="review-status" role="status"></p>
+  <a class="subtitle" href="https://belajar.iprime-bansari.online/kirim-tugas.html">Kembali ke Kirim Tugas</a>
+</section>
+<nav class="tabs" role="tablist" aria-label="Pilih simulator"><button class="tab active" id="tab-ram" role="tab" aria-controls="ram" data-tab="ram" aria-selected="true">▤ RAM Binary Translator</button><button class="tab" id="tab-dot" role="tab" aria-controls="dot" data-tab="dot" aria-selected="false">▦ Dot Matrix Simulator</button><button class="tab" id="tab-rgb" role="tab" aria-controls="rgb" data-tab="rgb" aria-selected="false">TV LED RGB</button><button class="tab" id="tab-seg" role="tab" aria-controls="seg" data-tab="seg" aria-selected="false">7/14 Segmen</button></nav>
+<section id="ram" role="tabpanel" aria-labelledby="tab-ram" class="tabpane active">
+<div class="ram-mobile-top"><strong>▤ RAM Binary Translator</strong><button type="button" class="button" id="ram-menu" aria-expanded="false" aria-controls="ram-settings">☰ Pengaturan</button></div>
+<div class="ram-layout">
+
+<div class="stack ram-workspace"><article class="panel"><div class="toolbar"><h2 style="margin:0">▤ Tabel Input RAM</h2><span class="spacer"></span><button type="button" class="button" id="ram-guide" aria-haspopup="dialog" aria-controls="ascii-guide">ⓘ Panduan ASCII</button></div><div class="toolbar"><button class="button primary" id="ram-hello">Isi Hello</button><button class="button" id="ram-sample">Isi Paragraf</button><button class="button" id="ram-clear">Clear RAM</button><button class="button" id="ram-save">Save RAM</button><button class="button" id="ram-import">Import File</button><button type="button" class="button" id="ram-send" aria-haspopup="dialog">Kirim Tugas</button><input id="ram-file" type="file" accept=".ram,.json,.bin,.txt,application/octet-stream,text/plain,application/json" hidden=""></div><div class="scrolltable"><table><thead><tr><th>Address</th><th>Binary Input (8-bit)</th><th>Character</th><th>Status</th></tr></thead><tbody id="ram-rows"><tr><td>0x0000</td><td><input aria-label="Binary byte address 0" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0001</td><td><input aria-label="Binary byte address 1" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0002</td><td><input aria-label="Binary byte address 2" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0003</td><td><input aria-label="Binary byte address 3" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0004</td><td><input aria-label="Binary byte address 4" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0005</td><td><input aria-label="Binary byte address 5" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0006</td><td><input aria-label="Binary byte address 6" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0007</td><td><input aria-label="Binary byte address 7" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0008</td><td><input aria-label="Binary byte address 8" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0009</td><td><input aria-label="Binary byte address 9" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x000A</td><td><input aria-label="Binary byte address 10" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x000B</td><td><input aria-label="Binary byte address 11" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x000C</td><td><input aria-label="Binary byte address 12" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x000D</td><td><input aria-label="Binary byte address 13" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x000E</td><td><input aria-label="Binary byte address 14" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x000F</td><td><input aria-label="Binary byte address 15" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0010</td><td><input aria-label="Binary byte address 16" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0011</td><td><input aria-label="Binary byte address 17" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0012</td><td><input aria-label="Binary byte address 18" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0013</td><td><input aria-label="Binary byte address 19" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0014</td><td><input aria-label="Binary byte address 20" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0015</td><td><input aria-label="Binary byte address 21" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0016</td><td><input aria-label="Binary byte address 22" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0017</td><td><input aria-label="Binary byte address 23" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0018</td><td><input aria-label="Binary byte address 24" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x0019</td><td><input aria-label="Binary byte address 25" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x001A</td><td><input aria-label="Binary byte address 26" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x001B</td><td><input aria-label="Binary byte address 27" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x001C</td><td><input aria-label="Binary byte address 28" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x001D</td><td><input aria-label="Binary byte address 29" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x001E</td><td><input aria-label="Binary byte address 30" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr><tr><td>0x001F</td><td><input aria-label="Binary byte address 31" maxlength="8" placeholder="00000000"></td><td>—</td><td><span class="status ">Empty</span></td></tr></tbody></table></div><div class="toolbar" style="margin-top:12px;margin-bottom:0"><button class="smallbtn" id="ram-prev" disabled="">← Sebelumnya</button><span id="ram-page" class="subtitle">Halaman 1 / 4</span><button class="smallbtn" id="ram-next">Berikutnya →</button></div></article><article class="panel"><div class="toolbar"><h2 style="margin:0">Hasil Terjemahan</h2><span class="spacer"></span><button class="button" id="ram-copy">Salin</button><button class="button" id="ram-export-text">Unduh TXT</button></div><textarea class="output" id="ram-output" readonly="" placeholder="Teks dari memori RAM akan muncul di sini..."></textarea><p class="note">Memori disimpan sebagai byte. Karakter non-ASCII dapat menggunakan beberapa byte UTF-8. Byte kosong tidak ikut ditampilkan; byte nol (00) merupakan data valid.</p></article></div></div>
+<aside id="ram-settings" class="ram-settings" aria-label="Pengaturan RAM">
+<div class="ram-drawer-head"><strong>Pengaturan RAM</strong><button type="button" class="button" id="ram-menu-close">✕ Tutup</button></div><article class="panel"><div class="ram-art" aria-label="Ilustrasi modul RAM"><div class="chip">RAM</div><div class="chip"></div><div class="chip"></div><div class="chip"></div></div><h3>Kapasitas Memori</h3><div class="memory-sizes" id="ram-sizes"><button class="selected">128 B</button><button class="">256 B</button><button class="">512 B</button><button class="">1 KB</button><button class="">2 KB</button><button class="">4 KB</button></div><div class="stats"><div class="stat">Terpakai <strong id="ram-used">0 B</strong></div><div class="stat">Kosong <strong id="ram-free">128 B</strong></div><div class="stat">Mode <strong>UTF-8 / ASCII</strong></div></div><p class="subtitle" style="margin-top:20px">Penggunaan RAM <span id="ram-percent" style="float:right">0%</span></p><div class="track"><span id="ram-bar" style="width: 0%;"></span></div><p class="note">Satu alamat menyimpan 1 byte (8 bit). Tabel menampilkan 32 alamat per halaman.</p></article></aside>
+<button id="ram-backdrop" class="ram-backdrop" hidden="" aria-label="Tutup pengaturan RAM"></button></section>
+<div id="ascii-guide" class="ascii-modal" hidden="" role="dialog" aria-modal="true" aria-labelledby="ascii-guide-title">
+ <div class="ascii-shade" id="ascii-shade"></div>
+ <div class="ascii-dialog panel" role="document">
+  <div class="ascii-dialog-heading"><div><h2 id="ascii-guide-title">Panduan Tabel ASCII – HEX</h2><p class="subtitle">Kode ASCII standar 00–7F (hexadecimal), tanpa kolom biner.</p></div><button type="button" class="button" id="ascii-close">✕ Tutup</button></div>
+  <div class="ascii-scroll"><table><thead><tr><th>Kode HEX</th><th>Karakter / Keterangan</th></tr></thead><tbody id="ascii-rows"><tr><td>0x00</td><td>NUL</td></tr><tr><td>0x01</td><td>SOH</td></tr><tr><td>0x02</td><td>STX</td></tr><tr><td>0x03</td><td>ETX</td></tr><tr><td>0x04</td><td>EOT</td></tr><tr><td>0x05</td><td>ENQ</td></tr><tr><td>0x06</td><td>ACK</td></tr><tr><td>0x07</td><td>BEL</td></tr><tr><td>0x08</td><td>BS</td></tr><tr><td>0x09</td><td>HT (Tab)</td></tr><tr><td>0x0A</td><td>LF (Baris baru)</td></tr><tr><td>0x0B</td><td>VT</td></tr><tr><td>0x0C</td><td>FF</td></tr><tr><td>0x0D</td><td>CR</td></tr><tr><td>0x0E</td><td>SO</td></tr><tr><td>0x0F</td><td>SI</td></tr><tr><td>0x10</td><td>DLE</td></tr><tr><td>0x11</td><td>DC1</td></tr><tr><td>0x12</td><td>DC2</td></tr><tr><td>0x13</td><td>DC3</td></tr><tr><td>0x14</td><td>DC4</td></tr><tr><td>0x15</td><td>NAK</td></tr><tr><td>0x16</td><td>SYN</td></tr><tr><td>0x17</td><td>ETB</td></tr><tr><td>0x18</td><td>CAN</td></tr><tr><td>0x19</td><td>EM</td></tr><tr><td>0x1A</td><td>SUB</td></tr><tr><td>0x1B</td><td>ESC</td></tr><tr><td>0x1C</td><td>FS</td></tr><tr><td>0x1D</td><td>GS</td></tr><tr><td>0x1E</td><td>RS</td></tr><tr><td>0x1F</td><td>US</td></tr><tr><td>0x20</td><td>SPACE (Spasi)</td></tr><tr><td>0x21</td><td>!</td></tr><tr><td>0x22</td><td>"</td></tr><tr><td>0x23</td><td>#</td></tr><tr><td>0x24</td><td>$</td></tr><tr><td>0x25</td><td>%</td></tr><tr><td>0x26</td><td>&amp;</td></tr><tr><td>0x27</td><td>'</td></tr><tr><td>0x28</td><td>(</td></tr><tr><td>0x29</td><td>)</td></tr><tr><td>0x2A</td><td>*</td></tr><tr><td>0x2B</td><td>+</td></tr><tr><td>0x2C</td><td>,</td></tr><tr><td>0x2D</td><td>-</td></tr><tr><td>0x2E</td><td>.</td></tr><tr><td>0x2F</td><td>/</td></tr><tr><td>0x30</td><td>0</td></tr><tr><td>0x31</td><td>1</td></tr><tr><td>0x32</td><td>2</td></tr><tr><td>0x33</td><td>3</td></tr><tr><td>0x34</td><td>4</td></tr><tr><td>0x35</td><td>5</td></tr><tr><td>0x36</td><td>6</td></tr><tr><td>0x37</td><td>7</td></tr><tr><td>0x38</td><td>8</td></tr><tr><td>0x39</td><td>9</td></tr><tr><td>0x3A</td><td>:</td></tr><tr><td>0x3B</td><td>;</td></tr><tr><td>0x3C</td><td>&lt;</td></tr><tr><td>0x3D</td><td>=</td></tr><tr><td>0x3E</td><td>&gt;</td></tr><tr><td>0x3F</td><td>?</td></tr><tr><td>0x40</td><td>@</td></tr><tr><td>0x41</td><td>A</td></tr><tr><td>0x42</td><td>B</td></tr><tr><td>0x43</td><td>C</td></tr><tr><td>0x44</td><td>D</td></tr><tr><td>0x45</td><td>E</td></tr><tr><td>0x46</td><td>F</td></tr><tr><td>0x47</td><td>G</td></tr><tr><td>0x48</td><td>H</td></tr><tr><td>0x49</td><td>I</td></tr><tr><td>0x4A</td><td>J</td></tr><tr><td>0x4B</td><td>K</td></tr><tr><td>0x4C</td><td>L</td></tr><tr><td>0x4D</td><td>M</td></tr><tr><td>0x4E</td><td>N</td></tr><tr><td>0x4F</td><td>O</td></tr><tr><td>0x50</td><td>P</td></tr><tr><td>0x51</td><td>Q</td></tr><tr><td>0x52</td><td>R</td></tr><tr><td>0x53</td><td>S</td></tr><tr><td>0x54</td><td>T</td></tr><tr><td>0x55</td><td>U</td></tr><tr><td>0x56</td><td>V</td></tr><tr><td>0x57</td><td>W</td></tr><tr><td>0x58</td><td>X</td></tr><tr><td>0x59</td><td>Y</td></tr><tr><td>0x5A</td><td>Z</td></tr><tr><td>0x5B</td><td>[</td></tr><tr><td>0x5C</td><td>\</td></tr><tr><td>0x5D</td><td>]</td></tr><tr><td>0x5E</td><td>^</td></tr><tr><td>0x5F</td><td>_</td></tr><tr><td>0x60</td><td>`</td></tr><tr><td>0x61</td><td>a</td></tr><tr><td>0x62</td><td>b</td></tr><tr><td>0x63</td><td>c</td></tr><tr><td>0x64</td><td>d</td></tr><tr><td>0x65</td><td>e</td></tr><tr><td>0x66</td><td>f</td></tr><tr><td>0x67</td><td>g</td></tr><tr><td>0x68</td><td>h</td></tr><tr><td>0x69</td><td>i</td></tr><tr><td>0x6A</td><td>j</td></tr><tr><td>0x6B</td><td>k</td></tr><tr><td>0x6C</td><td>l</td></tr><tr><td>0x6D</td><td>m</td></tr><tr><td>0x6E</td><td>n</td></tr><tr><td>0x6F</td><td>o</td></tr><tr><td>0x70</td><td>p</td></tr><tr><td>0x71</td><td>q</td></tr><tr><td>0x72</td><td>r</td></tr><tr><td>0x73</td><td>s</td></tr><tr><td>0x74</td><td>t</td></tr><tr><td>0x75</td><td>u</td></tr><tr><td>0x76</td><td>v</td></tr><tr><td>0x77</td><td>w</td></tr><tr><td>0x78</td><td>x</td></tr><tr><td>0x79</td><td>y</td></tr><tr><td>0x7A</td><td>z</td></tr><tr><td>0x7B</td><td>{</td></tr><tr><td>0x7C</td><td>|</td></tr><tr><td>0x7D</td><td>}</td></tr><tr><td>0x7E</td><td>~</td></tr><tr><td>0x7F</td><td>DEL</td></tr></tbody></table></div>
+  <p class="note">ASCII hanya mencakup nilai 00–7F. Nilai 80–FF bukan karakter ASCII standar; pada UTF-8 dapat menjadi bagian karakter multibyte.</p>
+ </div>
+</div>
+<section id="dot" role="tabpanel" aria-labelledby="tab-dot" class="tabpane">
+<div class="dot-mobile-top"><strong>▦ Dot Matrix 128 Byte</strong><button type="button" class="button dot-menu-button" id="dot-menu" aria-expanded="false" aria-controls="dot-settings">☰ Pengaturan</button></div>
+<div class="dot-layout">
+<div class="stack dot-workspace">
+<article class="panel"><div class="toolbar"><h2 style="margin:0">▦ LED Dot Matrix Display</h2></div><div class="matrix-actions" role="group" aria-label="Kontrol pergeseran di atas dot matrix"><button type="button" class="button" id="dot-display-left">← Geser Kiri</button><button type="button" class="button primary" id="dot-display-auto" aria-pressed="false">▶ Otomatis</button><button type="button" class="button" id="dot-display-right">Geser Kanan →</button></div><div class="matrix-shell"><div id="matrix" class="matrix" aria-label="Simulasi LED dot matrix" style="--led-on: #ff5144; --led-glow: #ff5144aa; grid-template-columns: repeat(16, var(--dot-size)); --dot-size: 2px; --dot-gap: 4px;"><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led on" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div><div class="led" aria-hidden="true"></div></div></div><div class="legend"><span><i></i> LED ON</span><span><i class="off"></i> LED OFF</span><span id="dot-meta" style="margin-left:auto">8 × 16 • animasi 128/128 B • posisi 0</span></div></article>
+<article class="panel"><div class="toolbar"><h2 style="margin:0">Memory Hexadecimal</h2><span class="spacer"></span><button type="button" id="dot-help-toggle" class="button" aria-expanded="false" aria-controls="dot-help">ⓘ Petunjuk ▾</button></div>
+<div class="info" id="dot-help" hidden=""><p>Setiap 2 digit hex adalah <strong>1 kolom vertikal berisi 8 LED</strong>. Kolom dibaca dari kiri ke kanan. Bit 7 = LED paling atas. Jumlah kolom yang terlihat mengikuti ukuran display yang dipilih. Animasi mengubah tampilan, bukan input hex.</p><p><strong>Isi memori (00–FF, dipisahkan spasi, koma, atau baris baru).</strong> Data seperti <code>FF</code> menyalakan semua LED pada kolom tersebut, sedangkan <code>00</code> mematikannya. Jika jumlah byte kurang, kolom sisanya bernilai <code>00</code>.</p></div>
+<div class="toolbar"><label class="control" for="hex-input">Isi memori HEX (maksimal 128 Byte)</label><span class="spacer"></span><span class="subtitle" id="dot-memory">30 / 128 B</span></div><textarea id="hex-input" class="hextext" spellcheck="false" autocapitalize="characters" placeholder="18 3C 7E FF 7E 3C 18 00"></textarea><div class="error" id="hex-error" role="status"></div><div class="toolbar"><button class="button primary" id="dot-apply">Terapkan HEX</button><button class="button" id="dot-save">Save .dot</button><button class="button" id="dot-import">Import File</button><button type="button" class="button" id="dot-send" aria-haspopup="dialog">Kirim Tugas</button><input type="file" id="dot-file" accept=".dot,.json,.hex,.txt,.bin" hidden=""></div><p class="note">Memori tetap 128 byte pada semua ukuran display. Pergeseran hanya mengubah posisi tampilan LED.</p></article>
+</div>
+<aside id="dot-settings" class="stack dot-settings" aria-label="Pengaturan dot matrix">
+<div class="dot-mobile-drawer-head"><strong>Pengaturan Dot Matrix</strong><button type="button" id="dot-menu-close" class="button" aria-label="Tutup menu">✕ Tutup</button></div>
+<article class="panel"><h2>Memori &amp; Contoh</h2><div class="toolbar"><button type="button" class="button primary" id="dot-example">Contoh A B C D E</button><button type="button" class="button" id="dot-clear">Clear Memory</button></div><p class="note">Contoh menggunakan pola LED dengan bit 7 di baris paling atas.</p></article>
+<article class="panel"><h2>Pengaturan Display</h2><div class="dot-config"><label>Ukuran<select id="dot-size"><option value="8">8 × 8</option><option value="16" selected="">8 × 16</option><option value="32">8 × 32</option></select></label><label>Warna LED<select id="dot-color"><option value="red">Merah</option><option value="green">Hijau</option><option value="amber">Kuning</option></select></label><label>Mode tepi<select id="dot-edge"><option value="wrap">Berulang / Wrap</option><option value="zero">Kosongkan tepi</option></select></label></div><p class="note">Mengubah ukuran display tidak menghapus memori.</p></article>
+<article class="panel"><h2>Kontrol Simulasi</h2><div class="mode-switch" role="group" aria-label="Mode animasi"><button type="button" id="mode-auto" class="mode-button active" aria-pressed="true">▶ Otomatis</button><button type="button" id="mode-manual" class="mode-button" aria-pressed="false">✋ Manual</button></div><div class="dot-config controls-grid"><label>Arah otomatis<select id="dot-direction"><option value="left">← Geser kiri</option><option value="right">Geser kanan →</option></select></label><label>Jarak geser<select id="dot-step"><option value="1">1× (1 kolom)</option><option value="2">2× (2 kolom)</option><option value="4">4× (4 kolom)</option><option value="8">8× (8 kolom)</option></select></label><label>Panjang animasi<input type="number" id="dot-animate-length" min="1" max="128" step="1" value="128" inputmode="numeric"></label><label>Interval (ms)<input type="number" id="dot-speed" min="60" max="3000" step="20" value="350" inputmode="numeric"></label></div>
+<div id="auto-actions" class="toolbar action-row"><button class="button primary" id="dot-play">▶ Jalankan</button><button class="button" id="dot-pause">❚❚ Jeda</button></div><div id="manual-actions" class="toolbar action-row" hidden=""><button class="button primary" id="dot-once-left">← Geser Kiri</button><button class="button primary" id="dot-once-right">Geser Kanan →</button></div><div class="toolbar action-row"><button class="button" id="dot-reset">↺ Reset Posisi</button><span id="dot-status" class="subtitle" role="status">Otomatis • siap</span></div><p class="note">Geser otomatis dan manual mengacu pada memori hexadecimal yang sama.</p></article>
+<article class="panel"><h2>Animasi Tambahan</h2><div class="toolbar"><button class="button" id="dot-invert">Invert LED</button><button class="button" id="dot-reverse">Balik Kolom</button></div><p class="note">Efek ini mengubah nilai HEX di memori. Simpan .dot untuk menyimpan hasilnya.</p></article>
+</aside></div><button id="dot-backdrop" class="dot-backdrop" hidden="" aria-label="Tutup pengaturan"></button></section>
+<section id="rgb" role="tabpanel" aria-labelledby="tab-rgb" class="tabpane">
+  <div class="rgb-layout">
+    <article class="panel">
+      <div class="toolbar rgb-heading">
+        <h2 style="margin:0">Layar TV LED</h2><span class="spacer"></span>
+        <button type="button" class="button" id="rgb-tv-toggle" aria-expanded="true" aria-controls="rgb-tv">Sembunyikan TV</button>
+      </div>
+      <div class="rgb-stage">
+        <figure class="rgb-tv" id="rgb-tv">
+          <figcaption>Layar TV LCD</figcaption>
+          <canvas id="rgb-screen" width="320" height="180" role="img" aria-label="Layar TV dengan kotak biru yang menandai area kecil untuk diperbesar"></canvas>
+          <div class="rgb-stand" aria-hidden="true"></div>
+          <p class="note">Kotak biru menandai area 8 × 8 piksel.</p>
+        </figure>
+        <div class="rgb-connector" id="rgb-connector" aria-hidden="true">→</div>
+        <figure class="rgb-zoom">
+          <figcaption>Pembesaran 8 × 8 piksel</figcaption>
+          <div class="rgb-grid" id="rgb-grid" role="group" aria-label="64 piksel yang dapat diedit"><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 1, kolom 1, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 1, kolom 2, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 1, kolom 3, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 1, kolom 4, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 1, kolom 5, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 1, kolom 6, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 1, kolom 7, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 1, kolom 8, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 2, kolom 1, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 2, kolom 2, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 2, kolom 3, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 2, kolom 4, #FF0000" style="background-color: rgb(255, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 2, kolom 5, #FF0000" style="background-color: rgb(255, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 2, kolom 6, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 2, kolom 7, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 2, kolom 8, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 3, kolom 1, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 3, kolom 2, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 3, kolom 3, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 3, kolom 4, #FF0000" style="background-color: rgb(255, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 3, kolom 5, #FF0000" style="background-color: rgb(255, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 3, kolom 6, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 3, kolom 7, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 3, kolom 8, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 4, kolom 1, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 4, kolom 2, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 4, kolom 3, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="true" aria-label="Baris 4, kolom 4, #FFFF00" style="background-color: rgb(255, 255, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 4, kolom 5, #FFFF00" style="background-color: rgb(255, 255, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 4, kolom 6, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 4, kolom 7, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 4, kolom 8, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 5, kolom 1, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 5, kolom 2, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 5, kolom 3, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 5, kolom 4, #FFFF00" style="background-color: rgb(255, 255, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 5, kolom 5, #FFFF00" style="background-color: rgb(255, 255, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 5, kolom 6, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 5, kolom 7, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 5, kolom 8, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 6, kolom 1, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 6, kolom 2, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 6, kolom 3, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 6, kolom 4, #00FF00" style="background-color: rgb(0, 255, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 6, kolom 5, #00FF00" style="background-color: rgb(0, 255, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 6, kolom 6, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 6, kolom 7, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 6, kolom 8, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 7, kolom 1, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 7, kolom 2, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 7, kolom 3, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 7, kolom 4, #00FF00" style="background-color: rgb(0, 255, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 7, kolom 5, #00FF00" style="background-color: rgb(0, 255, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 7, kolom 6, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 7, kolom 7, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 7, kolom 8, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 8, kolom 1, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 8, kolom 2, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 8, kolom 3, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 8, kolom 4, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 8, kolom 5, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 8, kolom 6, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 8, kolom 7, #000000" style="background-color: rgb(0, 0, 0);"></button><button type="button" class="rgb-pixel" aria-pressed="false" aria-label="Baris 8, kolom 8, #000000" style="background-color: rgb(0, 0, 0);"></button></div>
+        </figure>
+      </div>
+      <p class="note" id="rgb-position">Baris 4, kolom 4</p>
+    </article>
+    <div class="stack">
+      <article class="panel">
+        <h2>Warna Piksel</h2>
+        <div>
+          <div class="rgb-channels">
+            <label class="control">R · Merah<input type="text" id="rgb-r" maxlength="2" autocomplete="off" spellcheck="false"><span id="rgb-strip-r" class="rgb-channel-strip" aria-hidden="true" style="background-color: rgb(255, 0, 0);"></span></label>
+            <label class="control">G · Hijau<input type="text" id="rgb-g" maxlength="2" autocomplete="off" spellcheck="false"><span id="rgb-strip-g" class="rgb-channel-strip" aria-hidden="true" style="background-color: rgb(0, 255, 0);"></span></label>
+            <label class="control">B · Biru<input type="text" id="rgb-b" maxlength="2" autocomplete="off" spellcheck="false"><span id="rgb-strip-b" class="rgb-channel-strip" aria-hidden="true" style="background-color: rgb(0, 0, 0);"></span></label>
+          </div>
+          <output class="rgb-preview" id="rgb-preview" for="rgb-r rgb-g rgb-b" style="background-color: rgb(255, 255, 0); color: rgb(24, 35, 56);">#FFFF00</output>
+          <div class="rgb-color-actions">
+            <div class="rgb-swatches" id="rgb-swatches" role="group" aria-label="Pilihan warna"><button type="button" aria-label="Merah #FF0000" title="Merah" style="background-color: rgb(255, 0, 0);"></button><button type="button" aria-label="Hijau #00FF00" title="Hijau" style="background-color: rgb(0, 255, 0);"></button><button type="button" aria-label="Biru #0000FF" title="Biru" style="background-color: rgb(0, 0, 255);"></button><button type="button" aria-label="Kuning #FFFF00" title="Kuning" style="background-color: rgb(255, 255, 0);"></button><button type="button" aria-label="Putih #FFFFFF" title="Putih" style="background-color: rgb(255, 255, 255);"></button><button type="button" aria-label="Hitam #000000" title="Hitam" style="background-color: rgb(0, 0, 0);"></button></div>
+
+          </div>
+          <p class="error" id="rgb-status" role="status"></p>
+          <details class="rgb-color-guide">
+            <summary>Panduan Warna HEX</summary>
+            <table aria-label="Tabel warna RGB">
+              <thead><tr><th scope="col">Warna</th><th scope="col">Kode HEX</th></tr></thead>
+              <tbody id="rgb-color-guide"><tr><td><span class="rgb-guide-swatch" aria-hidden="true" style="background-color: rgb(255, 0, 0);"></span>Merah</td><td>#FF0000</td></tr><tr><td><span class="rgb-guide-swatch" aria-hidden="true" style="background-color: rgb(0, 255, 0);"></span>Hijau</td><td>#00FF00</td></tr><tr><td><span class="rgb-guide-swatch" aria-hidden="true" style="background-color: rgb(0, 0, 255);"></span>Biru</td><td>#0000FF</td></tr><tr><td><span class="rgb-guide-swatch" aria-hidden="true" style="background-color: rgb(255, 255, 0);"></span>Kuning</td><td>#FFFF00</td></tr><tr><td><span class="rgb-guide-swatch" aria-hidden="true" style="background-color: rgb(255, 255, 255);"></span>Putih</td><td>#FFFFFF</td></tr><tr><td><span class="rgb-guide-swatch" aria-hidden="true" style="background-color: rgb(0, 0, 0);"></span>Hitam</td><td>#000000</td></tr><tr><td><span class="rgb-guide-swatch" aria-hidden="true" style="background-color: rgb(0, 255, 255);"></span>Sian</td><td>#00FFFF</td></tr><tr><td><span class="rgb-guide-swatch" aria-hidden="true" style="background-color: rgb(255, 0, 255);"></span>Magenta</td><td>#FF00FF</td></tr><tr><td><span class="rgb-guide-swatch" aria-hidden="true" style="background-color: rgb(255, 165, 0);"></span>Jingga</td><td>#FFA500</td></tr><tr><td><span class="rgb-guide-swatch" aria-hidden="true" style="background-color: rgb(128, 0, 128);"></span>Ungu</td><td>#800080</td></tr><tr><td><span class="rgb-guide-swatch" aria-hidden="true" style="background-color: rgb(128, 128, 128);"></span>Abu-abu</td><td>#808080</td></tr></tbody>
+            </table>
+          </details>
+        </div>
+      <div class="toolbar rgb-actions">
+        <button type="button" class="button" id="rgb-erase">Hapus Piksel</button>
+        <button type="button" class="button" id="rgb-clear">Bersihkan Layar</button>
+        <button type="button" class="button" id="rgb-example">Contoh Lampu Lalu Lintas</button>
+      </div>
+      </article>
+      <div class="toolbar">
+        <button type="button" class="button" id="rgb-save">Simpan</button>
+        <button type="button" class="button" id="rgb-import">Import File</button>
+        <input type="file" id="rgb-file" accept=".json,application/json" hidden="">
+        <button type="button" class="button primary" id="rgb-send" aria-haspopup="dialog">Kirim Tugas</button>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="seg" role="tabpanel" aria-labelledby="tab-seg" class="tabpane">
+  <article class="panel">
+    <div class="toolbar">
+      <label class="control">Jenis tampilan
+        <select id="seg-type"><option value="7">7 segmen</option><option value="14">14 segmen</option></select>
+      </label>
+      <label class="control">Jumlah digit
+        <select id="seg-count"><option value="1">×1</option><option value="2">×2</option><option value="3">×3</option><option value="4">×4</option></select>
+      </label>
+      <span class="spacer"></span>
+      <button type="button" class="button" id="seg-guide-toggle" aria-expanded="false" aria-controls="seg-guide">Tampilkan Panduan</button>
+    </div>
+    <div class="seg-screen" id="seg-screen" aria-label="Tampilan segmen"><svg viewBox="0 0 80 104" role="img" aria-label="Digit 1, segmen menyala: tidak ada"><line x1="20" y1="12" x2="60" y2="12"></line><line x1="66" y1="18" x2="66" y2="46"></line><line x1="66" y1="58" x2="66" y2="86"></line><line x1="20" y1="92" x2="60" y2="92"></line><line x1="14" y1="58" x2="14" y2="86"></line><line x1="14" y1="18" x2="14" y2="46"></line><line x1="20" y1="52" x2="60" y2="52"></line></svg></div>
+    <p class="note" id="seg-order">Urutan bit: a · b · c · d · e · f · g</p>
+    <div class="seg-inputs" id="seg-inputs"><label class="control">Digit 1 · 7 bit<input type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0000000" aria-describedby="seg-order seg-error-0" aria-invalid="false"><span id="seg-error-0" class="error" role="status"></span></label></div>
+    <p class="note">Masukkan bit dari kiri ke kanan. <strong>1</strong> menyala, <strong>0</strong> mati.</p>
+    <div class="toolbar" style="margin-top:10px">
+      <button type="button" class="button primary" id="seg-send" aria-haspopup="dialog">Kirim Tugas</button>
+    </div>
+    <section class="seg-guide" id="seg-guide" aria-labelledby="seg-guide-title" hidden="">
+      <h3 id="seg-guide-title">Posisi segmen</h3>
+      <div id="seg-guide-image"><svg viewBox="0 0 80 104" role="img" aria-label="Posisi segmen a sampai g"><line x1="20" y1="12" x2="60" y2="12"></line><text x="40" y="12">a</text><line x1="66" y1="18" x2="66" y2="46"></line><text x="66" y="32">b</text><line x1="66" y1="58" x2="66" y2="86"></line><text x="66" y="72">c</text><line x1="20" y1="92" x2="60" y2="92"></line><text x="40" y="92">d</text><line x1="14" y1="58" x2="14" y2="86"></line><text x="14" y="72">e</text><line x1="14" y1="18" x2="14" y2="46"></line><text x="14" y="32">f</text><line x1="20" y1="52" x2="60" y2="52"></line><text x="40" y="52">g</text></svg></div>
+      <p class="note" id="seg-example">Contoh angka 0: 1111110. Segmen a sampai f menyala.</p>
+    </section>
+  </article>
+</section>
+<p class="footer">Aplikasi simulasi lokal di browser • Tidak mengakses RAM fisik komputer atau server CasaOS</p>
+</div>
+<dialog id="task-dialog" class="panel" aria-labelledby="task-heading">
+  <h2 id="task-heading">Kirim Tugas</h2>
+  <form id="task-form">
+    <label class="control">Judul tugas
+      <input type="text" id="task-title" maxlength="100" required="">
+    </label>
+    <label class="control">Kode guru
+      <input type="text" id="task-code" maxlength="12" required="" placeholder="6 atau 8 karakter dari gurumu" autocomplete="off" autocapitalize="characters" spellcheck="false" autofocus="">
+    </label>
+    <label class="control">Catatan untuk guru (opsional)
+      <textarea id="task-note" maxlength="500" rows="2"></textarea>
+    </label>
+    <p id="task-file" class="note"></p>
+    <p id="task-status" class="subtitle" role="status"></p>
+    <div id="task-links" hidden="">
+      <a id="task-login" href="https://belajar.iprime-bansari.online/pembayaran/masuk.html?kembali=/kirim-tugas.html" target="_blank" rel="noopener" hidden="">Masuk dengan Google</a>
+      <a id="task-profile" href="https://belajar.iprime-bansari.online/profil.html" target="_blank" rel="noopener" hidden="">Lengkapi profil</a>
+      <a id="task-history" href="https://belajar.iprime-bansari.online/kirim-tugas.html" target="_blank" rel="noopener" hidden="">Lihat riwayat</a>
+    </div>
+    <div class="toolbar">
+      <button type="submit" class="button primary" id="task-submit">Kirim</button>
+      <button type="button" class="button" id="task-close">Tutup</button>
+    </div>
+  </form>
+</dialog>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);const sizeOptions=[128,256,512,1024,2048,4096];const enc=new TextEncoder(),dec=new TextDecoder('utf-8',{fatal:false});let ramSize=128,ram=new Array(128).fill(null),ramPage=0;const perPage=32;
+function saveFile(name,data,type){const blob=new Blob([data],{type});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+function ramProject(){return {format:'RAM-SIM-1',capacity:ramSize,bytes:ram}}
+function byteToChar(n){if(n===null)return '—';if(n===0)return 'NUL';if(n<32||n===127)return '·';return n<128?String.fromCharCode(n):'·'}
+function sizeLabel(n){return n>=1024?(n/1024)+' KB':n+' B'}
+function renderSizes(){const box=$('ram-sizes');box.replaceChildren();sizeOptions.forEach(n=>{const b=document.createElement('button');b.textContent=sizeLabel(n);b.className=n===ramSize?'selected':'';b.onclick=()=>{if(n<ram.length&&ram.slice(n).some(v=>v!==null)&&!confirm('Byte di luar kapasitas baru akan terhapus. Lanjutkan?'))return;ram=Array.from({length:n},(_,i)=>ram[i]??null);ramSize=n;ramPage=Math.min(ramPage,Math.ceil(n/perPage)-1);renderRam()};box.appendChild(b)})}
+function renderRam(){renderSizes();const used=ram.filter(v=>v!==null).length;$('ram-used').textContent=sizeLabel(used);$('ram-free').textContent=sizeLabel(ramSize-used);$('ram-percent').textContent=Math.round(100*used/ramSize)+'%';$('ram-bar').style.width=100*used/ramSize+'%';renderRows();$('ram-output').value=dec.decode(Uint8Array.from(ram.filter(v=>v!==null)))}
+function renderRows(){const tb=$('ram-rows');tb.replaceChildren();const start=ramPage*perPage;for(let i=start;i<Math.min(start+perPage,ramSize);i++){const tr=document.createElement('tr'),addr=document.createElement('td'),tdIn=document.createElement('td'),ch=document.createElement('td'),st=document.createElement('td'),input=document.createElement('input'),pill=document.createElement('span');addr.textContent='0x'+i.toString(16).toUpperCase().padStart(4,'0');input.setAttribute('aria-label','Binary byte address '+i);input.maxLength=8;input.placeholder='00000000';input.value=ram[i]===null?'':ram[i].toString(2).padStart(8,'0');pill.className='status '+(ram[i]===null?'':'ok');pill.textContent=ram[i]===null?'Empty':'Valid';ch.textContent=byteToChar(ram[i]);input.addEventListener('input',()=>{const v=input.value.trim();if(v===''){ram[i]=null;pill.textContent='Empty';pill.className='status';ch.textContent='—'}else if(/^[01]{8}$/.test(v)){ram[i]=parseInt(v,2);pill.textContent='Valid';pill.className='status ok';ch.textContent=byteToChar(ram[i])}else{ram[i]=null;pill.textContent='Invalid';pill.className='status bad';ch.textContent='—'}const used=ram.filter(x=>x!==null).length;$('ram-used').textContent=sizeLabel(used);$('ram-free').textContent=sizeLabel(ramSize-used);$('ram-percent').textContent=Math.round(100*used/ramSize)+'%';$('ram-bar').style.width=100*used/ramSize+'%';$('ram-output').value=dec.decode(Uint8Array.from(ram.filter(x=>x!==null)))});tdIn.appendChild(input);st.appendChild(pill);[addr,tdIn,ch,st].forEach(x=>tr.appendChild(x));tb.appendChild(tr)}$('ram-page').textContent=`Halaman ${ramPage+1} / ${Math.ceil(ramSize/perPage)}`;$('ram-prev').disabled=ramPage===0;$('ram-next').disabled=(ramPage+1)*perPage>=ramSize}
+function fillText(t){const bytes=enc.encode(t);if(bytes.length>4096){alert('Teks lebih besar dari batas 4 KB.');return}const needed=sizeOptions.find(x=>x>=bytes.length)||4096;if(needed>ramSize){ramSize=needed;ram=new Array(needed).fill(null)}else ram.fill(null);bytes.forEach((v,i)=>ram[i]=v);ramPage=0;renderRam()}
+$('ram-hello').onclick=()=>fillText('Hello');$('ram-sample').onclick=()=>fillText('RAM Binary Translator menyimpan data dalam bentuk byte. Setiap karakter ditampilkan berdasarkan isi memori.\n\nAplikasi ini juga menyediakan tab Dot Matrix Simulator, dengan input hexadecimal untuk menghidupkan LED dan membuat animasi.');$('ram-clear').onclick=()=>{if(ram.some(v=>v!==null)&&!confirm('Kosongkan seluruh RAM?'))return;ram.fill(null);renderRam()};$('ram-prev').onclick=()=>{ramPage--;renderRows()};$('ram-next').onclick=()=>{ramPage++;renderRows()};$('ram-copy').onclick=async()=>{try{await navigator.clipboard.writeText($('ram-output').value)}catch{ $('ram-output').select();document.execCommand('copy')}};$('ram-export-text').onclick=()=>saveFile('ram-output.txt',$('ram-output').value,'text/plain;charset=utf-8');$('ram-save').onclick=()=>saveFile('memori.ram',JSON.stringify(ramProject(),null,2),'application/json');$('ram-import').onclick=()=>$('ram-file').click();
+async function importRamProject(f){
+  let bytes,capacity;if(/\.(ram|json)$/i.test(f.name)){const obj=JSON.parse(await f.text());if(obj.format!=='RAM-SIM-1'||!sizeOptions.includes(obj.capacity)||!Array.isArray(obj.bytes)||obj.bytes.length!==obj.capacity||obj.bytes.some(v=>v!==null&&(!Number.isInteger(v)||v<0||v>255)))throw Error('Format RAM tidak sesuai.');capacity=obj.capacity;ram=obj.bytes.slice()}else{bytes=/\.bin$/i.test(f.name)?new Uint8Array(await f.arrayBuffer()):enc.encode(await f.text());if(bytes.length>4096)throw Error('File melebihi kapasitas maksimal 4 KB.');capacity=sizeOptions.find(n=>n>=bytes.length)||128;ram=Array(capacity).fill(null);bytes.forEach((v,i)=>ram[i]=v)}ramSize=capacity;ramPage=0;renderRam()
+}
+$('ram-file').onchange=async e=>{
+  const file=e.target.files[0];
+  if(!file)return;
+  try{await importRamProject(file)}catch(err){alert('Import gagal: '+err.message)}finally{e.target.value=''}
+};
+
+// RAM drawer + ASCII reference guide (standard ASCII, no binary column)
+const ramDrawer=$('ram-settings'),ramMenu=$('ram-menu'),ramBackdrop=$('ram-backdrop');
+function toggleRamDrawer(open){ramDrawer.classList.toggle('open',open);ramBackdrop.hidden=!open;document.body.classList.toggle('ram-lock',open);ramMenu.setAttribute('aria-expanded',String(open));if(open)$('ram-menu-close').focus();else ramMenu.focus()}
+ramMenu.onclick=()=>toggleRamDrawer(true);$('ram-menu-close').onclick=()=>toggleRamDrawer(false);ramBackdrop.onclick=()=>toggleRamDrawer(false);
+const asciiNames=['NUL','SOH','STX','ETX','EOT','ENQ','ACK','BEL','BS','HT (Tab)','LF (Baris baru)','VT','FF','CR','SO','SI','DLE','DC1','DC2','DC3','DC4','NAK','SYN','ETB','CAN','EM','SUB','ESC','FS','GS','RS','US'];
+const asciiBody=$('ascii-rows'),asciiFrag=document.createDocumentFragment();
+for(let i=0;i<128;i++){const tr=document.createElement('tr'),hex=document.createElement('td'),desc=document.createElement('td');hex.textContent='0x'+i.toString(16).toUpperCase().padStart(2,'0');desc.textContent=i<32?asciiNames[i]:i===32?'SPACE (Spasi)':i===127?'DEL':String.fromCharCode(i);tr.append(hex,desc);asciiFrag.appendChild(tr)}asciiBody.appendChild(asciiFrag);
+const asciiModal=$('ascii-guide');
+function toggleAscii(open){asciiModal.hidden=!open;document.body.classList.toggle('ascii-lock',open);if(open)$('ascii-close').focus();else $('ram-guide').focus()}
+$('ram-guide').onclick=()=>toggleAscii(true);$('ascii-close').onclick=()=>toggleAscii(false);$('ascii-shade').onclick=()=>toggleAscii(false);
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(!asciiModal.hidden){toggleAscii(false);return}if(ramDrawer.classList.contains('open'))toggleRamDrawer(false)});
+
+let dotWidth=16, animateLength=128, source=new Uint8Array(128), offset=0, animMode='auto', timer=null, ledNodes=[], isPlaying=false;
+const colors={red:['#ff5144','#ff5144aa'],green:['#27ed8d','#27ed8daa'],amber:['#ffbb3b','#ffbb3baa']};
+const hx=n=>n.toString(16).toUpperCase().padStart(2,'0');
+let filled=0;
+function formatHex(values){const lines=[];for(let i=0;i<values.length;i+=8)lines.push(values.slice(i,i+8).map(hx).join(' '));return lines.join('\n')}
+function syncHex(){ $('hex-input').value=formatHex(Array.from(source.slice(0,filled))); updateCount();$('hex-error').textContent='';}
+function updateCount(){ $('dot-memory').textContent=`${filled} / 128 B`;}
+function parseHex(value){const parts=value.trim()?value.trim().split(/[\s,;]+/).filter(Boolean):[];if(parts.length>128)throw Error(`Memori maksimal 128 byte, ditemukan ${parts.length} byte.`);if(parts.some(v=>!/^(?:0x)?[0-9a-fA-F]{2}$/.test(v)))throw Error('Setiap byte harus 2 digit hex, contoh 18 3C FF 00.');return parts.map(v=>parseInt(v.replace(/^0x/i,''),16));}
+function buildMatrix(){const el=$('matrix');el.replaceChildren();ledNodes=[];el.style.gridTemplateColumns=`repeat(${dotWidth}, var(--dot-size))`;const frag=document.createDocumentFragment();for(let i=0;i<8*dotWidth;i++){let d=document.createElement('div');d.className='led';d.setAttribute('aria-hidden','true');ledNodes.push(d);frag.appendChild(d)}el.appendChild(frag);fitMatrix();drawMatrix()}
+function fitMatrix(){const shell=document.querySelector('.matrix-shell');if(!shell)return;const avail=Math.max(90,shell.clientWidth-28),gap=dotWidth===32?3:4,pixel=Math.max(2,Math.min(24,Math.floor((avail-(dotWidth-1)*gap)/dotWidth)));$('matrix').style.setProperty('--dot-size',pixel+'px');$('matrix').style.setProperty('--dot-gap',gap+'px')}
+function shownByte(x){const index=x+offset;if($('dot-edge').value==='wrap')return source[((index%animateLength)+animateLength)%animateLength];return index>=0&&index<animateLength?source[index]:0}
+function drawMatrix(){const [c,g]=colors[$('dot-color').value];$('matrix').style.setProperty('--led-on',c);$('matrix').style.setProperty('--led-glow',g);for(let x=0;x<dotWidth;x++){const b=shownByte(x);for(let y=0;y<8;y++)ledNodes[y*dotWidth+x]?.classList.toggle('on',!!(b&(128>>y)))}$('dot-meta').textContent=`8 × ${dotWidth} • animasi ${animateLength}/128 B • posisi ${((offset%animateLength)+animateLength)%animateLength}`}
+function setDotStatus(t){$('dot-status').textContent=t}
+function syncDisplayButtons(){$('dot-display-auto').classList.toggle('is-active',isPlaying);$('dot-display-auto').setAttribute('aria-pressed',String(isPlaying));$('dot-display-auto').textContent=isPlaying?'❚❚ Jeda Otomatis':'▶ Otomatis'}
+function pause(){if(timer!==null)clearInterval(timer);timer=null;isPlaying=false;$('dot-play').textContent='▶ Jalankan';syncDisplayButtons();setDotStatus('Jeda / siap')}
+function shift(dir,step){const n=[1,2,4,8].includes(step)?step:1;offset+=dir==='left'?n:-n;if($('dot-edge').value==='wrap'){offset=((offset%animateLength)+animateLength)%animateLength}else{offset=Math.max(-dotWidth,Math.min(animateLength,offset))}drawMatrix()}
+function refreshTimer(){if(!isPlaying)return;clearInterval(timer);const delay=Math.max(60,Math.min(3000,Number($('dot-speed').value)||350));timer=setInterval(()=>shift($('dot-direction').value,Number($('dot-step').value)),delay)}
+function play(){if(animMode!=='auto')setMode('auto',false);if(isPlaying||document.hidden||!$('dot').classList.contains('active'))return;isPlaying=true;refreshTimer();$('dot-play').textContent='❚❚ Jeda';syncDisplayButtons();setDotStatus('Animasi berjalan')}
+function setMode(mode,autoplay=true){pause();animMode=mode;const auto=mode==='auto';$('mode-auto').classList.toggle('active',auto);$('mode-manual').classList.toggle('active',!auto);$('mode-auto').setAttribute('aria-pressed',String(auto));$('mode-manual').setAttribute('aria-pressed',String(!auto));$('auto-actions').hidden=!auto;$('manual-actions').hidden=auto;$('dot-speed').disabled=!auto;$('dot-direction').disabled=!auto;setDotStatus(auto?'Otomatis • siap':'Manual • gunakan tombol kiri/kanan');if(auto&&autoplay)play()}
+function applyHex(){try{const values=parseHex($('hex-input').value);source.fill(0);source.set(values);filled=values.length;offset=0;syncHex();drawMatrix();setDotStatus('Memori berhasil diterapkan');if(animMode==='auto')play();return true}catch(err){$('hex-error').textContent=err.message;return false}}
+function example(){
+ // Font 5x7 (kolom), dikonversi dari bit-0-atas menjadi bit-7-atas.
+ // Dengan demikian A tidak lagi terbalik secara vertikal.
+ const glyphs={A:[0x7E,0x11,0x11,0x11,0x7E],B:[0x7F,0x49,0x49,0x49,0x36],C:[0x3E,0x41,0x41,0x41,0x22],D:[0x7F,0x41,0x41,0x22,0x1C],E:[0x7F,0x49,0x49,0x49,0x41]};
+ const flipBits=v=>{let result=0;for(let bit=0;bit<8;bit++)result=(result<<1)|((v>>bit)&1);return result};
+ const exampleBytes=[];for(const letter of 'ABCDE'){for(const byte of glyphs[letter])exampleBytes.push(flipBits(byte));exampleBytes.push(0)}
+ source.fill(0);source.set(exampleBytes);filled=exampleBytes.length;offset=0;syncHex();drawMatrix();setDotStatus('Contoh huruf A B C D E dimuat');
+}
+$('mode-auto').onclick=()=>setMode('auto');$('mode-manual').onclick=()=>setMode('manual');
+$('dot-size').onchange=e=>{dotWidth=Number(e.target.value);buildMatrix()};$('dot-color').onchange=drawMatrix;$('dot-edge').onchange=()=>{offset=0;drawMatrix()};$('dot-speed').onchange=refreshTimer;$('dot-animate-length').onchange=e=>{animateLength=Math.max(1,Math.min(128,Math.trunc(Number(e.target.value)||128)));e.target.value=String(animateLength);offset=0;drawMatrix();setDotStatus(`Panjang animasi: ${animateLength} byte`)};$('dot-direction').onchange=()=>{};
+$('dot-clear').onclick=()=>{pause();source.fill(0);filled=0;offset=0;syncHex();drawMatrix()};$('dot-example').onclick=()=>{example();if(animMode==='auto')play()};$('dot-apply').onclick=()=>{pause();applyHex()};
+function manualShift(dir){if(animMode!=='manual')setMode('manual',false);else if(isPlaying)pause();shift(dir,Number($('dot-step').value))}
+$('dot-once-left').onclick=()=>manualShift('left');$('dot-once-right').onclick=()=>manualShift('right');
+$('dot-display-left').onclick=()=>manualShift('left');$('dot-display-right').onclick=()=>manualShift('right');$('dot-display-auto').onclick=()=>isPlaying?pause():play();
+$('dot-play').onclick=()=>isPlaying?pause():play();$('dot-pause').onclick=pause;
+$('dot-invert').onclick=()=>{source=Uint8Array.from(source,v=>v^255);filled=128;syncHex();drawMatrix()};
+$('dot-reverse').onclick=()=>{source.reverse();filled=128;syncHex();drawMatrix()};
+$('dot-reset').onclick=()=>{offset=0;drawMatrix();setDotStatus('Posisi awal dipulihkan')};
+function dotProject(){return {format:'DOT-MATRIX-2',height:8,width:dotWidth,capacity:128,animateLength,filled,bytes:Array.from(source),offset,edge:$('dot-edge').value,step:Number($('dot-step').value),direction:$('dot-direction').value,mode:animMode,color:$('dot-color').value,speed:Number($('dot-speed').value)}}
+$('dot-save').onclick=()=>saveFile('dotmatrix.dot',JSON.stringify(dotProject(),null,2),'application/json');
+$('dot-import').onclick=()=>$('dot-file').click();async function importDotProject(f){
+  pause();let values=[],settings=null;if(/\.(dot|json)$/i.test(f.name)){const obj=JSON.parse(await f.text());if(!['DOT-MATRIX-1','DOT-MATRIX-2'].includes(obj.format)||obj.height!==8||![8,16,32].includes(obj.width)||!Array.isArray(obj.bytes)||obj.bytes.length>128||obj.bytes.some(v=>!Number.isInteger(v)||v<0||v>255))throw Error('Format dot matrix tidak sesuai.');values=obj.bytes;settings=obj;dotWidth=obj.width;filled=obj.format==='DOT-MATRIX-2'?Math.max(0,Math.min(128,obj.filled??128)):obj.bytes.length}else if(/\.bin$/i.test(f.name)){const b=new Uint8Array(await f.arrayBuffer());if(b.length>128)throw Error('File melebihi 128 byte.');values=Array.from(b);filled=b.length}else{values=parseHex(await f.text());filled=values.length}source=new Uint8Array(128);source.set(values);if(!settings){animateLength=128;$('dot-animate-length').value='128'}offset=Number.isInteger(settings?.offset)?settings.offset:0;$('dot-size').value=String(dotWidth);if(settings){if(Number.isInteger(settings.animateLength)&&settings.animateLength>=1&&settings.animateLength<=128)animateLength=settings.animateLength;else animateLength=128;$('dot-animate-length').value=String(animateLength);if(['wrap','zero'].includes(settings.edge))$('dot-edge').value=settings.edge;if([1,2,4,8].includes(settings.step))$('dot-step').value=settings.step;if(['left','right'].includes(settings.direction))$('dot-direction').value=settings.direction;if(['red','green','amber'].includes(settings.color))$('dot-color').value=settings.color;if(Number.isFinite(settings.speed))$('dot-speed').value=Math.max(60,Math.min(3000,settings.speed));if(['auto','manual'].includes(settings.mode))setMode(settings.mode,false)}syncHex();buildMatrix();setDotStatus('File berhasil diimpor');if(animMode==='auto')play()
+}
+$('dot-file').onchange=async e=>{
+  const file=e.target.files[0];
+  if(!file)return;
+  try{await importDotProject(file)}catch(err){$('hex-error').textContent='Import gagal: '+err.message}finally{e.target.value=''}
+};
+const menu=$('dot-menu'),settings=$('dot-settings'),backdrop=$('dot-backdrop');
+function setMenu(open){settings.classList.toggle('open',open);backdrop.hidden=!open;document.body.classList.toggle('dot-lock',open);menu.setAttribute('aria-expanded',String(open));if(open)$('dot-menu-close').focus();else menu.focus()}
+menu.onclick=()=>setMenu(!settings.classList.contains('open'));$('dot-menu-close').onclick=()=>setMenu(false);backdrop.onclick=()=>setMenu(false);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&settings.classList.contains('open'))setMenu(false)});
+const help=$('dot-help');$('dot-help-toggle').onclick=()=>{help.hidden=!help.hidden;$('dot-help-toggle').setAttribute('aria-expanded',String(!help.hidden));$('dot-help-toggle').textContent=help.hidden?'ⓘ Petunjuk ▾':'ⓘ Sembunyikan ▴'};
+$('hex-input').addEventListener('input',()=>{try{const n=parseHex($('hex-input').value).length;$('dot-memory').textContent=`${n} / 128 B`;$('hex-error').textContent=''}catch(err){$('hex-error').textContent=err.message}});
+if(typeof ResizeObserver!=='undefined')new ResizeObserver(fitMatrix).observe(document.querySelector('.matrix-shell'));else window.addEventListener('resize',fitMatrix);
+window.matchMedia('(min-width: 768px)').addEventListener?.('change',e=>{if(e.matches&&settings.classList.contains('open'))setMenu(false)});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});document.addEventListener('keydown',e=>{if(animMode!=='manual'||!$('dot').classList.contains('active'))return;if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();shift(e.key==='ArrowLeft'?'left':'right',Number($('dot-step').value))}});
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-selected',String(x===b))});document.querySelectorAll('.tabpane').forEach(p=>p.classList.toggle('active',p.id===b.dataset.tab));if(b.dataset.tab==='dot'){fitMatrix();if(animMode==='auto')play()}else{pause();if(settings.classList.contains('open'))setMenu(false)}if(ramDrawer.classList.contains('open'))toggleRamDrawer(false);if(!asciiModal.hidden)toggleAscii(false)});
+renderRam();example();buildMatrix();setMode('auto',false);
+const rgbSize = 8;
+const rgbInputs = ['rgb-r', 'rgb-g', 'rgb-b'].map($);
+const rgbStrips = ['rgb-strip-r', 'rgb-strip-g', 'rgb-strip-b'].map($);
+const rgbPixels = [];
+const rgbBytes = new Uint8Array(rgbSize * rgbSize * rgbInputs.length);
+let rgbSelected = 27;
+
+function rgbHex(bytes) {
+  return '#' + Array.from(bytes, hx).join('');
+}
+
+function drawRgbTv() {
+  const ctx = $('rgb-screen').getContext('2d');
+  const rect = (color, x, y, w, h) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
+  };
+  rect('#94d9ff', 0, 0, 320, 180);
+  rect('#e3f5ff', 24, 22, 45, 8);
+  rect('#e3f5ff', 118, 39, 67, 8);
+  rect('#7cb2d6', 26, 68, 40, 45);
+  rect('#6ba5cf', 72, 54, 38, 59);
+  rect('#eec38e', 260, 35, 60, 79);
+  rect('#5192bb', 272, 48, 28, 25);
+  rect('#66a86a', 0, 102, 320, 20);
+  rect('#cbd0d4', 0, 115, 320, 13);
+  rect('#626d79', 0, 128, 320, 52);
+  for (let x = 25; x < 290; x += 33) rect('#f6f9fb', x, 141, 15, 28);
+  rect('#273548', 227, 88, 2, 31);
+
+  // Each editable cell is one canvas pixel inside this highlighted region.
+  const left = 224, top = 80;
+  rgbPixels.forEach((_, index) => {
+    const address = index * 3;
+    rect(rgbHex(rgbBytes.subarray(address, address + 3)),
+      left + index % rgbSize, top + Math.floor(index / rgbSize), 1, 1);
+  });
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(left - 1.5, top - 1.5, 11, 11);
+  ctx.strokeStyle = '#1769ea';
+  ctx.strokeRect(left - 2.5, top - 2.5, 13, 13);
+}
+
+function updateRgbPreview() {
+  const values = rgbInputs.map(input => input.value.trim().toUpperCase());
+  const intensity = values.map(value => /^[0-9A-F]{2}$/.test(value) ? parseInt(value, 16) : null);
+  rgbStrips.forEach((strip, index) => {
+    const color = [0, 0, 0];
+    color[index] = intensity[index];
+    strip.style.backgroundColor = intensity[index] === null ? '' : rgbHex(color);
+  });
+  const valid = intensity.every(value => value !== null);
+  const preview = $('rgb-preview');
+  preview.textContent = valid ? '#' + values.join('') : 'Masukkan 2 digit HEX per kanal';
+  preview.style.backgroundColor = valid ? preview.textContent : '';
+  const brightness = intensity[0] * 0.299 + intensity[1] * 0.587 + intensity[2] * 0.114;
+  preview.style.color = valid && brightness < 140 ? '#fff' : '#182338';
+  return valid ? intensity : null;
+}
+
+function renderRgbPixel(pixel, index) {
+  const address = index * 3;
+  const color = rgbHex(rgbBytes.subarray(address, address + 3));
+  pixel.style.backgroundColor = color;
+  pixel.setAttribute('aria-pressed', String(index === rgbSelected));
+  pixel.setAttribute('aria-label', `Baris ${Math.floor(index / rgbSize) + 1}, kolom ${index % rgbSize + 1}, ${color}`);
+}
+
+function renderRgb() {
+  rgbPixels.forEach(renderRgbPixel);
+  const address = rgbSelected * 3;
+  $('rgb-position').textContent = `Baris ${Math.floor(rgbSelected / rgbSize) + 1}, kolom ${rgbSelected % rgbSize + 1}`;
+  rgbInputs.forEach((input, index) => { input.value = hx(rgbBytes[address + index]); });
+  $('rgb-status').textContent = '';
+  updateRgbPreview();
+  drawRgbTv();
+}
+
+function loadRgbExample() {
+  rgbBytes.fill(0);
+  const colors = [[255, 0, 0], [255, 255, 0], [0, 255, 0]];
+  for (let index = 0; index < colors.length; index++) {
+    const row = 1 + index * 2;
+    for (const offset of [0, 1, rgbSize, rgbSize + 1]) {
+      rgbBytes.set(colors[index], (row * rgbSize + 3 + offset) * 3);
+    }
+  }
+  rgbSelected = 27;
+  renderRgb();
+}
+
+function rgbProject() {
+  return {format: 'TV-LED-RGB-1', width: rgbSize, height: rgbSize,
+    selected: rgbSelected, bytes: Array.from(rgbBytes)};
+}
+
+async function importRgbProject(file) {
+  const project = JSON.parse(await file.text());
+  if (!project || project.format !== 'TV-LED-RGB-1' ||
+      project.width !== rgbSize || project.height !== rgbSize ||
+      !Array.isArray(project.bytes) || project.bytes.length !== rgbBytes.length ||
+      project.bytes.some(value => !Number.isInteger(value) || value < 0 || value > 255)) {
+    throw new Error('Format proyek TV LED RGB tidak sesuai.');
+  }
+  rgbBytes.set(project.bytes);
+  rgbSelected = Number.isInteger(project.selected) && project.selected >= 0 &&
+    project.selected < rgbPixels.length ? project.selected : 0;
+  renderRgb();
+}
+
+for (let index = 0; index < rgbSize * rgbSize; index++) {
+  const pixel = document.createElement('button');
+  pixel.type = 'button';
+  pixel.className = 'rgb-pixel';
+  pixel.onclick = () => {
+    rgbSelected = index;
+    renderRgb();
+  };
+  rgbPixels.push(pixel);
+  $('rgb-grid').append(pixel);
+}
+function paintSelectedRgb() {
+  $('rgb-status').textContent = '';
+  const values = updateRgbPreview();
+  if (!values) return;
+  rgbBytes.set(values, rgbSelected * 3);
+  renderRgbPixel(rgbPixels[rgbSelected], rgbSelected);
+  drawRgbTv();
+}
+
+const rgbPalette = {
+  Merah: 'FF0000', Hijau: '00FF00', Biru: '0000FF', Kuning: 'FFFF00',
+  Putih: 'FFFFFF', Hitam: '000000', Sian: '00FFFF', Magenta: 'FF00FF',
+  Jingga: 'FFA500', Ungu: '800080', 'Abu-abu': '808080'
+};
+for (const [index, [label, color]] of Object.entries(rgbPalette).entries()) {
+  const row = document.createElement('tr');
+  const name = document.createElement('td');
+  const chip = document.createElement('span');
+  chip.className = 'rgb-guide-swatch';
+  chip.style.backgroundColor = '#' + color;
+  chip.setAttribute('aria-hidden', 'true');
+  name.append(chip, label);
+  const code = document.createElement('td');
+  code.textContent = '#' + color;
+  row.append(name, code);
+  $('rgb-color-guide').append(row);
+
+  if (index < 6) {
+    const swatch = document.createElement('button');
+    swatch.type = 'button';
+    swatch.style.backgroundColor = '#' + color;
+    swatch.setAttribute('aria-label', label + ' #' + color);
+    swatch.title = label;
+    swatch.onclick = () => {
+      rgbInputs.forEach((input, channel) => { input.value = color.slice(channel * 2, channel * 2 + 2); });
+      paintSelectedRgb();
+    };
+    $('rgb-swatches').append(swatch);
+  }
+}
+rgbInputs.forEach(input => input.addEventListener('input', paintSelectedRgb));
+function showRgbTv(visible) {
+  const hidden = !visible;
+  $('rgb-tv').hidden = hidden;
+  $('rgb-connector').hidden = hidden;
+  $('rgb-tv-toggle').textContent = hidden ? 'Tampilkan TV' : 'Sembunyikan TV';
+  $('rgb-tv-toggle').setAttribute('aria-expanded', String(visible));
+}
+showRgbTv(!window.matchMedia('(max-width:600px)').matches);
+$('rgb-tv-toggle').onclick = () => showRgbTv($('rgb-tv').hidden);
+$('rgb-erase').onclick = () => {
+  const address = rgbSelected * 3;
+  rgbBytes.fill(0, address, address + 3);
+  renderRgb();
+};
+$('rgb-clear').onclick = () => {
+  if (!rgbBytes.some(Boolean) || !confirm('Bersihkan semua piksel?')) return;
+  rgbBytes.fill(0);
+  renderRgb();
+};
+$('rgb-example').onclick = loadRgbExample;
+$('rgb-save').onclick = () => saveFile('tv-led-rgb.json', JSON.stringify(rgbProject(), null, 2), 'application/json');
+$('rgb-import').onclick = () => $('rgb-file').click();
+$('rgb-file').onchange = async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    if (file.size > 65536) throw new Error('Berkas melebihi batas ukuran proyek.');
+    await importRgbProject(file);
+  } catch (error) {
+    $('rgb-status').textContent = 'Import gagal. ' + error.message;
+  } finally {
+    event.target.value = '';
+  }
+};
+loadRgbExample();
+
+const segLayouts = {
+  7: [
+    ['a', 20, 12, 60, 12], ['b', 66, 18, 66, 46], ['c', 66, 58, 66, 86],
+    ['d', 20, 92, 60, 92], ['e', 14, 58, 14, 86], ['f', 14, 18, 14, 46],
+    ['g', 20, 52, 60, 52]
+  ],
+  14: [
+    ['a', 20, 12, 60, 12], ['b', 66, 18, 66, 46], ['c', 66, 58, 66, 86],
+    ['d', 20, 92, 60, 92], ['e', 14, 58, 14, 86], ['f', 14, 18, 14, 46],
+    ['g', 20, 52, 35, 52], ['h', 45, 52, 60, 52],
+    ['i', 22, 20, 34, 44], ['j', 40, 20, 40, 44], ['k', 58, 20, 46, 44],
+    ['l', 46, 60, 58, 84], ['m', 40, 60, 40, 84], ['n', 34, 60, 22, 84]
+  ]
+};
+const segInputs = {7: Array(4).fill('0000000'), 14: Array(4).fill('00000000000000')};
+const segType = $('seg-type');
+const segCount = $('seg-count');
+const segGuide = $('seg-guide');
+const segGuideToggle = $('seg-guide-toggle');
+
+function buatGambarSegmen(layout, label, panduan = false) {
+  const namespace = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(namespace, 'svg');
+  svg.setAttribute('viewBox', '0 0 80 104');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', label);
+  const lines = layout.map(([name, x1, y1, x2, y2]) => {
+    const line = document.createElementNS(namespace, 'line');
+    for (const [attr, value] of Object.entries({x1, y1, x2, y2})) line.setAttribute(attr, value);
+    svg.append(line);
+    if (panduan) {
+      const text = document.createElementNS(namespace, 'text');
+      text.setAttribute('x', (x1 + x2) / 2);
+      text.setAttribute('y', (y1 + y2) / 2);
+      text.textContent = name;
+      svg.append(text);
+    }
+    return line;
+  });
+  return {svg, lines};
+}
+
+function tampilSegmen() {
+  const type = Number(segType.value);
+  const layout = segLayouts[type];
+  const digits = Number(segCount.value);
+  const screen = $('seg-screen'), fields = $('seg-inputs');
+  screen.replaceChildren();
+  fields.replaceChildren();
+  $('seg-order').textContent = 'Urutan bit: ' + layout.map(([name]) => name).join(' · ');
+
+  for (let digit = 0; digit < digits; digit++) {
+    const label = document.createElement('label');
+    label.className = 'control';
+    label.textContent = 'Digit ' + (digit + 1) + ' · ' + type + ' bit';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.inputMode = 'numeric';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    input.value = segInputs[type][digit];
+    input.placeholder = '0'.repeat(type);
+    input.setAttribute('aria-describedby', 'seg-order seg-error-' + digit);
+    const status = document.createElement('span');
+    status.id = 'seg-error-' + digit;
+    status.className = 'error';
+    status.setAttribute('role', 'status');
+    const {svg, lines} = buatGambarSegmen(layout, 'Digit ' + (digit + 1));
+    function perbaruiDigit() {
+      segInputs[type][digit] = input.value;
+      const bits = input.value.replace(/\s+/g, '');
+      const valid = /^[01]*$/.test(bits) && bits.length <= type;
+      input.setAttribute('aria-invalid', String(!valid));
+      status.textContent = valid ? '' : 'Gunakan maksimal ' + type + ' bit, hanya 0 dan 1.';
+      const aktif = layout.filter((_, index) => valid && bits[index] === '1');
+      lines.forEach((line, index) => line.classList.toggle('is-on', valid && bits[index] === '1'));
+      const namaAktif = aktif.map(([name]) => name).join(', ') || 'tidak ada';
+      svg.setAttribute('aria-label', 'Digit ' + (digit + 1) + ', segmen menyala: ' + namaAktif);
+    }
+    input.addEventListener('input', perbaruiDigit);
+    label.append(input, status);
+    fields.append(label);
+    screen.append(svg);
+    perbaruiDigit();
+  }
+
+  const {svg} = buatGambarSegmen(layout, 'Posisi segmen a sampai ' + layout.at(-1)[0], true);
+  $('seg-guide-image').replaceChildren(svg);
+  $('seg-example').textContent = 'Contoh angka 0: 111111' + '0'.repeat(type - 6)
+    + '. Segmen a sampai f menyala.';
+}
+
+segType.addEventListener('change', tampilSegmen);
+segCount.addEventListener('change', tampilSegmen);
+segGuideToggle.onclick = () => {
+  segGuide.hidden = !segGuide.hidden;
+  segGuideToggle.textContent = segGuide.hidden ? 'Tampilkan Panduan' : 'Sembunyikan Panduan';
+  segGuideToggle.setAttribute('aria-expanded', String(!segGuide.hidden));
+};
+tampilSegmen();
+
+function segProject() {
+  const segments = Number(segType.value);
+  const count = Number(segCount.value);
+  const bits = segInputs[segments].slice(0, count).map(value => value.replace(/\s+/g, ''));
+  if (bits.some(value => !/^[01]*$/.test(value) || value.length > segments)) {
+    throw new Error('Perbaiki input biner pada digit yang akan dikirim.');
+  }
+  return {format: 'SEGMENT-DISPLAY-1', segments, bits: bits.map(value => value.padEnd(segments, '0'))};
+}
+
+async function importSegProject(file) {
+  const project = JSON.parse(await file.text());
+  const {segments, bits} = project || {};
+  if (project?.format !== 'SEGMENT-DISPLAY-1' || ![7, 14].includes(segments) ||
+      !Array.isArray(bits) || bits.length < 1 || bits.length > 4 ||
+      bits.some(value => typeof value !== 'string' || !/^[01]+$/.test(value) || value.length !== segments)) {
+    throw new Error('Format proyek 7/14 Segmen tidak sesuai.');
+  }
+  segType.value = String(segments);
+  segCount.value = String(bits.length);
+  segInputs[segments] = [...bits, ...Array(4 - bits.length).fill('0'.repeat(segments))];
+  tampilSegmen();
+}
+
+const taskDialog = $('task-dialog');
+const taskSubmit = $('task-submit');
+const taskActions = ['task-login', 'task-profile', 'task-history'];
+let taskFile;
+let sendingTask = false;
+
+function taskStatus(message, error = false, action = '') {
+  $('task-status').textContent = message;
+  $('task-status').dataset.error = String(error);
+  $('task-links').hidden = !action;
+  for (const id of taskActions) $(id).hidden = id !== action;
+}
+
+function openTask(mode) {
+  const isDot = mode === 'dot';
+  const title = {ram: 'RAM Binary Translator', dot: 'Dot Matrix', rgb: 'TV LED RGB', seg: '7/14 Segmen'}[mode];
+  const filename = {ram: 'memori-ram.json', dot: 'dotmatrix.json', rgb: 'tv-led-rgb.json', seg: 'tampilan-segmen.json'}[mode];
+  $('task-form').reset();
+  $('task-title').value = title;
+  $('task-file').textContent = 'Berkas: ' + filename;
+  try { $('task-code').value = localStorage.getItem('kodeGuru') || ''; } catch {}
+  taskFile = null;
+  taskSubmit.disabled = false;
+  taskStatus('');
+  try {
+    const project = {ram: ramProject, dot: dotProject, rgb: rgbProject, seg: segProject}[mode]();
+    if (isDot && $('hex-input').value !== formatHex(project.bytes.slice(0, project.filled))) {
+      // Include HEX that the student typed even before pressing Terapkan HEX.
+      const bytes = parseHex($('hex-input').value);
+      project.filled = bytes.length;
+      project.bytes = Array.from({length: project.capacity}, (_, i) => bytes[i] ?? 0);
+      project.offset = 0;
+    }
+    if (mode === 'ram' && $('ram-rows').querySelector('.status.bad')) {
+      throw new Error('Perbaiki input RAM yang belum berisi 8 digit biner.');
+    }
+    taskFile = new File([JSON.stringify(project, null, 2)], filename, {type: 'application/json'});
+  } catch (error) {
+    taskSubmit.disabled = true;
+    taskStatus(error.message + ' Tutup jendela ini untuk memperbaikinya.', true);
+  }
+  taskDialog.showModal();
+}
+
+$('ram-send').onclick = () => openTask('ram');
+$('dot-send').onclick = () => openTask('dot');
+$('rgb-send').onclick = () => openTask('rgb');
+$('seg-send').onclick = () => openTask('seg');
+$('task-close').onclick = () => taskDialog.close();
+taskDialog.addEventListener('cancel', event => {
+  if (sendingTask) event.preventDefault();
+});
+
+$('task-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (sendingTask || taskSubmit.disabled || !taskFile) return;
+
+  const title = $('task-title').value.trim();
+  const code = $('task-code').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!title || ![6, 8].includes(code.length)) {
+    taskStatus(title ? 'Kode guru harus berisi 6 atau 8 karakter.' : 'Isi judul tugas dulu.', true);
+    $(title ? 'task-code' : 'task-title').focus();
+    return;
+  }
+
+  sendingTask = true;
+  taskSubmit.disabled = true;
+  $('task-close').disabled = true;
+  taskStatus('Sedang mengirim…');
+  try {
+    const form = new FormData();
+    form.append('judul', title);
+    form.append('kode', code);
+    form.append('catatan', $('task-note').value.trim());
+    const packet = crypto.getRandomValues(new Uint8Array(8));
+    form.append('paket', Array.from(packet, byte => byte.toString(16).padStart(2, '0')).join(''));
+    form.append('berkas', taskFile, taskFile.name);
+
+    const response = await fetch('../pembayaran/backend/kirim_tugas.php', {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: form
+    });
+    const result = await response.json().catch(() => null);
+    if (response.status === 401) {
+      taskStatus('Masuk dengan akun sekolah di tab baru, lalu kembali ke sini dan tekan Kirim lagi.', true, 'task-login');
+    } else if (result?.perluProfil) {
+      taskStatus(result.pesan, true, 'task-profile');
+    } else if (response.ok && result?.sukses) {
+      taskFile = null;
+      try { localStorage.setItem('kodeGuru', code); } catch {}
+      taskStatus('Tugas berhasil dikirim.', false, 'task-history');
+    } else {
+      taskStatus(result?.pesan || 'Pengiriman gagal. Coba lagi.', true);
+    }
+  } catch {
+    taskStatus('Pengiriman belum terkonfirmasi. Periksa koneksi dan riwayat tugas sebelum mencoba lagi.', true, 'task-history');
+  } finally {
+    sendingTask = false;
+    taskSubmit.disabled = !taskFile;
+    $('task-close').disabled = false;
+  }
+});
+async function openSubmittedProject() {
+  const taskId = new URLSearchParams(location.search).get('tugas');
+  if (taskId === null) return;
+  document.body.classList.add('review-pending');
+  $('review-panel').hidden = false;
+  $('review-status').textContent = 'Memuat hasil pekerjaan siswa…';
+
+  try {
+    if (!/^[1-9][0-9]*$/.test(taskId)) throw new Error('Nomor kiriman tidak valid.');
+    const url = '../pembayaran/backend/unduh_tugas.php?id=' + encodeURIComponent(taskId);
+    const response = await fetch(url, {credentials: 'same-origin', cache: 'no-store'});
+    if (response.status === 401) throw new Error('Sesi masuk berakhir. Buka Kirim Tugas untuk masuk kembali.');
+    if (response.status === 404) throw new Error('Kiriman sudah dihapus atau tidak dapat diakses dari akun ini.');
+    if (!response.ok) throw new Error('Kiriman gagal dimuat. Muat ulang halaman untuk mencoba lagi.');
+    if (Number(response.headers.get('Content-Length')) > 65536) throw new Error('Ukuran berkas melebihi batas proyek simulator.');
+
+    const blob = await response.blob();
+    if (blob.size > 65536) throw new Error('Ukuran berkas melebihi batas proyek simulator.');
+    const project = new File([blob], 'tugas.json', {type: 'application/json'});
+    const {format} = JSON.parse(await project.text()) || {};
+    if (format === 'RAM-SIM-1') {
+      await importRamProject(project);
+    } else if (format === 'DOT-MATRIX-1' || format === 'DOT-MATRIX-2') {
+      await importDotProject(project);
+      document.body.classList.remove('review-pending');
+      $('tab-dot').click();
+      pause();
+      fitMatrix();
+    } else if (format === 'TV-LED-RGB-1') {
+      await importRgbProject(project);
+      $('tab-rgb').click();
+    } else if (format === 'SEGMENT-DISPLAY-1') {
+      await importSegProject(project);
+      $('tab-seg').click();
+    } else {
+      throw new Error('Format proyek simulator ini tidak didukung.');
+    }
+    document.body.classList.remove('review-pending');
+    $('review-status').textContent = 'Hasil pekerjaan siswa sudah dimuat.';
+  } catch (error) {
+    $('review-status').textContent = error instanceof SyntaxError
+      ? 'Berkas proyek tidak dapat dibaca sebagai JSON.'
+      : (error.message || 'Kiriman gagal dimuat.');
+  }
+}
+openSubmittedProject();
+})();
+</script><script type="module" src="./RAM &amp; Dot Matrix Simulator_files/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;aa1c918a41db4736b3d196f379e8cdd7&quot;,&quot;r&quot;:1,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+</body></html>

@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<!-- saved from url=(0075)https://belajar.iprime-bansari.online/simulasi/simulator-listrik-rumah.html -->
+<html lang="id"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Simulator Instalasi Listrik Rumah v0.1</title>
+<style>
+  :root{
+    --pcb-bg:#0d2b1c; --pcb-bg-dark:#081f14; --panel:#123322; --panel-2:#0f2a1c; --border:#1e4a30;
+    --copper:#c98a4b; --copper-dim:#5a4630; --silk:#eef0e6; --silk-dim:#9fb3a7; --gold:#d9b35c;
+    --hi:#6bffb0; --hi-glow:rgba(107,255,176,.55); --lo:#2c473a; --warn:#ff6b4a;
+    --L:#ff4d3d; --DP:#ff8a3d; --DN:#5b7080; --N:#5aa9ff;
+    --font-ui:'Segoe UI',system-ui,-apple-system,sans-serif;
+    --font-mono:'Consolas','SFMono-Regular','Courier New',monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{background:var(--pcb-bg-dark);color:var(--silk);font-family:var(--font-ui);display:flex;flex-direction:column;overflow:hidden;}
+  header.toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--panel);border-bottom:2px solid var(--border);flex-wrap:wrap;}
+  header.toolbar h1{font-family:var(--font-mono);font-size:16px;letter-spacing:.5px;margin:0 16px 0 0;color:var(--gold);font-weight:600;white-space:nowrap;}
+  header.toolbar h1 span{color:var(--silk-dim);font-weight:400;font-size:12px;display:block;margin-top:1px;}
+  .btn{background:var(--panel-2);border:1px solid var(--border);color:var(--silk);padding:7px 12px;border-radius:4px;font-family:var(--font-ui);font-size:13px;cursor:pointer;transition:background .12s,border-color .12s;}
+  .btn:hover{background:#17402a;border-color:var(--copper);}
+  .btn.primary{background:#1c4a2d;border-color:var(--hi);color:var(--hi);}
+  .btn.primary:hover{background:#22572f;}
+  .btn.danger:hover{border-color:var(--warn);color:var(--warn);}
+  .spacer{flex:1;}
+  .speed-wrap{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--silk-dim);}
+  .speed-wrap input{accent-color:var(--copper);}
+  .zoom-wrap{display:flex;align-items:center;gap:4px;}
+  .zoom-wrap .btn{padding:7px 10px;min-width:32px;text-align:center;}
+  .bg-wrap{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--silk-dim);}
+  .bg-swatch{width:22px;height:22px;border-radius:5px;border:2px solid var(--border);cursor:pointer;padding:0;flex-shrink:0;}
+  .bg-swatch:hover{border-color:var(--copper);}
+  .bg-swatch.active{border-color:var(--hi);box-shadow:0 0 0 1px var(--hi);}
+  .settings-group{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  #btnToggleSettings{transition:transform .15s;}
+  #btnToggleSettings.open{transform:rotate(180deg);}
+  #btnZoomReset{font-family:var(--font-mono);font-size:11px;min-width:44px;}
+  .workspace{flex:1;display:flex;min-height:0;}
+  aside.palette{width:190px;background:var(--panel);border-right:2px solid var(--border);overflow-y:auto;padding:10px;flex-shrink:0;}
+  aside.palette h2{font-size:11px;color:var(--silk-dim);margin:14px 0 6px;font-weight:600;border-bottom:1px solid var(--border);padding-bottom:4px;}
+  aside.palette h2:first-child{margin-top:0;}
+  .palette-btn{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--panel-2);border:1px solid var(--border);color:var(--silk);padding:8px 10px;margin-bottom:6px;border-radius:4px;cursor:pointer;font-family:var(--font-mono);font-size:12px;}
+  .palette-btn:hover{border-color:var(--copper);}
+  .palette-btn.active{border-color:var(--hi);background:#173a26;color:var(--hi);}
+  .palette-btn .swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0;background:var(--copper-dim);border:1px solid var(--copper);}
+  .palette-btn i{font-style:normal;width:16px;text-align:center;font-size:14px;flex-shrink:0;}
+
+  .pv{width:18px;height:18px;border-radius:3px;flex-shrink:0;position:relative;display:inline-block;}
+  .pv-meter{background:#dfe6ea;border:1px solid #8c979d;}
+  .pv-meter::before{content:'';position:absolute;left:2px;right:2px;top:2px;height:6px;background:#0b1f14;border-radius:1px;}
+  .pv-meter::after{content:'';position:absolute;right:2px;bottom:2px;width:5px;height:5px;border-radius:50%;background:#1a1a1a;}
+  .pv-mcb{background:#f6f6f4;border:1px solid #c3c6c7;}
+  .pv-mcb::before{content:'';position:absolute;left:3px;right:3px;top:3px;bottom:3px;background:#2b2e31;border-radius:1px;}
+  .pv-mcb::after{content:'';position:absolute;left:5px;right:5px;top:5px;height:5px;background:#2f8de4;border-radius:1px;}
+  .pv-tdus{background:radial-gradient(circle,#fff,#dcdfe1);border-radius:50%;border:1px solid #b4b8bc;}
+  .pv-tdus::before{content:'';position:absolute;left:3px;top:3px;width:3px;height:3px;border-radius:50%;background:#8a9a86;}
+  .pv-tdus::after{content:'';position:absolute;right:3px;bottom:3px;width:3px;height:3px;border-radius:50%;background:#8a9a86;}
+  .pv-arde{background:linear-gradient(180deg,#e6e03a 0 32%,#8d4b2a 32% 100%);border-radius:2px;}
+  .pv-arde::after{content:'';position:absolute;left:2px;right:2px;bottom:3px;height:6px;background:#6a3620;border-radius:1px;}
+  .pv-socket{background:linear-gradient(#e9eaea,#c9cccd);border:1px solid #a4a8ac;transform:rotate(90deg);}
+  .pv-socket::before{content:'';position:absolute;left:50%;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#e6e7e9;border:1px solid #bfc2c5;}
+  .pv-socket::after{content:'';position:absolute;left:50%;top:38%;width:2px;height:2px;background:#1b1b1b;margin-left:-1px;box-shadow:0 5px 0 #1b1b1b;}
+  .pv-strip{background:linear-gradient(#fbfbf9,#e9eae7);border:1px solid #d3d4d0;border-radius:3px;}
+  .pv-strip::before{content:'';position:absolute;left:3px;right:3px;top:2px;height:4px;background:#7a1f1f;border-radius:1px;}
+  .pv-strip::after{content:'';position:absolute;left:50%;bottom:2px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:#dfe0dd;border:1px solid #c7c8c4;}
+  .pv-switch{background:linear-gradient(#f3ead4,#e8dcc0);border:1px solid #cfc2a2;border-radius:3px;}
+  .pv-switch::before{content:'';position:absolute;left:50%;top:3px;bottom:3px;width:7px;margin-left:-3.5px;background:#40382a;border-radius:1px;}
+
+  main.canvas-wrap{flex:1;position:relative;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;background:radial-gradient(circle,rgba(255,255,255,.055) 1px,transparent 1.4px);background-size:22px 22px;background-color:var(--pcb-bg);cursor:crosshair;}
+  main.canvas-wrap.bg-blue{background-color:#0d1f33;}
+  main.canvas-wrap.bg-dark{background-color:#1c1e22;}
+  main.canvas-wrap.bg-light{background-color:#e8ebee;background-image:radial-gradient(circle,rgba(0,0,0,.09) 1px,transparent 1.4px);}
+  main.canvas-wrap.bg-blueprint{background-color:#0b3d63;background-image:linear-gradient(rgba(255,255,255,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.14) 1px,transparent 1px);}
+  #canvasSizer{position:relative;}
+  #canvas{position:absolute;top:0;left:0;width:9600px;height:6000px;transform-origin:0 0;}
+  svg#wires{position:absolute;top:0;left:0;width:9600px;height:6000px;pointer-events:none;}
+  svg#wires path.wire{pointer-events:stroke;cursor:pointer;}
+  svg#wires path.wire.selected{filter:drop-shadow(0 0 3px var(--warn));}
+  .comp{position:absolute;background:var(--panel-2);border:1.5px solid var(--copper);border-radius:5px;color:var(--silk);font-family:var(--font-mono);font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;user-select:none;box-shadow:0 2px 6px rgba(0,0,0,.35);touch-action:none;}
+  .comp.selected{border-color:var(--warn);box-shadow:0 0 0 2px rgba(255,107,74,.35);}
+  .comp .ico{font-size:26px;line-height:1;pointer-events:none;}
+  .comp .nm{font-weight:600;font-size:10px;margin-top:3px;pointer-events:none;}
+  .comp .sublabel{font-size:9px;color:var(--silk-dim);display:block;pointer-events:none;}
+  .pin{position:absolute;width:11px;height:11px;border-radius:50%;background:var(--lo);border:1.5px solid var(--copper);transform:translate(-50%,-50%);cursor:pointer;z-index:5;touch-action:none;}
+  .pin::before{content:'';position:absolute;top:50%;left:50%;width:30px;height:30px;transform:translate(-50%,-50%);}
+  .pin.L{border-color:var(--L);} .pin.N{border-color:var(--N);} .pin.P{border-color:#dfe3e6;} .pin.P.hi{background:#dfe3e6;box-shadow:0 0 6px #fff;} .pin.G{border-color:#d9de3a;background:linear-gradient(90deg,#2fa552 50%,#e6e03a 50%);} .pin.DP{border-color:var(--DP);} .pin.DP.hi{background:var(--DP);box-shadow:0 0 6px var(--DP);} .pin.DN{border-color:var(--DN);} .pin.DN.hi{background:var(--DN);box-shadow:0 0 6px var(--DN);}
+  .pin.L.hi{background:var(--L);box-shadow:0 0 6px var(--L);}
+  .pin.N.hi{background:var(--N);box-shadow:0 0 6px var(--N);} .pin.G.hi{box-shadow:0 0 6px #b6e04a;}
+  .pin:hover{border-color:var(--warn);}
+  .pin-label{position:absolute;font-size:9px;font-weight:700;transform:translateY(-50%);pointer-events:none;white-space:nowrap;}
+  .pin-label.L{color:var(--L);} .pin-label.N{color:var(--N);} .pin-label.G{color:#2fa552;} .pin-label.P{color:#dfe3e6;font-size:8px;} .comp.SOCKET .pin-label.P{color:#555;} .pin-label.DP{color:var(--DP);} .pin-label.DN{color:var(--DN);}
+  /* beban */
+  .comp.load:not(.run) .ico{filter:grayscale(1) opacity(.5);}
+  .comp.load.run{border-color:var(--hi);}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes pulse{50%{transform:scale(1.06);}}
+  /* TV */
+  .comp.TV{display:block;background:transparent;border:none;box-shadow:none;}
+  .comp.TV>*{position:absolute;}
+  .tv-screen{left:2px;right:2px;top:2px;height:70px;background:#0c0c0d;border:5px solid #171718;border-radius:4px;overflow:hidden;transition:background .2s,box-shadow .2s;}
+  .tv-glare{position:absolute;top:0;right:0;width:55%;height:100%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.06) 50%,transparent 60%);}
+  .tv-brand{position:absolute;left:6px;bottom:4px;color:#555;font:700 7px var(--font-ui);letter-spacing:.5px;}
+  .tv-neck{left:50%;top:74px;width:6px;height:8px;margin-left:-3px;background:#222;}
+  .tv-stand{left:50%;top:82px;width:56px;height:8px;margin-left:-28px;background:linear-gradient(#3a3a3c,#111);border-radius:2px;}
+  .comp.TV.run .tv-screen{background:linear-gradient(160deg,#123a5c,#0a2a44);box-shadow:0 0 14px rgba(70,170,255,.6);}
+  .comp.TV.run .tv-brand{color:#8fc8ff;}
+  .comp.TV:not(.run) .tv-screen{filter:grayscale(.3) brightness(.9);}
+  /* FRIDGE */
+  .comp.FRIDGE{display:block;background:transparent;border:none;box-shadow:none;}
+  .comp.FRIDGE>*{position:absolute;}
+  .fr-top{left:2px;right:2px;top:2px;height:56px;background:linear-gradient(100deg,#1c1c1d,#050505 55%,#1c1c1d);border-radius:8px 8px 0 0;border:1px solid #000;transition:box-shadow .2s;}
+  .fr-brand{color:#eee;font:700 6px var(--font-ui);text-align:center;margin-top:5px;letter-spacing:.4px;}
+  .fr-strip{left:2px;right:2px;top:58px;height:6px;background:linear-gradient(90deg,#8a713a,#e0c887,#8a713a);}
+  .fr-bottom{left:2px;right:2px;top:64px;bottom:2px;background:linear-gradient(100deg,#1c1c1d,#050505 55%,#1c1c1d);border-radius:0 0 8px 8px;border:1px solid #000;}
+  .comp.FRIDGE.run .fr-top,.comp.FRIDGE.run .fr-bottom{box-shadow:0 0 10px rgba(107,255,176,.45);}
+  .comp.FRIDGE:not(.run) .fr-top,.comp.FRIDGE:not(.run) .fr-bottom{filter:grayscale(.4) brightness(.85);}
+  /* RICE COOKER */
+  .comp.COOKER{display:block;background:transparent;border:none;box-shadow:none;}
+  .comp.COOKER>*{position:absolute;}
+  .rc2-svg{left:0;top:0;width:100%;height:100%;transition:filter .2s;}
+  .rc2-svg .rc2-disp{fill:#333;transition:fill .2s;}
+  .rc2-svg .rc2-start{transition:stroke .2s,filter .2s;}
+  .comp.COOKER.run .rc2-svg .rc2-disp{fill:#4dff7a;}
+  .comp.COOKER.run .rc2-svg .rc2-start{stroke:#ff8b3d;filter:drop-shadow(0 0 4px #ff8b3d);}
+  .comp.COOKER:not(.run) .rc2-svg{filter:grayscale(.35) brightness(.92);}
+  /* BLENDER */
+  .comp.BLENDER{display:block;background:transparent;border:none;box-shadow:none;}
+  .comp.BLENDER>*{position:absolute;}
+  .bl-jar{left:14px;right:14px;top:0;height:70px;background:rgba(210,220,225,.28);border:2px solid #9aa3a7;border-radius:6px 6px 3px 3px;overflow:hidden;}
+  .bl-lid{position:absolute;left:-2px;right:-2px;top:-6px;height:10px;background:#141518;border-radius:5px 5px 0 0;}
+  .bl-handle{position:absolute;right:-9px;top:14px;width:9px;height:30px;background:#141518;border-radius:0 6px 6px 0;}
+  .bl-blade{position:absolute;left:50%;bottom:4px;width:14px;height:3px;margin-left:-7px;background:#8a9298;display:block;transform-origin:center;}
+  .bl-base{left:0;right:0;top:70px;bottom:0;background:linear-gradient(160deg,#3a3d40,#232527);border-radius:0 0 8px 8px;}
+  .bl-brand{color:#e7e9ea;font:700 8px var(--font-ui);text-align:center;padding-top:4px;}
+  .bl-brand span{font-weight:700;}
+  .bl-knob{width:30px;height:30px;border-radius:50%;background:#101112;border:2px solid #4a4d50;margin:3px auto 0;color:#cfd2d3;font:700 5px/1.05 var(--font-ui);text-align:center;display:flex;align-items:center;justify-content:center;transition:box-shadow .2s,border-color .2s;}
+  .bl-btns{display:flex;justify-content:center;gap:4px;margin-top:3px;}
+  .bl-btns i{width:12px;height:5px;background:#151617;border-radius:1px;}
+  .comp.BLENDER.run .bl-blade{animation:spin .25s linear infinite;background:#dfe3e6;}
+  .comp.BLENDER.run .bl-knob{border-color:#6bffb0;box-shadow:0 0 8px rgba(107,255,176,.6);}
+  .comp.BLENDER:not(.run) .bl-base{filter:grayscale(.3) brightness(.92);}
+  /* WASHER */
+  .comp.WASHER{display:block;background:transparent;border:none;box-shadow:none;}
+  .comp.WASHER>*{position:absolute;}
+  .wa-top{left:2px;right:2px;top:2px;height:18px;background:#f2f2f0;border:1px solid #c9c9c6;border-radius:4px 4px 0 0;}
+  .wa-brand{position:absolute;left:5px;top:3px;font:700 6px var(--font-ui);color:#333;}
+  .wa-dial{position:absolute;left:50%;top:2px;width:13px;height:13px;margin-left:-6.5px;border-radius:50%;background:radial-gradient(circle,#e3e3e0,#bdbdba);border:1px solid #9a9a97;}
+  .wa-disp{position:absolute;right:5px;top:5px;width:24px;height:8px;background:#0c1a24;border-radius:1px;}
+  .wa-drum{left:2px;right:2px;top:20px;bottom:2px;background:#f2f2f0;border:1px solid #c9c9c6;border-radius:0 0 4px 4px;}
+  .wa-ring{position:absolute;left:50%;top:52%;width:70%;padding-top:70%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,#3a4650,#0c0e10 70%);border:4px solid #3ea0dc;}
+  .wa-glass{position:absolute;left:14%;top:14%;right:14%;bottom:14%;border-radius:50%;background:radial-gradient(circle,#40506080,#05060780);transition:box-shadow .2s;}
+  .wa-glass i{position:absolute;left:50%;top:50%;width:60%;height:2px;margin:-1px 0 0 -30%;background:#7d8ea0;}
+  .wa-lockled{position:absolute;right:8px;bottom:8px;width:5px;height:5px;border-radius:50%;background:#3a3a3a;}
+  .comp.WASHER.run .wa-glass{animation:spin 1s linear infinite;box-shadow:0 0 10px rgba(107,255,176,.5) inset;}
+  .comp.WASHER.run .wa-lockled{background:#6bffb0;box-shadow:0 0 5px #6bffb0;}
+  .comp.WASHER:not(.run) .wa-drum{filter:grayscale(.25) brightness(.94);}
+  /* meteran */
+  
+  
+  .comp.METER{display:block;background:#eceff1;border:2px solid #8c979d;border-radius:9px;color:#1d2a30;}
+  .comp.METER>*{position:absolute;}
+  .m-warn{left:12px;right:12px;top:7px;font:700 6px var(--font-ui);color:#c62828;text-align:center;pointer-events:none;}
+  .m-lcd{left:12px;top:19px;width:104px;height:40px;background:#a8b88a;border:2px solid #6f7d5a;border-radius:3px;color:#26301c;text-align:right;padding:2px 6px 0;pointer-events:none;}
+  .m-lcd small{position:absolute;left:4px;top:2px;font:600 6px var(--font-ui);}
+  .m-lcd b{font:italic 700 26px/34px var(--font-mono);letter-spacing:1px;}
+  .m-eye{right:12px;top:14px;width:48px;height:48px;border-radius:50%;background:radial-gradient(circle,#1a1a1a 0 28%,#d9dee1 30% 62%,#b7c0c5 64%);border:2px solid #aab3b8;pointer-events:none;}
+  .m-led{top:67px;width:7px;height:7px;border-radius:50%;background:#3a3f42;pointer-events:none;}
+  .m-led.ok{background:#3ddc84;box-shadow:0 0 5px #3ddc84;} .m-led.low{background:#ffb020;box-shadow:0 0 5px #ffb020;} .m-led.empty{background:#ff3b30;box-shadow:0 0 6px #ff3b30;}
+  .m-led.blink{animation:blink 1s steps(2) infinite;} @keyframes blink{50%{opacity:.2;}}
+  .m-ledtx{left:12px;top:77px;font:5.5px var(--font-ui);color:#3a474d;white-space:nowrap;pointer-events:none;}
+  .m-info{left:12px;top:90px;width:104px;text-align:left;line-height:1.3;pointer-events:none;}
+  .m-info div{font:6.5px var(--font-ui);color:#333;}
+  .m-info .m-brand{font:800 15px var(--font-ui);color:#1e6fb8;}
+  .m-info .va{font:700 9px var(--font-mono);color:#0d3b66;margin-top:5px;} .m-info .rp{font:700 8px var(--font-mono);color:#555;}
+  .m-keys{right:12px;top:84px;width:58px;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;cursor:pointer;touch-action:manipulation;}
+  .m-keys i{font-style:normal;height:13px;border-radius:7px;background:#cfd4d7;border:1px solid #98a1a6;font:700 7px var(--font-ui);color:#333;display:flex;align-items:center;justify-content:center;}
+  .m-keys i:last-child{background:#d32f2f;border-color:#8e1b1b;color:#fff;}
+  .m-keys:hover i{border-color:#1e6fb8;}
+  .m-cover{left:6px;right:6px;bottom:6px;top:172px;background:rgba(170,195,210,.3);border:1.5px solid rgba(120,140,150,.7);border-radius:6px;pointer-events:none;}
+  .m-scr{left:18px;right:18px;top:180px;display:flex;justify-content:space-between;pointer-events:none;}
+  .m-scr i{width:9px;height:9px;border-radius:50%;background:#8f979b;border:1px solid #5d666a;}
+  .m-wire.g{left:6px !important;width:166px !important;background:repeating-linear-gradient(90deg,#2fa552 0 7px,#e6e03a 7px 14px);}
+  .m-wire{left:110px;width:62px;height:3px;border-radius:2px;pointer-events:none;}
+  .m-mcb{left:34px;top:200px;width:76px;height:84px;background:#f4f4f2;border:2px solid #b5b9ba;border-radius:4px;display:flex;flex-direction:column;align-items:center;padding-top:5px;cursor:pointer;touch-action:manipulation;text-align:center;}
+  .m-lev{width:46px;height:20px;margin-top:8px;background:#d9dcdd;border:1px solid #9aa3a7;border-radius:3px;position:relative;pointer-events:none;}
+  .m-lev i{position:absolute;top:2px;bottom:2px;width:20px;left:2px;background:#3b8fe0;border-radius:2px;transition:left .12s,background .12s;}
+  .m-mcb.on .m-lev i{left:22px;} .m-mcb.trip .m-lev i{left:12px;background:#e53935;}
+  .m-mcb b{font:700 9px var(--font-mono);color:#1a3d6b;margin-top:3px;pointer-events:none;} .m-mcb .ms{font:700 8px var(--font-mono);color:#444;pointer-events:none;}
+  .m-mcb.trip .ms{color:#e53935;}
+  /* breaker & saklar */
+  .lever{width:26px;height:38px;background:var(--lo);border:1.5px solid var(--copper);border-radius:4px;position:relative;margin:3px 0;pointer-events:none;}
+  .lever i{position:absolute;left:2px;right:2px;height:15px;top:19px;background:var(--silk-dim);border-radius:2px;transition:top .12s,background .12s;}
+  .comp.SWITCH{display:block;background:linear-gradient(#f3ead4,#e8dcc0);border:2px solid #cfc2a2;border-radius:12px;color:#7a6f52;}
+  .comp.SWITCH>*{position:absolute;}
+  .k-bev{left:8px;top:8px;right:8px;bottom:8px;border-radius:9px;border:1px solid #d8ccb0;box-shadow:inset 0 0 6px rgba(160,140,100,.25);pointer-events:none;}
+  .k-key{top:24px;width:42px;height:58px;border-radius:3px;background:linear-gradient(#f8f0dd,#eadfc4);border:1px solid #b9ac8b;box-shadow:0 0 0 2px #40382a;cursor:pointer;touch-action:manipulation;font:700 9px/58px var(--font-mono);color:#a89c7e;text-align:center;}
+  .k-key.on{background:linear-gradient(#eadfc4,#f8f0dd);}
+  .k-scr{top:48px;width:9px;height:9px;border-radius:50%;background:radial-gradient(circle,#d9b85a,#9a7a25);pointer-events:none;}
+  .k-brand{right:12px;bottom:9px;font:700 7px var(--font-mono);color:#b8a888;pointer-events:none;}
+  .pin-label.in-mark{background:var(--L);color:#111;padding:0 4px;border-radius:2px;font-weight:800;}
+  .comp.LAMP{display:block;background:transparent;border:none;box-shadow:none;border-radius:6px;}
+  .comp.LAMP>*{position:absolute;}
+  .comp.LAMP.selected{box-shadow:0 0 0 2px rgba(255,107,74,.7);}
+  .l-svg{left:0;top:0;width:100px;height:116px;overflow:visible;pointer-events:none;transition:filter .2s;}
+  .l-svg .gl{fill:rgba(210,225,235,.35);stroke:#b9c0c4;transition:fill .15s;}
+  .l-svg .fil{stroke:#8a8f93;fill:none;stroke-width:1.6;stroke-linecap:round;}
+  .comp.LAMP.run .gl{fill:#fff3a0;stroke:#ffd54a;}
+  .comp.LAMP.run .fil{stroke:#ff9d00;}
+  .comp.LAMP.run .l-svg{filter:drop-shadow(0 0 12px #ffd54a);}
+  .l-w{left:0;right:0;top:122px;text-align:center;pointer-events:none;}
+  .l-w b{font:700 13px var(--font-mono);color:var(--gold);}
+
+  /* SOLAR */
+  .comp.SOLAR{display:block;background:linear-gradient(160deg,#1b3a5c,#0e2038);border:3px solid #8a949a;border-radius:4px;}
+  .comp.SOLAR>*{position:absolute;}
+  .sp-grid{left:4px;right:4px;top:4px;bottom:20px;background-image:linear-gradient(#2f5f8f 1px,transparent 1px),linear-gradient(90deg,#2f5f8f 1px,transparent 1px);background-size:16.6% 33.3%;background-color:#12335a;border:1px solid #3a6a94;}
+  .sp-wthr{right:6px;top:5px;font-size:14px;cursor:pointer;touch-action:manipulation;background:rgba(0,0,0,.35);border-radius:4px;padding:1px 4px;}
+  .sp-info{left:0;right:0;bottom:2px;text-align:center;color:#dfeeff;font:700 8px var(--font-mono);}
+  .comp.SOLAR:not(.run) .sp-grid{filter:grayscale(.4) brightness(.7);}
+  /* MPPT */
+  .comp.MPPT{background:#eceeec;border:2px solid #aab0ac;border-radius:5px;color:#334;justify-content:flex-start;padding-top:5px;}
+  .mp-cap{position:absolute;bottom:14px;transform:translateX(-50%);font:700 7px var(--font-ui);color:#556;white-space:nowrap;pointer-events:none;}
+  .comp.MPPT .mp-w,.comp.MPPT .mp-arr{font-size:8px;line-height:1.2;padding:0 3px;}
+  .mp-led{width:9px;height:9px;border-radius:50%;background:#666;margin:5px auto 3px;transition:background .2s,box-shadow .2s;}
+  .comp.MPPT.chg .mp-led{background:#3ddc84;box-shadow:0 0 6px #3ddc84;animation:blink 1.2s steps(2) infinite;}
+  .mp-arr.warn{color:var(--warn);font-weight:700;}
+  /* BATTERY */
+  .comp.BATTERY{display:block;background:#20242a;border:2px solid #454c54;border-radius:8px;color:#dfe3e6;}
+  .comp.BATTERY>*{position:absolute;}
+  .bt-cap{left:36%;right:36%;top:-8px;height:8px;background:#454c54;border-radius:2px 2px 0 0;}
+  .bt-cap+.nm{left:0;right:0;top:4px;text-align:center;font:700 9px var(--font-mono);color:#9aa0a3;}
+  .bt-bar{left:8px;right:8px;top:28px;height:16px;background:#0e1114;border:1px solid #454c54;border-radius:3px;overflow:hidden;}
+  .bt-fill{position:absolute;left:0;top:0;bottom:0;width:50%;background:#3ddc84;transition:width .3s,background .3s;}
+  .bt-pct{left:0;right:0;top:48px;text-align:center;font:700 11px var(--font-mono);color:var(--hi);}
+  .bt-sw{left:8px;right:8px;top:74px;height:20px;background:#101214;border:1px solid #3a3f45;border-radius:3px;display:flex;align-items:center;justify-content:center;font:700 9px var(--font-ui);color:#7a8085;cursor:pointer;touch-action:manipulation;}
+  .comp.BATTERY.on .bt-sw{color:#6bffb0;border-color:#2e7d4f;}
+  .bt-status{left:0;right:0;bottom:6px;text-align:center;font:9px var(--font-mono);color:#9aa0a3;}
+  /* INVERTER / HYBRID */
+  .comp.INVERTER{background:linear-gradient(#f2f2f0,#dfe1e2);border:2px solid #aab0ac;border-radius:6px;color:#223;}
+  .iv-wave{display:block;margin:2px auto;width:70%;height:20px;}
+  .iv-wave path{fill:none;stroke:#8a9298;stroke-width:2;}
+  .comp.INVERTER.on .iv-wave path{stroke:#1f9d55;}
+  .comp.INVERTER.trip .iv-wave path{stroke:var(--warn);}
+  /* ZAMDON-style toroidal inverter hybrid */
+  .comp.HYBRID{display:block;background:linear-gradient(100deg,#0d3d78 0%,#1f6fc7 22%,#2f86e0 50%,#1f6fc7 78%,#0d3d78 100%);border:1px solid #0a2c58;border-radius:4px;box-shadow:0 3px 8px rgba(0,0,0,.35);transition:filter .2s;}
+  .comp.HYBRID>*{position:absolute;}
+  .zd-brand{left:6%;top:6%;font:800 13px var(--font-ui);color:#fff;letter-spacing:.3px;}
+  .zd-brand sup{font-size:6px;}
+  .zd-wave{left:6%;right:8%;top:20%;height:11%;}
+  .zd-wave path{fill:none;stroke:rgba(255,255,255,.85);stroke-width:1.6;}
+  .zd-ind{left:6%;top:35%;width:38%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);border-radius:2px;padding:3px 4px;}
+  .zd-ind-title{font:700 6px var(--font-ui);color:#fff;margin-bottom:2px;}
+  .zd-row{display:flex;align-items:center;gap:3px;font:700 5.5px var(--font-ui);color:#c9dcf0;line-height:1.7;transition:color .15s;}
+  .zd-row i{width:5px;height:5px;border-radius:50%;flex-shrink:0;background:#5a6f88;transition:box-shadow .15s,background .15s;}
+  .zd-row.active{color:#fff;}
+  .zd-row.hy-solar.active i{background:#3ddc84;box-shadow:0 0 5px #3ddc84;}
+  .zd-row.hy-batt.active i{background:#ffd54a;box-shadow:0 0 5px #ffd54a;}
+  .zd-row.hy-grid.active i{background:#5aa9ff;box-shadow:0 0 5px #5aa9ff;}
+  .zd-panel{right:6%;top:35%;width:38%;height:18%;background:#dfe3e6;border-radius:3px;border:1px solid #aab3ba;}
+  .zd-lcd{position:absolute;left:6%;right:6%;top:10%;height:50%;background:#111;border-radius:1px;}
+  .zd-btns{position:absolute;left:4%;right:4%;bottom:8%;display:flex;justify-content:space-between;}
+  .zd-btns i{width:12%;height:11px;border-radius:50%;background:#c3c9cd;border:1px solid #8b949a;}
+  .zd-title{left:0;right:0;top:59%;text-align:center;font:800 8px var(--font-ui);color:#fff;letter-spacing:.2px;}
+  .comp.HYBRID.on .zd-lcd{background:#123a24;box-shadow:0 0 5px rgba(61,220,132,.7) inset;}
+  .comp.HYBRID.on .zd-wave path{stroke:#bfe3ff;}
+  .comp.HYBRID.trip{filter:hue-rotate(140deg) saturate(1.4);}
+  .zd-info{position:absolute;right:6%;top:8%;text-align:right;font:700 6px var(--font-mono);color:#dcebff;}
+  .zd-stat{position:absolute;left:6%;top:70%;font:700 7px var(--font-mono);color:#dcebff;}
+  .comp.HYBRID.trip .zd-stat{color:#ffe9a0;}
+  .hy-srcs{display:flex;justify-content:center;gap:6px;margin:2px 0;}
+  .hy-srcs i{font-style:normal;font:700 7px var(--font-mono);padding:1px 4px;border-radius:2px;background:#d8dadb;color:#888;border:1px solid #aeb2b3;}
+  .hy-srcs i.active{background:#1c4a2d;color:#6bffb0;border-color:#2e7d4f;}
+  .comp.STRIP{display:block;background:linear-gradient(100deg,#fbfbf9,#e9eae7 55%,#fbfbf9);border:2px solid #d3d4d0;border-radius:10px;box-shadow:0 3px 6px rgba(0,0,0,.15);}
+  .comp.STRIP>*{position:absolute;}
+  .x-cable{left:50%;margin-left:-3px;top:-16px;width:6px;height:16px;background:#f2f2f2;border:1px solid #cfd0d1;border-bottom:none;pointer-events:none;}
+  .x-swbox{left:28px;top:12px;width:44px;height:34px;background:#2b1a1a;border-radius:3px;}
+  .x-rock{left:4px;top:4px;right:4px;bottom:4px;background:#7a1f1f;border-radius:2px;color:#ffd6d0;font:700 13px/26px var(--font-mono);text-align:center;cursor:pointer;touch-action:manipulation;transition:background .15s,box-shadow .15s;}
+  .comp.STRIP.live .x-rock{background:#ff2a1f;box-shadow:0 0 10px #ff3a2a;}
+  .x-sock{left:15px;width:70px;height:70px;border-radius:50%;background:linear-gradient(150deg,#fdfdfc,#dfe0dd);border:1px solid #c7c8c4;box-shadow:inset 0 1px 3px rgba(0,0,0,.15);pointer-events:none;}
+  .x-sock i{position:absolute;display:block;}
+  .x-h{width:9px;height:9px;border-radius:50%;background:#1b1b1b;}
+  .x-c{width:6px;height:8px;background:#b8963d;border-radius:1px;}
+  .x-gnd{width:7px;height:7px;border-radius:50%;background:#8f9a5a;}
+  .x-plug{display:none;position:absolute;left:6px;top:8px;width:58px;height:54px;background:linear-gradient(145deg,#4a4a4a,#1b1b1b);border-radius:9px;box-shadow:0 1px 3px rgba(0,0,0,.4);z-index:2;}
+  .x-plug i{position:absolute;right:-16px;top:50%;width:18px;height:9px;margin-top:-4.5px;background:#141414;border-radius:0 3px 3px 0;}
+  .x-sock.plugged .x-plug{display:block;}
+  .comp.ARDE{display:block;background:transparent;border:none;box-shadow:none;border-radius:6px;}
+  .comp.ARDE>*{position:absolute;}
+  .comp.ARDE.selected{box-shadow:0 0 0 2px rgba(255,107,74,.7);}
+  .a-wire{left:24px;top:0;width:8px;height:72px;border-radius:4px;background:repeating-linear-gradient(0deg,#2fa552 0 8px,#e6e03a 8px 16px);pointer-events:none;}
+  .a-rod{left:34px;top:48px;width:22px;height:120px;background:linear-gradient(90deg,#5a2e1a,#8d4b2a 40%,#6a3620);border-radius:2px;pointer-events:none;}
+  .a-cap{left:32px;top:42px;width:26px;height:10px;border-radius:50%;background:#a85a30;border:1px solid #6a3620;pointer-events:none;}
+  .a-clamp{left:22px;top:66px;width:46px;height:30px;background:linear-gradient(#c9a43a,#8c6f1d);border:1px solid #6b5514;border-radius:3px;pointer-events:none;}
+  .a-screw{position:absolute;right:4px;top:8px;width:13px;height:13px;border-radius:50%;background:radial-gradient(circle,#dfe6ea 0 40%,#9aa5ab 42%);border:1px solid #6d777c;}
+  .a-soil{left:0;right:0;top:130px;bottom:0;background:linear-gradient(#5d4530,#3b2a1c);border-top:3px solid #7a5b3d;border-radius:0 0 6px 6px;color:#d8c7a8;font:700 10px var(--font-mono);text-align:center;padding-top:34px;pointer-events:none;}
+  .comp.SOCKET{display:block;background:linear-gradient(145deg,#d6d8db,#b9bcc0);border:2px solid #969a9e;border-radius:4px;}
+  .comp.SOCKET>*{position:absolute;}
+  .s-plate{left:16px;top:16px;right:16px;bottom:16px;background:#dcdedf;border:1px solid #a4a8ac;border-radius:2px;pointer-events:none;}
+  .s-well{left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:50%;background:#e6e7e9;border:2px solid #bfc2c5;pointer-events:none;transition:box-shadow .15s;}
+  .comp.SOCKET.on .s-well{box-shadow:0 0 12px 2px var(--hi);}
+  .s-well i{position:absolute;display:block;}
+  .s-hole{top:30px;width:9px;height:9px;border-radius:50%;background:#1b1b1b;}
+  .s-clip{left:31px;width:6px;height:8px;background:#b8963d;border-radius:1px;}
+    .s-gnd{left:31px;top:31px;width:6px;height:6px;border-radius:50%;background:#8f9a5a;}
+  .s-plug{display:none;position:absolute;left:8px;top:8px;width:54px;height:54px;background:linear-gradient(145deg,#4a4a4a,#1b1b1b);border-radius:9px;box-shadow:0 1px 3px rgba(0,0,0,.4);z-index:2;}
+  .s-plug i{position:absolute;left:50%;bottom:-16px;width:9px;height:18px;margin-left:-4.5px;background:#141414;border-radius:0 0 3px 3px;}
+  .s-well.plugged .s-plug{display:block;}
+  .comp.TDUS{display:block;background:transparent;border:none;box-shadow:none;}
+  .comp.TDUS>*{position:absolute;}
+  .comp.TDUS.selected{box-shadow:none;}
+  .t-stub{background:linear-gradient(#f0f1f3,#d9dcdf);border:2px solid #b4b8bc;border-radius:8px;pointer-events:none;}
+  .t-stub::after{content:'';position:absolute;background:#c3c7cb;border-radius:2px;}
+  .t-stub.h{top:42px;height:60px;width:56px;} .t-stub.h::after{left:10px;right:6px;top:28px;height:3px;}
+  .t-stub.v{left:70px;width:60px;top:110px;height:70px;} .t-stub.v::after{top:10px;bottom:6px;left:28px;width:3px;}
+  .t-box{left:38px;top:10px;width:124px;height:124px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff,#eceef0 60%,#d9dcdf);border:2px solid #b4b8bc;box-shadow:0 3px 6px rgba(0,0,0,.25);pointer-events:none;color:#a4a9ad;font:700 10px/124px var(--font-mono);text-align:center;letter-spacing:1px;}
+  .t-scr{position:absolute;width:15px;height:15px;border-radius:50%;background:radial-gradient(circle,#8a9a86 0 30%,#c9d1c5 32%);border:1px solid #7c867a;}
+  .comp.TDUS.selected .t-box,.comp.TDUS.selected .t-stub{border-color:var(--warn);}
+  .comp.TDUS .pin-label{font-size:9px;}
+  .comp.BREAKER,.comp.BREAKER2,.comp.ATS{background:#f6f6f4;border:2px solid #c3c6c7;color:#222;justify-content:flex-start;padding:6px 8px 6px;gap:3px;}
+  .comp.BREAKER.trip,.comp.BREAKER2.trip,.comp.ATS.trip{border-color:var(--warn);}
+  .b-scr{display:flex;justify-content:space-around;width:100%;pointer-events:none;}
+  .b-scr i{width:13px;height:13px;border-radius:50%;background:radial-gradient(circle,#9aa0a3 0 35%,#d5d8da 37%);border:1px solid #8d9396;}
+  .b-brand{font:700 10px var(--font-ui);color:#1f9d55;pointer-events:none;margin-top:2px;}
+  .comp .rate.b-rate{background:none;pointer-events:none;color:#1b1b1b;font:700 20px/1.1 var(--font-ui);padding:0 8px;}
+  .b-sw{position:relative;width:100%;height:50px;background:#2b2e31;border-radius:3px;margin-top:2px;pointer-events:none;}
+  .comp.BREAKER2 .b-sw::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:#0d0e0f;}
+  .b-knob{position:absolute;left:5px;right:5px;height:21px;bottom:4px;border-radius:2px;background:#2f8de4;border:1px solid #1b5fa8;transition:bottom .12s,background .12s;z-index:1;}
+  .comp.BREAKER.on .b-knob,.comp.BREAKER2.on .b-knob,.comp.ATS.on .b-knob{bottom:25px;}
+  .comp.BREAKER.trip .b-knob,.comp.BREAKER2.trip .b-knob,.comp.ATS.trip .b-knob{bottom:14px;background:#e53935;border-color:#8e1b1b;}
+  .b-txt{font:600 8px var(--font-ui);color:#333;text-align:center;line-height:1.2;pointer-events:none;}
+  .b-txt .bstat{font:700 9px var(--font-mono);color:#1a3d6b;}
+  .comp.trip .b-txt .bstat{color:#e53935;}
+  .ats-src{display:flex;justify-content:center;gap:10px;margin-top:2px;}
+  .ats-src i{font-style:normal;width:18px;height:14px;border-radius:2px;background:#d8dadb;border:1px solid #aeb2b3;font:700 8px/14px var(--font-mono);text-align:center;color:#888;}
+  .ats-src i.active{background:#1c4a2d;color:#6bffb0;border-color:#2e7d4f;}
+  .comp.SWITCH .lever{width:28px;height:34px;}
+  .comp.SWITCH .lever i{top:2px;}
+  .comp.SWITCH.on .lever i{top:17px;background:var(--hi);}
+  .rate{font:700 11px var(--font-mono);background:var(--pcb-bg-dark);color:var(--gold);border:1px solid var(--copper);border-radius:3px;padding:2px 7px;cursor:pointer;touch-action:manipulation;}
+  .rate:hover{border-color:var(--hi);}
+  .bstat{font-size:9px;font-weight:700;pointer-events:none;}
+  .comp-rename-btn{position:absolute;top:-9px;right:-9px;width:18px;height:18px;border-radius:50%;background:var(--panel-2);border:1px solid var(--copper);color:var(--silk-dim);font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:8;touch-action:manipulation;}
+  .comp-rename-btn:hover{border-color:var(--warn);color:var(--warn);}
+  .comp-name-tag{position:absolute;left:50%;top:-22px;transform:translateX(-50%);white-space:nowrap;background:rgba(8,31,20,.9);border:1px solid var(--copper-dim);color:var(--gold);font-size:10px;font-family:var(--font-mono);padding:1px 6px;border-radius:3px;pointer-events:none;z-index:7;}
+  .comp-menu{position:absolute;z-index:50;display:flex;flex-direction:column;align-items:stretch;gap:6px;background:var(--panel);border:1px solid var(--copper);border-radius:5px;padding:8px;box-shadow:0 4px 12px rgba(0,0,0,.5);touch-action:none;}
+  .comp-menu-name{background:var(--pcb-bg-dark);border:1px solid var(--border);color:var(--silk);font-family:var(--font-mono);font-size:12px;padding:6px 8px;border-radius:3px;width:130px;}
+  .comp-menu-name:focus{outline:none;border-color:var(--copper);}
+  .comp-menu-rotate,.comp-menu-close,.comp-menu-delete{background:var(--panel-2);border:1px solid var(--border);color:var(--silk);font-family:var(--font-ui);font-size:12px;padding:7px 8px;border-radius:3px;cursor:pointer;white-space:nowrap;touch-action:manipulation;text-align:center;}
+  .comp-menu-rotate:hover{border-color:var(--hi);color:var(--hi);}
+  .comp-menu-close:hover{border-color:var(--warn);color:var(--warn);}
+  .comp-menu-delete{border-color:#5a2a22;color:#ff9b85;}
+  .comp-menu-delete:hover{border-color:var(--warn);background:#3a1712;color:var(--warn);}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px;}
+  .modal-box{background:var(--panel);border:1px solid var(--copper);border-radius:8px;padding:18px;width:100%;max-width:280px;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+  .modal-box h3{margin:0 0 12px;font-size:14px;color:var(--gold);font-family:var(--font-mono);font-weight:600;}
+  .modal-input{width:100%;background:var(--pcb-bg-dark);border:1px solid var(--border);color:var(--silk);font-family:var(--font-mono);font-size:13px;padding:9px 10px;border-radius:4px;}
+  .modal-input:focus{outline:none;border-color:var(--copper);}
+  .modal-error{color:var(--warn);font-size:11px;margin-top:8px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
+  footer.statusbar{background:var(--panel);border-top:2px solid var(--border);color:var(--silk-dim);font-size:12px;padding:7px 16px;font-family:var(--font-mono);min-height:16px;display:flex;align-items:baseline;gap:16px;}
+  footer.statusbar #status{flex:1;min-width:0;}
+  footer.statusbar .credit{flex-shrink:0;color:var(--copper-dim);font-size:10px;white-space:nowrap;}
+  footer.statusbar b{color:var(--gold);}
+  footer.statusbar .bad{color:var(--warn);}
+  ::-webkit-scrollbar{width:12px;height:12px;}
+  ::-webkit-scrollbar-track{background:var(--pcb-bg-dark);}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--copper-dim);}
+  @media (max-width:760px){
+    header.toolbar{padding:8px 10px;gap:6px;}
+    header.toolbar h1{font-size:12px;margin-right:4px;}
+    header.toolbar h1 span{display:none;}
+    .btn{padding:8px 10px;font-size:12px;touch-action:manipulation;}
+    .speed-wrap{font-size:11px;order:5;flex-basis:100%;}
+    .zoom-wrap{order:6;}
+    .speed-wrap input{flex:1;min-width:80px;}
+    .settings-group{flex-basis:100%;}
+    .workspace{flex-direction:column;}
+    aside.palette{width:100%;height:auto;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;display:flex;flex-wrap:nowrap;align-items:center;gap:6px;padding:8px;border-right:none;border-bottom:2px solid var(--border);flex-shrink:0;}
+    aside.palette h2{display:none;}
+    .palette-btn{width:auto;flex:0 0 auto;margin-bottom:0;white-space:nowrap;padding:10px 12px;touch-action:manipulation;}
+    main.canvas-wrap{flex:1;min-height:0;}
+    .pin{width:16px;height:16px;}
+    footer.statusbar{font-size:11px;padding:6px 10px;flex-wrap:wrap;}
+    footer.statusbar .credit{flex-basis:100%;text-align:right;}
+  }
+  #btnKirimTugas{white-space:nowrap}
+  #btnKirimTugas[hidden]{display:none}
+  @media(max-width:700px){#btnKirimTugas{min-height:40px}}
+</style>
+</head>
+<body>
+
+<header class="toolbar">
+  <h1>SIM‑LISTRIK RUMAH<span>rangkai instalasi &amp; pantau beban</span></h1>
+  <button type="button" class="btn primary" id="btnKirimTugas" aria-haspopup="dialog">Kirim Tugas</button>
+  <button class="btn primary" id="btnRun" title="Jalankan kWh Meter">▶</button>
+  <button class="btn" id="btnUndo" title="Urungkan (Ctrl+Z)">↺</button>
+  <button class="btn danger" id="btnDelete" title="Hapus komponen/kabel terpilih (Delete)">🗑</button>
+  <button class="btn" id="btnToggleSettings" title="Tampilkan/sembunyikan pengaturan zoom &amp; waktu">▼</button>
+  <div class="settings-group" id="settingsGroup" style="display:none;">
+    <div class="speed-wrap">
+      <span>Percepatan waktu</span>
+      <input type="range" id="timeScale" min="60" max="6000" step="60" value="600">
+      <span id="timeLabel">600×</span>
+    </div>
+    <div class="zoom-wrap">
+      <button class="btn" id="btnZoomOut" title="Perkecil tampilan">−</button>
+      <button class="btn" id="btnZoomReset" title="Atur ulang ke 100%">100%</button>
+      <button class="btn" id="btnZoomIn" title="Perbesar tampilan">+</button>
+    </div>
+    <div class="bg-wrap" id="bgWrap">
+      <span>Latar</span>
+      <button class="bg-swatch active" data-bg="green" title="Hijau PCB (baku)" style="background:#0d2b1c"></button>
+      <button class="bg-swatch" data-bg="blue" title="Biru gelap" style="background:#0d1f33"></button>
+      <button class="bg-swatch" data-bg="dark" title="Abu gelap" style="background:#1c1e22"></button>
+      <button class="bg-swatch" data-bg="light" title="Terang" style="background:#e8ebee"></button>
+      <button class="bg-swatch" data-bg="blueprint" title="Blueprint" style="background:#0b3d63"></button>
+    </div>
+    <button class="btn" id="btnImport2">Impor .json</button>
+  </div>
+  <span class="spacer"></span>
+  <button class="btn" id="btnExample" title="Muat contoh rumah sederhana">Contoh</button>
+  <button class="btn" id="btnSave" title="Simpan ke penyimpanan lokal peramban">💾</button>
+  <button class="btn" id="btnLoad">Muat</button>
+  <button class="btn" id="btnExport">Ekspor .json</button>
+  <button class="btn danger" id="btnClear">Bersihkan</button>
+  <input type="file" id="fileInput" accept=".json" style="display:none">
+
+  <div id="importAuthModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <h3>Kode Akses Impor</h3>
+      <input type="password" id="importAuthInput" class="modal-input" placeholder="Masukkan kode akses" autocomplete="off">
+      <div id="importAuthError" class="modal-error" style="display:none;">Kode akses salah. Coba lagi.</div>
+      <div class="modal-actions">
+        <button type="button" id="importAuthCancel" class="btn">Batal</button>
+        <button type="button" id="importAuthConfirm" class="btn primary">Konfirmasi</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="workspace">
+  <aside class="palette">
+    <h2>Alat</h2>
+    <button class="palette-btn active" data-type="__select">
+      <span class="swatch" style="background:transparent;border-color:var(--silk-dim)"></span> Pilih / geser
+    </button>
+    <h2>Sumber &amp; proteksi</h2>
+    <button class="palette-btn" data-type="METER"><span class="pv pv-meter"></span> kWh Meter</button>
+    <button class="palette-btn" data-type="BREAKER"><span class="pv pv-mcb"></span> MCB</button>
+    <button class="palette-btn" data-type="TDUS"><span class="pv pv-tdus"></span> T‑dus</button>
+    <button class="palette-btn" data-type="ARDE"><span class="pv pv-arde"></span> Arde</button>
+    <h2>Instalasi</h2>
+    <button class="palette-btn" data-type="SOCKET"><span class="pv pv-socket"></span> Stop kontak</button>
+    <button class="palette-btn" data-type="STRIP"><span class="pv pv-strip"></span> Stop kontak kabel</button>
+    <button class="palette-btn" data-type="SWITCH"><span class="pv pv-switch"></span> Sakelar</button>
+    <h2>Beban</h2>
+    <button class="palette-btn" data-type="LAMP"><i>💡</i> Lampu</button>
+    <button class="palette-btn" data-type="TV"><i>📺</i> TV</button>
+    <button class="palette-btn" data-type="FRIDGE"><i>🧊</i> Kulkas</button>
+    <button class="palette-btn" data-type="COOKER"><i>🍚</i> Rice cooker</button>
+    <button class="palette-btn" data-type="BLENDER"><i>🥤</i> Blender</button>
+    <button class="palette-btn" data-type="WASHER"><i>🧺</i> Mesin cuci</button>
+    <h2>Energi Terbarukan</h2>
+    <button class="palette-btn" data-type="SOLAR"><i>☀</i> Panel Surya</button>
+    <button class="palette-btn" data-type="MPPT"><i>🔆</i> MPPT</button>
+    <button class="palette-btn" data-type="BATTERY"><i>🔋</i> Baterai</button>
+    <button class="palette-btn" data-type="INVERTER"><i>⇄</i> Inverter</button>
+    <button class="palette-btn" data-type="HYBRID"><i>⇄</i> Inverter Hybrid</button>
+    <button class="palette-btn" data-type="ATS"><i>🔀</i> MCB ATS</button>
+  </aside>
+
+  <main class="canvas-wrap" id="canvasWrap">
+    <div id="canvasSizer" style="width: 9600px; height: 6000px;">
+      <div id="canvas" style="transform: scale(1);"><svg id="wires"></svg></div>
+    </div>
+  </main>
+</div>
+
+<footer class="statusbar">
+  <span id="status">Pasang <b>kWh Meter</b> (sudah ada MCB) → <b>Circuit breaker</b> (opsional) → <b>T‑dus</b> → sakelar/stop kontak → beban. Tarik kabel dari pin keluaran (kanan) ke pin masukan (kiri): <span style="color:var(--L)">L = fase</span>, <span style="color:var(--N)">N = netral</span>, <span style="color:#2fa552">G = ground</span>. Klik komponen untuk menyalakan/mematikan. Ikon <b>✎</b> untuk nama &amp; putar. Zoom: tombol −/+, cubit dua jari, atau Ctrl+scroll. Klik <b>Contoh</b> untuk memulai cepat.</span>
+  <span class="credit">v0.1 · dani – SMKN Bansari 2026</span>
+</footer>
+
+<script>
+'use strict';
+
+function pasangTugasRangkaian({format, judul, namaBerkas, ambil, muat, tipeBawaan}) {
+  const API = '../pembayaran/backend/';
+  const batas = 262144;
+  const tombol = document.getElementById('btnKirimTugas');
+  const dialog = document.createElement('dialog');
+  dialog.setAttribute('aria-labelledby', 'judulKirimRangkaian');
+  dialog.style.cssText = 'width:min(420px,calc(100% - 32px));max-height:90vh;overflow:auto;border:1px solid #64748b;border-radius:14px;padding:18px;background:#18222f;color:white;font:inherit';
+  dialog.innerHTML = `
+    <h2 id="judulKirimRangkaian" style="margin:0 0 12px">Kirim Tugas</h2>
+    <form style="display:grid;gap:10px">
+      <label>Judul tugas<input name="judul" class="modal-input" maxlength="100" required style="display:block;width:100%;box-sizing:border-box"></label>
+      <label>Kode guru<input name="kode" class="modal-input" maxlength="12" autocomplete="off" autocapitalize="characters" required style="display:block;width:100%;box-sizing:border-box"></label>
+      <label>Catatan (opsional)<textarea name="catatan" class="modal-input" maxlength="500" style="display:block;width:100%;box-sizing:border-box"></textarea></label>
+      <p role="status" style="margin:0"></p>
+      <a target="_blank" rel="noopener" hidden style="color:#bae6fd"></a>
+      <div><button type="submit" class="btn primary">Kirim</button> <button type="button" class="btn">Tutup</button></div>
+    </form>`;
+  document.body.append(dialog);
+  const form = dialog.querySelector('form');
+  const status = form.querySelector('[role=status]');
+  const link = form.querySelector('a');
+  const kirim = form.querySelector('[type=submit]');
+  const tutup = form.querySelector('[type=button]');
+  let berkas, sibuk = false;
+
+  function pesan(teks, href = '', label = '') {
+    status.textContent = teks;
+    link.hidden = !href;
+    if (href) {
+      link.href = href;
+      link.textContent = label;
+    }
+  }
+
+  function validasi(data) {
+    const digital = format === 'IC-DIGITAL-1';
+    if (!data || typeof data !== 'object' || Array.isArray(data) || (data.format != null && data.format !== format) ||
+        (digital ? !Array.isArray(data.customICs) : 'customICs' in data)) {
+      throw new Error('Format rangkaian tidak sesuai dengan simulator ini.');
+    }
+    const ic = digital ? data.customICs : [];
+    const tipe = new Set(tipeBawaan);
+    const idValid = id => typeof id === 'string' && /^[a-z][a-z0-9_-]{0,39}$/i.test(id);
+    const angka = (n, min, max) => Number.isFinite(n) && n >= min && n <= max;
+    const indeks = n => Number.isInteger(n) && angka(n, 0, 127);
+    const pin = list => Array.isArray(list) && list.length <= 128 && list.every(s => typeof s === 'string');
+    const salah = () => { throw new Error('Komponen, kabel, atau Sub-IC pada proyek tidak valid.'); };
+    for (const sub of ic) {
+      if (!sub || !idValid(sub.id) || tipe.has(sub.id) || typeof sub.name !== 'string' ||
+          !pin(sub.inputs) || !pin(sub.outputs) || !angka(sub.w, 1, 5000) || !angka(sub.h, 1, 5000)) salah();
+      validasiRangkaian(sub);
+      tipe.add(sub.id);
+    }
+    validasiRangkaian(data);
+
+    // A Sub-IC can reference built-in components and earlier Sub-ICs.
+    function validasiRangkaian(rangkaian) {
+      if (!Array.isArray(rangkaian.components) || !Array.isArray(rangkaian.wires)) salah();
+      const ids = new Set();
+      for (const c of rangkaian.components) {
+        if (!c || !idValid(c.id) || ids.has(c.id) || !tipe.has(c.type) ||
+            !angka(c.x, -100000, 100000) || !angka(c.y, -100000, 100000) ||
+            !Array.isArray(c.outputs) || c.outputs.length > 128 ||
+            c.outputs.some(value => typeof value !== 'number' || !Number.isFinite(value))) salah();
+        if (digital && (!angka(c.w, 1, 5000) || !angka(c.h, 1, 5000))) salah();
+        if (!digital && ((c.n != null && (!Number.isInteger(c.n) || !angka(c.n, 1, 32))) ||
+            (c.keys != null && ![1, 2].includes(c.keys)))) salah();
+        ids.add(c.id);
+      }
+      for (const w of rangkaian.wires) {
+        if (!w || !idValid(w.id) || !ids.has(w.from) || !ids.has(w.to) ||
+            !indeks(w.fromPin) || !indeks(w.toPin)) salah();
+      }
+    }
+    return data;
+  }
+
+  tombol.addEventListener('click', () => {
+    form.reset();
+    form.elements.judul.value = judul;
+    try { form.elements.kode.value = localStorage.getItem('kodeGuru') || ''; } catch {}
+    berkas = null;
+    pesan('');
+    try {
+      const data = {format, ...ambil()};
+      const kandidat = new File([JSON.stringify(data)], namaBerkas, {type:'application/json'});
+      if (kandidat.size > batas) throw new Error('Proyek terlalu besar untuk dibuka lewat Periksa (maksimal 256 KB).');
+      validasi(data);
+      berkas = kandidat;
+    } catch (error) {
+      pesan(error.message);
+    }
+    kirim.disabled = !berkas;
+    dialog.showModal();
+  });
+  tutup.onclick = () => dialog.close();
+  dialog.addEventListener('cancel', event => { if (sibuk) event.preventDefault(); });
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (!berkas || sibuk) return;
+    const data = new FormData(form);
+    const kode = String(data.get('kode')).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (![6, 8].includes(kode.length) || !String(data.get('judul')).trim()) {
+      pesan('Isi judul dan kode guru 6 atau 8 karakter.');
+      return;
+    }
+    data.set('kode', kode);
+    data.set('berkas', berkas);
+    sibuk = kirim.disabled = tutup.disabled = true;
+    pesan('Sedang mengirim…');
+    try {
+      const response = await fetch(API + 'kirim_tugas.php', {method:'POST', credentials:'same-origin', body:data});
+      const hasil = await response.json().catch(() => null);
+      if (response.ok && hasil?.sukses) {
+        berkas = null;
+        try { localStorage.setItem('kodeGuru', kode); } catch {}
+        pesan('Tugas berhasil dikirim.', '../kirim-tugas.html', 'Lihat riwayat');
+      } else if (response.status === 401) {
+        pesan('Masuk di tab baru, lalu kembali ke sini untuk mengirim.', '../pembayaran/masuk.html?kembali=/kirim-tugas.html', 'Masuk dengan Google');
+      } else if (hasil?.perluProfil) {
+        pesan(hasil.pesan, '../profil.html', 'Lengkapi profil');
+      } else {
+        pesan(hasil?.pesan || 'Pengiriman gagal. Coba lagi.');
+      }
+    } catch {
+      pesan('Pengiriman belum terkonfirmasi. Periksa riwayat sebelum mencoba lagi.', '../kirim-tugas.html', 'Lihat riwayat');
+    } finally {
+      sibuk = tutup.disabled = false;
+      kirim.disabled = !berkas;
+    }
+  });
+
+  async function bukaKiriman(id) {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'padding:10px 14px;background:#233349;color:white;font:inherit';
+    const teks = document.createElement('span');
+    teks.setAttribute('role', 'status');
+    teks.textContent = 'Memuat rangkaian siswa…';
+    const kembali = document.createElement('a');
+    kembali.href = '../kirim-tugas.html';
+    kembali.textContent = 'Kembali ke Kirim Tugas';
+    kembali.style.color = '#bae6fd';
+    banner.append(teks, ' · ', kembali);
+    document.body.prepend(banner);
+    tombol.hidden = true;
+    try {
+      if (!/^[1-9][0-9]*$/.test(id)) throw new Error('Nomor kiriman tidak valid.');
+      const response = await fetch(API + 'unduh_tugas.php?id=' + encodeURIComponent(id), {credentials:'same-origin', cache:'no-store'});
+      if (response.status === 401) throw new Error('Sesi masuk berakhir. Masuk kembali lewat Kirim Tugas.');
+      if (!response.ok) throw new Error('Kiriman tidak tersedia untuk akun ini.');
+      const blob = await response.blob();
+      if (blob.size > batas) throw new Error('Ukuran proyek melebihi 256 KB.');
+      const data = validasi(JSON.parse(await blob.text()));
+      muat(JSON.stringify(data));
+      teks.textContent = 'Rangkaian siswa sudah dimuat.';
+    } catch (error) {
+      teks.textContent = 'Gagal memuat kiriman. ' + error.message;
+    }
+  }
+
+  const id = new URLSearchParams(location.search).get('tugas');
+  if (id !== null) bukaKiriman(id);
+}
+</script>
+<script>
+(function(){
+  "use strict";
+
+  const VOLT = 220, TARIF = 1444.7, RATINGS = [2,4,6,10,16];
+  const T9 = ['L','N','G','L','N','G','L','N','G'];
+  const LAMP_W = [3,5,7,10,15,20,25,40,60,100];
+  const VA_LIST = [450,900,1300,2200,3500,4400,5500];
+  const mcbA = c => Math.round((c.va||900)/VOLT);
+  const load = (label,icon,watts,ins=['P'])=>({label,icon,watts,load:1,w:100,h:86,ins,outs:[]});
+  const DEFS = {
+    METER:{label:'kWh Meter', w:190,h:300, ins:['G'], outs:['L','N','G'], pinXYin:[[0,.96]], pinXYout:[[1,.82],[1,.89],[1,.96]]},
+    STRIP:{label:'Stop Kontak Kabel', w:100,h:182, ins:['P'], outs:['P','P','P','P','P','P'], strip:true, singleOut:true},
+    ARDE:{label:'Arde', w:90,h:210, ins:[], outs:['G'], pinXYout:[[.31,0]]},
+    BREAKER:{label:'MCB 1P', w:84,h:150, ins:['L'], outs:['L'], pinX:[0.5]},
+    BREAKER2:{label:'MCB 2P', w:140,h:150, ins:['L','N'], outs:['L','N'], pinX:[0.28,0.72]},
+    TDUS:{label:'T-dus', w:200,h:180, ins:T9, outs:T9, bi:true, pinXY:[[0,.289],[0,.4],[0,.511],[1,.289],[1,.4],[1,.511],[.4,1],[.5,1],[.6,1]]},
+    SOCKET:{label:'Stop Kontak', w:130,h:130, ins:['L','N','G'], outs:['P'], pinXYin:[[.25,0],[.5,0],[.75,0]], pinXYout:[[.5,1]], singleOut:true},
+    SWITCH:{label:'Sakelar', w:100,h:105, ins:['L'], outs:['L','L'], sw:true},
+    LAMP:Object.assign(load('Lampu','💡',10,['L','N']),{w:100,h:150,pinXYin:[[0,.59],[1,.59]]}), TV:Object.assign(load('TV','📺',100),{w:132,h:98}),
+    FRIDGE:Object.assign(load('Kulkas','🧊',120),{w:80,h:156}),
+    COOKER:Object.assign(load('Rice Cooker','🍚',400),{w:118,h:108}),
+    BLENDER:Object.assign(load('Blender','🥤',350),{w:88,h:132}),
+    WASHER:Object.assign(load('Mesin Cuci','🧺',400),{w:112,h:112}),
+    SOLAR:{label:'Panel Surya', w:150,h:96, ins:['DP','DN'], outs:['DP','DN'], bi:true, pinXY:[[.35,1],[.65,1]]},
+    MPPT:{label:'MPPT', w:150,h:106, ins:['DP','DN'], outs:['DP','DN','DP','DN'], pinXYin:[[.08,1],[.22,1]], pinXYout:[[.43,1],[.57,1],[.78,1],[.92,1]], labelIn:['+','−'], labelOut:['+','−','+','−']},
+    BATTERY:{label:'Baterai (ESS)', w:110,h:150, ins:['DP','DN'], outs:['DP','DN'], bi:true, pinXY:[[.3,0],[.7,0]]},
+    INVERTER:{label:'Inverter', w:118,h:104, ins:['DP','DN'], outs:['L','N'], pinXYin:[[.3,0],[.7,0]], pinXYout:[[.3,1],[.7,1]]},
+    HYBRID:{label:'Inverter Hybrid', w:280,h:172, ins:['G','L','N','DP','DN','DP','DN'], outs:['L','N'],
+      pinXYin:[[.035,1],[.10,1],[.165,1],[.315,1],[.38,1],[.55,1],[.615,1]], pinXYout:[[.85,1],[.915,1]]},
+    ATS:{label:'MCB ATS', w:130,h:140, ins:['L','N','L','N'], outs:['L','N'],
+      pinXYin:[[.18,0],[.32,0],[.68,0],[.82,0]], pinXYout:[[.35,1],[.65,1]],
+      labelIn:['A-L','A-N','B-L','B-N'], labelOut:['L','N']},
+  };
+  const isBrk = t => t==='BREAKER' || t==='BREAKER2' || t==='ATS';
+  const isDCPin = t => t==='DP' || t==='DN';
+  const TOGGLES = ['BREAKER','BREAKER2','ATS','BATTERY','INVERTER','HYBRID','LAMP','TV','FRIDGE','COOKER','BLENDER','WASHER'];
+  function stripH(n){ return 62 + n*76 + 4; }
+  function getDef(type){
+    const d = DEFS[type] || {label:'?', w:60,h:40, ins:[], outs:[]};
+    return Object.assign({inputs:d.ins.length, outputs:d.outs.length}, d);
+  }
+
+  let components = [], wires = [], idCounter = 1, historyStack = [];
+  const HISTORY_LIMIT = 50;
+  let placementType = null, selection = null, wireDraft = null, dragState = null, placePending = null, activeMenu = null;
+  const TAP_MOVE_THRESHOLD = 6;
+  let running = false, simTimer = null, timeScale = 600;
+  const TICK_MS = 100;
+
+  const canvas = document.getElementById('canvas');
+  const canvasSizer = document.getElementById('canvasSizer');
+  const svg = document.getElementById('wires');
+  const canvasWrap = document.getElementById('canvasWrap');
+  const status = document.getElementById('status');
+
+  const BASE_W = 9600, BASE_H = 6000, ZOOM_MIN = 0.3, ZOOM_MAX = 2.5, ZOOM_STEP = 0.1;
+  let zoomScale = 1;
+  const activePointers = new Map();
+  let pinchState = null;
+
+  function applyZoom(){
+    canvas.style.transform = 'scale('+zoomScale+')';
+    canvasSizer.style.width = (BASE_W*zoomScale)+'px';
+    canvasSizer.style.height = (BASE_H*zoomScale)+'px';
+    document.getElementById('btnZoomReset').textContent = Math.round(zoomScale*100)+'%';
+  }
+  function zoomAt(newScale, clientX, clientY){
+    newScale = Math.round(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, newScale))*100)/100;
+    if(newScale === zoomScale) return;
+    const r = canvasWrap.getBoundingClientRect(), old = zoomScale;
+    const cx = (clientX - r.left + canvasWrap.scrollLeft)/old, cy = (clientY - r.top + canvasWrap.scrollTop)/old;
+    zoomScale = newScale; applyZoom();
+    drawWires();
+    canvasWrap.scrollLeft = cx*zoomScale - (clientX - r.left);
+    canvasWrap.scrollTop = cy*zoomScale - (clientY - r.top);
+    if(activeMenu) closeComponentMenu();
+  }
+  function zoomFromButton(delta){
+    const r = canvasWrap.getBoundingClientRect();
+    zoomAt(zoomScale+delta, r.left+r.width/2, r.top+r.height/2);
+  }
+
+  function setStatus(html){ status.innerHTML = html; }
+  function snapshot(){ return JSON.stringify({components, wires, idCounter}); }
+  function pushHistory(){ historyStack.push(snapshot()); if(historyStack.length > HISTORY_LIMIT) historyStack.shift(); }
+  function pushHistorySnapshot(s){ historyStack.push(s); if(historyStack.length > HISTORY_LIMIT) historyStack.shift(); }
+  function refresh(){ buildDOM(); simulate(); updateVisuals(); }
+
+  function undo(){
+    if(!historyStack.length){ setStatus('Tidak ada tindakan yang bisa diurungkan.'); return; }
+    if(activeMenu){ activeMenu.el.remove(); activeMenu = null; }
+    const prev = JSON.parse(historyStack.pop());
+    components = prev.components; wires = prev.wires; idCounter = prev.idCounter;
+    selection = null; wireDraft = null;
+    refresh(); setStatus('Tindakan terakhir diurungkan.');
+  }
+  function deleteSelection(){
+    if(!selection){ setStatus('Tidak ada komponen atau kabel yang dipilih untuk dihapus.'); return; }
+    if(activeMenu){ activeMenu.el.remove(); activeMenu = null; }
+    pushHistory();
+    if(selection.type === 'comp'){
+      const id = selection.id;
+      components = components.filter(c=>c.id!==id);
+      wires = wires.filter(w=>w.from!==id && w.to!==id);
+      selection = null; refresh(); setStatus('Komponen dihapus.');
+    } else {
+      wires = wires.filter(w=>w.id!==selection.id);
+      selection = null; simulate(); updateVisuals(); setStatus('Kabel dihapus.');
+    }
+  }
+
+  function newComponent(type, x, y){
+    const def = getDef(type);
+    return {
+      id:'c'+(idCounter++), type, x, y, w:def.w, h:(type==='STRIP' ? stripH(2) : def.h), n:2, watts:def.watts||0,
+      state: type==='SWITCH' ? 0 : 1, state2:0, keys:1, name:'', rotation:0,
+      rating: (type==='MPPT') ? 500 : (type==='INVERTER') ? 1000 : (type==='HYBRID') ? 2000 : 6,
+      tripped:0, va:900, credit:64.95,
+      wp:200, weather:2, voltage:12, sysV:12, capWh:1000, soc:50, chargeW:300,
+      outputs:new Array(def.outputs).fill(0),
+    };
+  }
+
+  // ---------- simulasi ----------
+  function inWire(comp, i){ return wires.find(w=>w.to===comp.id && w.toPin===i); }
+  function inputValues(comp){
+    return getDef(comp.type).ins.map((_,i)=>{
+      let v = 0;
+      for(const w of wires){
+        if(w.to===comp.id && w.toPin===i){
+          const s = components.find(c=>c.id===w.from);
+          if(s && s.outputs[w.fromPin]) v = 1;
+        }
+      }
+      return v;
+    });
+  }
+  function propagate(){
+    components.forEach(c=>{ if(c.type==='TDUS') c.outputs = c.outputs.map(()=>0); });
+    for(let pass=0; pass<12; pass++){
+      for(const c of components){
+        const v = inputValues(c), d = getDef(c.type);
+        switch(c.type){
+          case 'METER': { const on = (c.state && c.credit>0) ? 1:0; c.outputs = [on,1,v[0]?1:0]; break; }
+          case 'ARDE': c.outputs = [1]; break;
+          case 'STRIP': { const on = (c.state && v[0]) ? 1:0; c.outputs = c.outputs.map((_,i)=> i < (c.n||2) ? on : 0); break; }
+          case 'BREAKER': c.outputs = [c.state && v[0] ? 1:0]; break;
+          case 'BREAKER2': c.outputs = [c.state && v[0] ? 1:0, c.state && v[1] ? 1:0]; break;
+          case 'TDUS': { const t = {L:0,N:0,G:0}; d.ins.forEach((ty,i)=>{ if(v[i]) t[ty] = 1; }); c.outputs = d.outs.map(ty=>t[ty]); break; }
+          case 'SOCKET': c.outputs = [(v[0] && v[1]) ? 1:0]; break;
+          case 'SWITCH': c.outputs = [c.state && v[0] ? 1:0, ((c.keys||1)===2 && c.state2 && v[0]) ? 1:0]; break;
+          case 'SOLAR': {
+            const frac = c.weather===2 ? 1 : c.weather===1 ? .4 : 0;
+            c._prodW = (c.wp||200)*frac;
+            const on = frac>0 ? 1:0; c.outputs = [on,on]; break;
+          }
+          case 'MPPT': {
+            const arr = traceSolarArray(c.id);
+            c._arrayV = arr ? arr.voltage : 0; c._arrayW = arr ? arr.watt : 0; c._arrayN = arr ? arr.count : 0;
+            const need = c.sysV||12;
+            const enough = !!(arr && arr.watt > 0 && arr.voltage >= need);
+            c._voltWarn = !!(arr && arr.watt>0 && !enough);
+            const batt = mpptBattery(c);
+            const battMatch = !!(batt && (batt.sysV||12) === need);
+            c._battMismatch = !!(enough && batt && !battMatch);
+            if(enough){
+              const chg = Math.min(c._arrayW, c.rating||500);
+              if(batt){
+                if(battMatch){ c._chargeW = chg; batt._chargeReq = Math.max(batt._chargeReq||0, chg); }
+                else c._chargeW = 0;
+              } else c._chargeW = chg;
+            } else c._chargeW = 0;
+            const loadOn = (batt && battMatch && batt.state && (batt.soc||0) > 0) ? 1 : 0;
+            c._loadOn = loadOn;
+            c.outputs = [enough?1:0, enough?1:0, loadOn, loadOn];
+            break;
+          }
+          case 'BATTERY': { const on = (c.state && (c.soc||0)>0) ? 1:0; c.outputs = [on,on]; break; }
+          case 'INVERTER': { const on = (c.state && v[0] && v[1]) ? 1:0; c.outputs = [on,on]; break; }
+          case 'HYBRID': {
+            // pin order: 0=G 1=L 2=N (AC in) · 3=D+ 4=D- (solar in) · 5=D+ 6=D- (battery in)
+            const gridOK = v[1] && v[2];
+            const arr = traceSolarArray(c.id, 3, 4);
+            c._arrayV = arr ? arr.voltage : 0; c._arrayW = arr ? arr.watt : 0; c._arrayN = arr ? arr.count : 0;
+            const solarOK = !!(arr && arr.watt > 0);
+            const battOK = v[5] && v[6];
+            const useSolar = solarOK;
+            const useBatt = !useSolar && battOK;
+            const useGrid = !useSolar && !useBatt && gridOK;
+            const on = c.state && (useSolar || useBatt || useGrid) ? 1:0;
+            c.outputs = [on,on];
+            c._srcUsed = !c.state ? 'NONE' : useSolar ? 'SOLAR' : useBatt ? 'BATT' : useGrid ? 'GRID' : 'NONE';
+            if(c.state){
+              const bw = inWire(c,5), srcC = bw && components.find(x=>x.id===bw.from), batt = battOfSource(srcC);
+              if(batt){
+                if(solarOK) batt._chargeReq = Math.max(batt._chargeReq||0, Math.min(c._arrayW, c.rating||2000));
+                else if(gridOK) batt._chargeReq = Math.max(batt._chargeReq||0, c.chargeW||300);
+              }
+            }
+            break;
+          }
+          case 'ATS': {
+            const aOK = v[0] && v[1], bOK = v[2] && v[3];
+            c._srcUsed = !c.state ? 'NONE' : aOK ? 'A' : bOK ? 'B' : 'NONE';
+            const on = c.state ? 1:0;
+            c.outputs = [on && (aOK?v[0]:v[2]), on && (aOK?v[1]:v[3])];
+            break;
+          }
+          default: if(d.load){ c._live = (v.length && v.every(x=>x))?1:0; c._run = (c.state && c._live)?1:0; }
+        }
+      }
+    }
+  }
+  // tambahkan arus beban ke semua breaker di sisi hulu (menelusuri jalur fase)
+  function mpptBattery(m){
+    const bw = wires.find(w=>w.from===m.id && (w.fromPin===0 || w.fromPin===1));
+    const b = bw && components.find(x=>x.id===bw.to);
+    return (b && b.type==='BATTERY') ? b : null;
+  }
+  function battOfSource(src){
+    if(!src) return null;
+    if(src.type==='BATTERY') return src;
+    if(src.type==='MPPT') return mpptBattery(src);
+    return null;
+  }
+  function traceSolarArray(mpptId, pinDP, pinDN){
+    if(pinDP==null) pinDP = 0; if(pinDN==null) pinDN = 1;
+    const mppt = components.find(c=>c.id===mpptId);
+    const wDP = inWire(mppt,pinDP), wDN = inWire(mppt,pinDN);
+    if(!wDP || !wDN) return null;
+    const startNode = wDP.from+':'+wDP.fromPin, targetNode = wDN.from+':'+wDN.fromPin;
+    const visited = new Set([startNode]);
+    const queue = [{node:startNode, volt:0}];
+    const seenPanels = new Set();
+    const startComp = components.find(c=>c.id===wDP.from);
+    if(startComp && startComp.type==='SOLAR') seenPanels.add(startComp.id);
+    let foundVolt = null, guard = 0;
+    while(queue.length && guard++ < 500){
+      const {node, volt} = queue.shift();
+      if(node === targetNode && foundVolt==null) foundVolt = volt;
+      const sep = node.lastIndexOf(':'), compId = node.slice(0,sep), pin = +node.slice(sep+1);
+      const comp = components.find(c=>c.id===compId);
+      if(!comp) continue;
+      if(comp.type==='SOLAR'){
+        const otherPin = pin===0 ? 1 : 0, otherNode = compId+':'+otherPin;
+        const dv = pin===0 ? -(comp.voltage||12) : (comp.voltage||12);
+        if(!visited.has(otherNode)){ visited.add(otherNode); queue.push({node:otherNode, volt:volt+dv}); }
+      }
+      for(const w of wires){
+        let oc=null, op=null;
+        if(w.from===compId && w.fromPin===pin){ oc=w.to; op=w.toPin; }
+        else if(w.to===compId && w.toPin===pin){ oc=w.from; op=w.fromPin; }
+        if(oc==null) continue;
+        const on2 = oc+':'+op;
+        if(!visited.has(on2)){
+          visited.add(on2);
+          const oComp = components.find(c=>c.id===oc);
+          if(oComp && oComp.type==='SOLAR') seenPanels.add(oComp.id);
+          queue.push({node:on2, volt});
+        }
+      }
+    }
+    if(foundVolt==null) return null;
+    let totalW = 0;
+    seenPanels.forEach(id=>{ const pnl = components.find(c=>c.id===id); if(pnl) totalW += (pnl._prodW||0); });
+    return { voltage: Math.abs(foundVolt), watt: totalW, count: seenPanels.size };
+  }
+  function upstreamWire(cur){
+    const d = getDef(cur.type);
+    if(!d.bi) return inWire(cur,0);
+    let best = null;
+    for(const w of wires){
+      if(w.to===cur.id && d.ins[w.toPin]==='L'){
+        const s = components.find(c=>c.id===w.from);
+        if(s && s.outputs[w.fromPin]) return w;
+        if(!best) best = w;
+      }
+    }
+    return best;
+  }
+  function walkPower(start, watts){
+    let cur = start, guard = 0;
+    while(cur && guard++ < 30){
+      let w;
+      if(cur.type==='TDUS') w = upstreamWire(cur);
+      else if(cur.type==='ATS') w = inWire(cur, cur._srcUsed==='B' ? 2 : 0);
+      else if(cur.type==='HYBRID') w = cur._srcUsed==='SOLAR' ? null : inWire(cur, cur._srcUsed==='BATT' ? 5 : 1);
+      else w = inWire(cur, 0);
+      if(!w) return;
+      const s = components.find(c=>c.id===w.from);
+      if(!s) return;
+      if(s.type==='METER'){ s._w = (s._w||0) + watts; return; }
+      if(s.type==='BATTERY'){ s._drawW = (s._drawW||0) + watts; return; }
+      if(s.type==='MPPT'){ const mb = mpptBattery(s); if(mb) mb._drawW = (mb._drawW||0) + watts; return; }
+      if(isBrk(s.type)) s._amps += watts/VOLT;
+      if(s.type==='INVERTER' || s.type==='HYBRID') s._outW = (s._outW||0) + watts;
+      cur = s;
+    }
+  }
+  function simulate(){
+    components.forEach(c=>{ if(c.type==='METER'){ if(c.va==null) c.va=900; if(c.credit==null) c.credit=64.95; } });
+    for(let round=0; round<6; round++){
+      components.forEach(c=>{
+        c._amps = 0;
+        if(c.type==='METER') c._w = 0;
+        if(c.type==='BATTERY'){ c._drawW = 0; c._chargeReq = 0; }
+        if(c.type==='INVERTER' || c.type==='HYBRID') c._outW = 0;
+      });
+      propagate();
+      for(const c of components){
+        const d = getDef(c.type);
+        if(d.load && c._run){ const wt = c.type==='LAMP' ? (c.watts||10) : d.watts; walkPower(c, wt); }
+      }
+      let tripped = false;
+      for(const c of components){
+        if(isBrk(c.type) && c.state && c._amps > c.rating + 1e-6){
+          c.state = 0; c.tripped = 1; tripped = true;
+          setStatus('<span class="bad">⚡ MCB/ATS TRIP!</span> Beban '+c._amps.toFixed(1)+' A melebihi '+c.rating+' A. Matikan sebagian perangkat, lalu klik tuas untuk menyalakan kembali.');
+        }
+        if((c.type==='INVERTER' || c.type==='HYBRID') && c.state && c._outW > (c.rating||99999) + 1e-6){
+          c.state = 0; c.tripped = 1; tripped = true;
+          setStatus('<span class="bad">⚡ Inverter kelebihan beban!</span> Daya '+Math.round(c._outW)+' W melebihi batas '+c.rating+' W. Kurangi beban, lalu klik untuk menyalakan kembali.');
+        }
+      }
+      for(const c of components){
+        if(c.type==='METER'){
+          const a = (c._w||0)/VOLT, lim = mcbA(c);
+          if(c.state && a > lim + 1e-6){
+            c.state = 0; c.tripped = 1; tripped = true;
+            setStatus('<span class="bad">⚡ MCB kWh Meter TRIP!</span> Beban '+a.toFixed(1)+' A melebihi '+lim+' A (daya '+c.va+' VA). Kurangi beban atau naikkan daya lewat ✎, lalu klik tuas biru MCB.');
+          }
+        }
+      }
+      if(!tripped) break;
+    }
+  }
+
+  // ---------- rendering ----------
+  function pinFrac(def, dir, i, comp){
+    if(def.sw){ const n = (comp && comp.keys) || 1; return dir==='in' ? [n===1 ? .3 : .2, 0] : [n===1 ? .7 : (i===0 ? .5 : .8), 0]; }
+    if(def.strip) return dir==='in' ? [.5,0] : [1,(98+i*76)/(comp?comp.h:stripH(2))];
+    if(dir==='in' && def.pinXYin) return def.pinXYin[i];
+    if(dir==='out' && def.pinXYout) return def.pinXYout[i];
+    return def.pinXY ? def.pinXY[i] : null;
+  }
+  function pinDir(comp, dir, i){
+    const d = getDef(comp.type);
+    let base = dir==='in' ? 'l' : 'r';
+    const q = pinFrac(d,dir,i,comp);
+    if(q){ base = q[1]===0 ? 'u' : q[0]===0 ? 'l' : q[0]===1 ? 'r' : 'd'; }
+    else if(d.pinX) base = dir==='in' ? 'u' : 'd';
+    const order = ['r','d','l','u'];
+    return order[(order.indexOf(base) + Math.round((comp.rotation||0)/90)) % 4];
+  }
+  function pinCoord(comp, dir, i){
+    const def = getDef(comp.type);
+    const count = dir==='in' ? def.inputs : def.outputs;
+    let localY = ((def.pinY && dir==='out') ? def.pinY[i] : (i+1)/(count+1))*comp.h, localX = dir==='in' ? 0 : comp.w;
+    if(def.pinX){ localX = def.pinX[i]*comp.w; localY = dir==='in' ? 0 : comp.h; }
+    const fq = pinFrac(def,dir,i,comp);
+    if(fq){ localX = fq[0]*comp.w; localY = fq[1]*comp.h; }
+    const cx = comp.w/2, cy = comp.h/2;
+    let dx = localX-cx, dy = localY-cy;
+    const rot = comp.rotation || 0;
+    if(rot===90){ const a=-dy,b=dx; dx=a; dy=b; }
+    else if(rot===180){ dx=-dx; dy=-dy; }
+    else if(rot===270){ const a=dy,b=-dx; dx=a; dy=b; }
+    return {x:comp.x+cx+dx, y:comp.y+cy+dy};
+  }
+
+  function closeComponentMenu(){
+    if(!activeMenu) return;
+    const comp = components.find(c=>c.id===activeMenu.compId);
+    const input = activeMenu.el.querySelector('.comp-menu-name');
+    if(comp && input){
+      const val = input.value.trim();
+      if(val !== (comp.name||'')){ pushHistory(); comp.name = val; }
+    }
+    activeMenu.el.remove(); activeMenu = null;
+    refresh();
+  }
+  function openComponentMenu(compId){
+    closeComponentMenu();
+    const comp = components.find(c=>c.id===compId); if(!comp) return;
+    const menu = document.createElement('div');
+    menu.className = 'comp-menu';
+    menu.style.left = ((comp.x+comp.w)*zoomScale+8)+'px';
+    menu.style.top = (comp.y*zoomScale-6)+'px';
+
+    const nameInput = document.createElement('input');
+    nameInput.type='text'; nameInput.className='comp-menu-name'; nameInput.placeholder='Nama label';
+    nameInput.value = comp.name || '';
+    nameInput.addEventListener('keydown', e=>{ e.stopPropagation(); if(e.key==='Enter') closeComponentMenu(); });
+
+    const mkBtn = (cls, txt, fn)=>{
+      const b = document.createElement('button'); b.type='button'; b.className=cls; b.textContent=txt;
+      b.addEventListener('click', e=>{ e.stopPropagation(); fn(); }); return b;
+    };
+    const rotateBtn = mkBtn('comp-menu-rotate','\u27F3 Putar 90\u00B0', ()=>{
+      pushHistory();
+      comp.rotation = ((comp.rotation||0)+90)%360;
+      const el = canvas.querySelector('.comp[data-id="'+comp.id+'"]');
+      if(el) el.style.transform = comp.rotation ? 'rotate('+comp.rotation+'deg)' : '';
+      simulate(); updateVisuals();
+    });
+    const deleteBtn = mkBtn('comp-menu-delete','\u{1F5D1} Hapus Komponen', ()=>{
+      pushHistory();
+      const id = comp.id;
+      components = components.filter(c=>c.id!==id);
+      wires = wires.filter(w=>w.from!==id && w.to!==id);
+      if(selection && selection.type==='comp' && selection.id===id) selection = null;
+      activeMenu.el.remove(); activeMenu = null;
+      refresh(); setStatus('Komponen dihapus.');
+    });
+    const closeBtn = mkBtn('comp-menu-close','\u2715', closeComponentMenu);
+
+    const extras = [];
+    if(comp.type==='METER'){
+      const lab = t=>{ const d = document.createElement('div'); d.textContent = t; d.style.cssText = 'font-size:10px;color:var(--silk-dim);margin-bottom:-3px;'; return d; };
+      const sel = document.createElement('select'); sel.className = 'comp-menu-name';
+      VA_LIST.forEach(v=>{ const o = document.createElement('option'); o.value = v; o.textContent = v+' VA (MCB '+Math.round(v/VOLT)+' A)'; if(v===(comp.va||900)) o.selected = true; sel.appendChild(o); });
+      sel.addEventListener('keydown', e=>e.stopPropagation());
+      sel.addEventListener('change', ()=>{
+        pushHistory(); comp.va = +sel.value; simulate(); updateVisuals();
+        setStatus('Daya kWh Meter diubah menjadi <b>'+comp.va+' VA</b> (MCB '+mcbA(comp)+' A).');
+      });
+      const rp = document.createElement('input'); rp.type = 'number'; rp.min = '0'; rp.step = '1000'; rp.placeholder = 'mis. 50000'; rp.className = 'comp-menu-name';
+      rp.addEventListener('keydown', e=>e.stopPropagation());
+      const topBtn = mkBtn('comp-menu-rotate','\u26A1 Isi pulsa', ()=>{
+        const v = +rp.value;
+        if(!(v>0)){ setStatus('Masukkan nominal pulsa dalam rupiah.'); return; }
+        pushHistory(); const kwh = v/TARIF; comp.credit = (comp.credit||0)+kwh; rp.value = '';
+        simulate(); updateVisuals();
+        setStatus('Pulsa Rp '+v.toLocaleString('id-ID')+' terisi: <b>+'+kwh.toFixed(2)+' kWh</b> (tarif Rp '+TARIF.toLocaleString('id-ID')+'/kWh).');
+      });
+      const zeroBtn = mkBtn('comp-menu-rotate','Kosongkan pulsa (uji coba)', ()=>{
+        pushHistory(); comp.credit = 0; simulate(); updateVisuals(); setStatus('Pulsa dikosongkan.');
+      });
+      extras.push(lab('Daya terpasang'), sel, lab('Isi pulsa (Rp)'), rp, topBtn, zeroBtn);
+    }
+    if(comp.type==='BREAKER' || comp.type==='BREAKER2'){
+      const tlb = document.createElement('div'); tlb.textContent = 'Jenis MCB'; tlb.style.cssText = 'font-size:10px;color:var(--silk-dim);margin-bottom:-3px;';
+      const tsel = document.createElement('select'); tsel.className = 'comp-menu-name';
+      [['BREAKER','MCB 1P (1 kutub)'],['BREAKER2','MCB 2P (2 kutub)']].forEach(([v,t])=>{ const o = document.createElement('option'); o.value = v; o.textContent = t; if(v===comp.type) o.selected = true; tsel.appendChild(o); });
+      tsel.addEventListener('keydown', e=>e.stopPropagation());
+      tsel.addEventListener('change', ()=>{
+        pushHistory();
+        comp.type = tsel.value;
+        const d = getDef(comp.type); comp.w = d.w; comp.h = d.h;
+        wires = wires.filter(w=>{
+          if(w.from===comp.id && w.fromPin >= d.outputs) return false;
+          if(w.to===comp.id && w.toPin >= d.inputs) return false;
+          return true;
+        });
+        activeMenu.el.remove(); activeMenu = null;
+        refresh();
+        setStatus('MCB diubah menjadi <b>'+(comp.type==='BREAKER2' ? '2P' : '1P')+'</b>.');
+      });
+      extras.push(tlb, tsel);
+    }
+    if(isBrk(comp.type)){
+      const lb = document.createElement('div'); lb.textContent = 'Arus MCB (rating)'; lb.style.cssText = 'font-size:10px;color:var(--silk-dim);margin-bottom:-3px;';
+      const rs = document.createElement('select'); rs.className = 'comp-menu-name';
+      RATINGS.forEach(v=>{ const o = document.createElement('option'); o.value = v; o.textContent = 'C'+v+' ('+v+' A)'; if(v===comp.rating) o.selected = true; rs.appendChild(o); });
+      rs.addEventListener('keydown', e=>e.stopPropagation());
+      rs.addEventListener('change', ()=>{
+        pushHistory(); comp.rating = +rs.value; simulate(); updateVisuals();
+        setStatus('Rating MCB diubah menjadi <b>'+comp.rating+' A</b> ('+(comp.rating*VOLT)+' VA).');
+      });
+      extras.push(lb, rs);
+    }
+    if(comp.type==='STRIP'){
+      const lb = document.createElement('div'); lb.textContent = 'Jumlah output'; lb.style.cssText = 'font-size:10px;color:var(--silk-dim);margin-bottom:-3px;';
+      const ns = document.createElement('select'); ns.className = 'comp-menu-name';
+      [2,3,4,5,6].forEach(v=>{ const o = document.createElement('option'); o.value = v; o.textContent = v+' lubang colokan'; if(v===(comp.n||2)) o.selected = true; ns.appendChild(o); });
+      ns.addEventListener('keydown', e=>e.stopPropagation());
+      ns.addEventListener('change', ()=>{
+        pushHistory(); comp.n = +ns.value; comp.h = stripH(comp.n);
+        wires = wires.filter(w=>!(w.from===comp.id && w.fromPin >= comp.n));
+        refresh(); setStatus('Stop kontak kabel sekarang punya <b>'+comp.n+'</b> output.');
+      });
+      extras.push(lb, ns);
+    }
+    if(comp.type==='SWITCH'){
+      const lb = document.createElement('div'); lb.textContent = 'Jenis sakelar'; lb.style.cssText = 'font-size:10px;color:var(--silk-dim);margin-bottom:-3px;';
+      const ks = document.createElement('select'); ks.className = 'comp-menu-name';
+      [[1,'Tunggal (1 tombol)'],[2,'Ganda (2 tombol)']].forEach(([v,t])=>{ const o = document.createElement('option'); o.value = v; o.textContent = t; if(v===(comp.keys||1)) o.selected = true; ks.appendChild(o); });
+      ks.addEventListener('keydown', e=>e.stopPropagation());
+      ks.addEventListener('change', ()=>{
+        pushHistory(); comp.keys = +ks.value; comp.w = comp.keys===2 ? 130 : 100;
+        wires = wires.filter(w=>!(w.from===comp.id && w.fromPin >= comp.keys));
+        refresh(); setStatus('Sakelar diubah menjadi <b>'+(comp.keys===2 ? 'ganda' : 'tunggal')+'</b>.');
+      });
+      extras.push(lb, ks);
+    }
+    if(comp.type==='LAMP'){
+      const lb = document.createElement('div'); lb.textContent = 'Daya lampu'; lb.style.cssText = 'font-size:10px;color:var(--silk-dim);margin-bottom:-3px;';
+      const ws = document.createElement('select'); ws.className = 'comp-menu-name';
+      LAMP_W.forEach(v=>{ const o = document.createElement('option'); o.value = v; o.textContent = v+' W'; if(v===(comp.watts||10)) o.selected = true; ws.appendChild(o); });
+      ws.addEventListener('keydown', e=>e.stopPropagation());
+      ws.addEventListener('change', ()=>{
+        pushHistory(); comp.watts = +ws.value; simulate(); updateVisuals();
+        setStatus('Daya lampu diubah menjadi <b>'+comp.watts+' W</b>.');
+      });
+      extras.push(lb, ws);
+    }
+    const mkLab = t=>{ const d = document.createElement('div'); d.textContent = t; d.style.cssText = 'font-size:10px;color:var(--silk-dim);margin-bottom:-3px;'; return d; };
+    const mkSel = (opts, cur, onChange)=>{
+      const sel = document.createElement('select'); sel.className = 'comp-menu-name';
+      opts.forEach(([v,t])=>{ const o = document.createElement('option'); o.value = v; o.textContent = t; if(v===cur) o.selected = true; sel.appendChild(o); });
+      sel.addEventListener('keydown', e=>e.stopPropagation());
+      sel.addEventListener('change', ()=>onChange(sel.value));
+      return sel;
+    };
+    if(comp.type==='SOLAR'){
+      extras.push(mkLab('Tegangan: 12V DC per panel (tetap)'));
+      extras.push(mkLab('Daya panel (Wp, maks 300)'), mkSel([10,20,30,50,80,100,150,200,250,300].map(v=>[v,v+' Wp']), Math.min(comp.wp||200,300), v=>{
+        pushHistory(); comp.wp = +v; simulate(); updateVisuals();
+        setStatus('Daya panel surya diubah menjadi <b>'+comp.wp+' Wp</b> (12V).');
+      }));
+      extras.push(mkLab('Cuaca / intensitas cahaya'), mkSel([[0,'Malam (0%)'],[1,'Mendung (40%)'],[2,'Cerah (100%)']], comp.weather==null?2:comp.weather, v=>{
+        pushHistory(); comp.weather = +v; simulate(); updateVisuals();
+        setStatus('Kondisi cahaya diubah.');
+      }));
+    }
+    if(comp.type==='MPPT'){
+      extras.push(mkLab('Tegangan sistem MPPT (V)'), mkSel([12,24,48].map(v=>[v,v+'V']), comp.sysV||12, v=>{
+        pushHistory(); comp.sysV = +v; simulate(); updateVisuals();
+        setStatus('Tegangan sistem MPPT diubah menjadi <b>'+comp.sysV+'V</b>. Array panel harus &ge; nilai ini, dan baterai harus diset ke tegangan yang sama.');
+      }));
+      extras.push(mkLab('Kapasitas MPPT (W)'), mkSel([200,300,500,800,1000,1500,2000,3000].map(v=>[v,v+' W']), comp.rating||500, v=>{
+        pushHistory(); comp.rating = +v; simulate(); updateVisuals();
+        setStatus('Kapasitas MPPT diubah menjadi <b>'+comp.rating+' W</b>.');
+      }));
+    }
+    if(comp.type==='BATTERY'){
+      extras.push(mkLab('Tegangan baterai (V)'), mkSel([12,24,48].map(v=>[v,v+'V']), comp.sysV||12, v=>{
+        pushHistory(); comp.sysV = +v; simulate(); updateVisuals();
+        setStatus('Tegangan baterai diubah menjadi <b>'+comp.sysV+'V</b>. Pastikan MPPT/Inverter Hybrid diset ke tegangan yang sama.');
+      }));
+      extras.push(mkLab('Kapasitas baterai (Wh)'), mkSel([200,500,1000,2000,3500,5000,10000].map(v=>[v,v+' Wh']), comp.capWh||1000, v=>{
+        pushHistory(); comp.capWh = +v; simulate(); updateVisuals();
+        setStatus('Kapasitas baterai diubah menjadi <b>'+comp.capWh+' Wh</b>.');
+      }));
+      const fullBtn = mkBtn('comp-menu-rotate','🔋 Isi penuh (100%)', ()=>{
+        pushHistory(); comp.soc = 100; simulate(); updateVisuals(); setStatus('Baterai diisi penuh (uji coba).');
+      });
+      const emptyBtn = mkBtn('comp-menu-rotate','Kosongkan (0%) (uji coba)', ()=>{
+        pushHistory(); comp.soc = 0; simulate(); updateVisuals(); setStatus('Baterai dikosongkan (uji coba).');
+      });
+      extras.push(fullBtn, emptyBtn);
+    }
+    if(comp.type==='INVERTER' || comp.type==='HYBRID'){
+      extras.push(mkLab('Daya maksimum inverter (W)'), mkSel([300,500,1000,1500,2000,3000,5000].map(v=>[v,v+' W']), comp.rating||1000, v=>{
+        pushHistory(); comp.rating = +v; simulate(); updateVisuals();
+        setStatus('Daya maksimum inverter diubah menjadi <b>'+comp.rating+' W</b>.');
+      }));
+    }
+    if(comp.type==='HYBRID'){
+      extras.push(mkLab('Daya cas dari grid (W)'), mkSel([100,200,300,500,800].map(v=>[v,v+' W']), comp.chargeW||300, v=>{
+        pushHistory(); comp.chargeW = +v; simulate(); updateVisuals();
+        setStatus('Daya pengisian baterai dari grid diubah menjadi <b>'+comp.chargeW+' W</b>.');
+      }));
+    }
+    const parts = [nameInput, ...extras, rotateBtn, deleteBtn, closeBtn];
+    parts.forEach(x=>menu.appendChild(x));
+    menu.addEventListener('pointerdown', e=>e.stopPropagation());
+    canvasSizer.appendChild(menu);
+    activeMenu = {el:menu, compId};
+  }
+
+  function buildDOM(){
+    canvas.querySelectorAll('.comp').forEach(el=>el.remove());
+    components.forEach(c=>canvas.appendChild(renderComponent(c)));
+    drawWires(); updateVisuals();
+  }
+
+  function renderComponent(comp){
+    const def = getDef(comp.type);
+    const el = document.createElement('div');
+    el.className = 'comp '+comp.type+(def.load ? ' load' : '');
+    el.style.left = comp.x+'px'; el.style.top = comp.y+'px';
+    el.style.width = comp.w+'px'; el.style.height = comp.h+'px';
+    if(comp.rotation) el.style.transform = 'rotate('+comp.rotation+'deg)';
+    el.dataset.id = comp.id;
+
+    let inner = '';
+    if(comp.type==='METER') inner = '<div class="m-warn">AWAS!!! MERUSAK SEGEL &amp; METER DIDENDA</div><div class="m-lcd"><small>SISA KWH</small><b>0.00</b></div><div class="m-eye"></div><i class="m-led l1" style="left:22px"></i><i class="m-led l2" style="left:50px"></i><i class="m-led l3" style="left:78px"></i><div class="m-ledtx">Status Kredit &nbsp;&nbsp; Tamper &nbsp;&nbsp; 1000 imp/kWh</div><div class="m-info"><div class="m-brand">Hexing</div><div>kWh Meter Fase Tunggal 2 Kawat</div><div>230V 5(60)A 50Hz · PRABAYAR</div><div class="va"></div><div class="rp"></div></div><div class="m-keys" title="Isi pulsa / atur daya">'+['1','2','3','4','5','6','7','8','9','←','0','↵'].map(k=>'<i>'+k+'</i>').join('')+'</div><div class="m-cover"></div><div class="m-scr"><i></i><i></i><i></i><i></i><i></i></div><div class="m-wire" style="top:245px;background:#e53935"></div><div class="m-wire" style="top:266px;background:#1e88e5"></div><div class="m-wire g" style="top:287px"></div><div class="m-mcb"><div class="m-lev"><i></i></div><b class="mr"></b><span class="ms"></span></div>';
+    else if(isBrk(comp.type)) inner = '<div class="b-scr">'+(comp.type==='BREAKER2'?'<i></i><i></i>':'<i></i>')+'</div><div class="b-brand">Schreder</div><div class="rate b-rate"></div><div class="b-sw"><div class="b-knob"></div></div><div class="b-txt">Schreder CE<div class="bstat"></div></div><div class="b-scr">'+(comp.type==='BREAKER2'?'<i></i><i></i>':'<i></i>')+'</div>';
+    else if(comp.type==='TDUS') inner = '<div class="t-stub h" style="left:0"></div><div class="t-stub h" style="right:0"></div><div class="t-stub v"></div><div class="t-box">T‑DUS<i class="t-scr" style="left:82px;top:16px"></i><i class="t-scr" style="left:24px;top:90px"></i></div>';
+    else if(comp.type==='SWITCH'){
+      const k = comp.keys||1;
+      inner = '<div class="k-bev"></div><i class="k-scr" style="left:8px"></i><i class="k-scr" style="right:8px"></i>';
+      for(let j=1;j<=k;j++) inner += '<div class="k-key" data-k="'+j+'" style="left:'+(k===1 ? 29 : (j===1 ? 21 : 67))+'px"></div>';
+      inner += '<div class="k-brand">SAKLAR</div>';
+    }
+    else if(comp.type==='SOLAR') inner = '<div class="sp-grid"></div><div class="sp-wthr" title="Klik untuk ganti cuaca">☀</div><div class="sp-info"><b class="sp-wp"></b></div>';
+else if(comp.type==='MPPT') inner = '<div class="nm">MPPT</div><div class="mp-led"></div><span class="sublabel mp-w"></span><span class="sublabel mp-arr"></span><span class="mp-cap" style="left:15%">SOLAR</span><span class="mp-cap" style="left:50%">BATERAI</span><span class="mp-cap" style="left:85%">BEBAN</span>';
+    else if(comp.type==='BATTERY') inner = '<div class="bt-cap"></div><div class="nm">BATERAI</div><div class="bt-bar"><div class="bt-fill"></div></div><div class="bt-pct"></div><div class="bt-sw">POWER</div><div class="bt-status"></div>';
+    else if(comp.type==='INVERTER') inner = '<div class="nm">INVERTER</div><svg class="iv-wave" viewBox="0 0 60 20"><path d="M2 10 Q10 0 18 10 T34 10 T50 10"/></svg><span class="sublabel iv-w"></span><div class="bstat iv-stat"></div>';
+    else if(comp.type==='HYBRID') inner = '<div class="zd-brand">ZAMDON<sup>&reg;</sup></div><svg class="zd-wave" viewBox="0 0 100 20"><path d="M2 10 Q12 0 22 10 T42 10 T62 10"/></svg><div class="zd-ind"><div class="zd-ind-title">Sumber Aktif</div><div class="zd-row hy-solar"><i class="g"></i>SURYA</div><div class="zd-row hy-batt"><i class="y"></i>BATERAI</div><div class="zd-row hy-grid"><i class="r"></i>GRID</div></div><div class="zd-panel"><div class="zd-lcd"></div><div class="zd-btns"><i></i><i></i><i></i><i></i></div></div><div class="zd-title">Toroidal Inverter Hybrid</div><span class="sublabel iv-w zd-info"></span><div class="bstat iv-stat zd-stat"></div><span class="mp-cap" style="left:10%;bottom:16px">AC IN</span><span class="mp-cap" style="left:35%;bottom:16px">SURYA</span><span class="mp-cap" style="left:58%;bottom:16px">BATERAI</span><span class="mp-cap" style="left:88%;bottom:16px">AC OUT</span>';
+    else if(comp.type==='ATS') inner = '<div class="b-scr"><i></i><i></i></div><div class="b-brand">ATS</div><div class="rate b-rate"></div><div class="b-sw"><div class="b-knob"></div></div><div class="b-txt">Auto Transfer<div class="bstat"></div></div><div class="ats-src"><i class="src-a">A</i><i class="src-b">B</i></div>';
+    else if(comp.type==='TV') inner = '<div class="tv-screen"><div class="tv-glare"></div><div class="tv-brand">POLYTRON</div></div><div class="tv-neck"></div><div class="tv-stand"></div>';
+    else if(comp.type==='FRIDGE') inner = '<div class="fr-top"><div class="fr-brand">POLYTRON</div></div><div class="fr-strip"></div><div class="fr-bottom"></div>';
+    else if(comp.type==='COOKER') inner = `<svg class="rc2-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 717 654"> <defs> <linearGradient id="steel" x1="0" x2="1"> <stop offset="0" stop-color="#aeb1b3"/> <stop offset="0.18" stop-color="#e0e1e1"/> <stop offset="0.5" stop-color="#bfc1c2"/> <stop offset="0.82" stop-color="#d9dadb"/> <stop offset="1" stop-color="#8f9294"/> </linearGradient> <linearGradient id="steelDark" x1="0" x2="1"> <stop offset="0" stop-color="#6e7173"/> <stop offset="0.5" stop-color="#c8c9ca"/> <stop offset="1" stop-color="#737678"/> </linearGradient> <linearGradient id="black" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="#08090a"/> <stop offset="0.55" stop-color="#1d1f20"/> <stop offset="1" stop-color="#050606"/> </linearGradient> <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="#111315"/> <stop offset="1" stop-color="#050607"/> </linearGradient> <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%"> <feGaussianBlur stdDeviation="9"/> </filter> <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"> <feGaussianBlur stdDeviation="2"/> </filter> </defs> <ellipse cx="363" cy="621" rx="286" ry="20" fill="#000" opacity=".18" filter="url(#shadow)"/> <path d="M58 510 C63 562 82 593 119 611 C176 637 540 638 603 610 C639 594 656 559 660 510 Z" fill="url(#black)" stroke="#050505" stroke-width="3"/> <path d="M99 590 Q105 614 124 616 L150 616 Q160 610 157 596 L151 581 L103 581 Z" fill="#0a0b0c"/> <path d="M554 590 Q559 615 579 616 L605 616 Q615 609 611 595 L604 580 L559 581 Z" fill="#0a0b0c"/> <path d="M56 159 C56 132 83 111 119 105 C252 82 466 82 599 104 C635 110 660 132 660 159 L660 503 C660 541 632 567 593 575 C464 601 251 601 123 575 C84 567 56 541 56 503 Z" fill="url(#steel)" stroke="#5f6264" stroke-width="3"/> <path d="M86 171 L86 510" stroke="#fff" stroke-opacity=".22" stroke-width="7"/> <path d="M113 163 L113 531" stroke="#666" stroke-opacity=".12" stroke-width="5"/> <path d="M620 164 L620 532" stroke="#fff" stroke-opacity=".16" stroke-width="6"/> <path d="M641 176 L641 506" stroke="#666" stroke-opacity=".13" stroke-width="5"/> <ellipse cx="358" cy="120" rx="306" ry="67" fill="#080909" stroke="#454749" stroke-width="3"/> <path d="M55 119 C57 82 90 61 132 54 C265 31 463 31 592 53 C635 60 661 83 663 119 C634 143 592 153 551 158 C431 173 282 173 165 158 C112 151 73 140 55 119Z" fill="url(#black)" stroke="#2f3132" stroke-width="3"/> <ellipse cx="358" cy="117" rx="296" ry="58" fill="#0b0c0d"/> <ellipse cx="358" cy="116" rx="292" ry="54" fill="#090a0b"/> <ellipse cx="300" cy="125" rx="64" ry="12" fill="#aaa" opacity=".65"/> <ellipse cx="300" cy="122" rx="58" ry="8" fill="#e2e2e2" opacity=".18"/> <rect x="407" y="79" width="91" height="5" rx="3" fill="#1f2021"/> <rect x="410" y="80" width="83" height="2" rx="1" fill="#000"/> <path d="M57 153 C111 176 219 183 359 184 C500 184 608 176 659 153" fill="none" stroke="#17191a" stroke-width="8"/> <path d="M62 160 C166 184 548 189 655 159" fill="none" stroke="#4c4f50" stroke-width="3" opacity=".65"/> <path d="M652 183 Q693 181 708 205 Q717 221 708 239 L690 251 Q679 256 671 247 L681 229 Q688 220 679 214 L653 210 Z" fill="url(#black)" stroke="#151718" stroke-width="4"/> <path d="M65 187 Q29 184 13 207 Q4 222 13 240 L31 251 Q42 256 49 247 L39 229 Q32 220 41 214 L65 210 Z" fill="url(#black)" stroke="#151718" stroke-width="4"/> <rect x="119" y="216" width="232" height="320" rx="20" fill="#0d0f10" stroke="#4b4e50" stroke-width="3"/> <rect x="127" y="224" width="216" height="304" rx="15" fill="url(#screen)"/> <text x="235" y="263" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#f2f2f2" letter-spacing=".8">POLYTRON</text> <rect x="183" y="276" width="106" height="57" rx="5" fill="#111416"/> <text class="rc2-disp" x="236" y="316" text-anchor="middle" font-family="monospace" font-size="34" fill="#dfe2e3">0:33</text> <g font-family="Arial, Helvetica, sans-serif" font-size="7.5" text-anchor="middle" fill="#bfc2c3"> <circle cx="176" cy="357" r="7" fill="#e8e9e9"/><text x="176" y="379">Low Carb</text> <circle cx="235" cy="357" r="7" fill="#e8e9e9"/><text x="235" y="379">Multi Push</text> <circle cx="294" cy="357" r="7" fill="#e8e9e9"/><text x="294" y="379">Nasi Merah</text> <circle cx="176" cy="402" r="7" fill="#e8e9e9"/><text x="176" y="424">Kukus</text> <circle cx="235" cy="402" r="7" fill="#e8e9e9"/><text x="235" y="424">Bubur</text> <circle cx="294" cy="402" r="7" fill="#e8e9e9"/><text x="294" y="424">Keep Warm</text> </g> <g fill="#111314" stroke="#737678" stroke-width="2"> <circle cx="176" cy="468" r="17"/> <circle class="rc2-start" cx="235" cy="468" r="21"/> <circle cx="294" cy="468" r="17"/> </g> <g font-family="Arial, Helvetica, sans-serif" font-size="8.5" text-anchor="middle" fill="#f0f0f0"> <text x="176" y="471">TIMER</text> <text x="235" y="464">START</text><text x="235" y="475">CANCEL</text> <text x="294" y="471">MENU</text> </g> <path d="M72 512 C162 550 548 554 644 512" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="3"/> <path d="M82 537 C184 573 534 576 635 536" fill="none" stroke="#777a7b" stroke-opacity=".2" stroke-width="2"/> </svg>`;
+    else if(comp.type==='BLENDER') inner = '<div class="bl-jar"><div class="bl-lid"></div><div class="bl-handle"></div><i class="bl-blade"></i></div><div class="bl-base"><div class="bl-brand">P<span>OLYTRON</span></div><div class="bl-knob"><span>PUSH<br>TEKAN</span></div><div class="bl-btns"><i></i><i></i><i></i></div></div>';
+    else if(comp.type==='WASHER') inner = '<div class="wa-top"><div class="wa-brand">POLYTRON</div><div class="wa-dial"></div><div class="wa-disp"></div></div><div class="wa-drum"><div class="wa-ring"><div class="wa-glass"><i></i></div></div></div><div class="wa-lockled"></div>';
+    else if(comp.type==='LAMP') inner = '<svg class="l-svg" viewBox="0 0 100 116"><rect x="0" y="85" width="26" height="6" fill="#d32f2f"/><rect x="74" y="85" width="26" height="6" fill="#222"/><path d="M28 78 Q28 74 34 74 H66 Q72 74 72 78 L78 100 Q79 108 70 110 H30 Q21 108 22 100 Z" fill="#f1f1ee" stroke="#c8c8c2"/><rect x="20" y="83" width="9" height="9" fill="#b8963d"/><rect x="71" y="83" width="9" height="9" fill="#b8963d"/><ellipse cx="50" cy="77" rx="19" ry="5" fill="#2a2a2a"/><rect x="38" y="60" width="24" height="16" fill="#a3a9ad"/><path d="M38 64H62M38 68H62M38 72H62" stroke="#6d7377" stroke-width="1.5"/><path class="gl" d="M40 60 C40 50 26 46 26 30 A24 24 0 1 1 74 30 C74 46 60 50 60 60 Z"/><path class="fil" d="M44 58V36M56 58V36M44 36L47 29L50 36L53 29L56 36"/></svg><div class="l-w"><b class="lw"></b></div>';
+    else if(comp.type==='STRIP'){
+      inner = '<div class="x-cable"></div><div class="x-swbox"><div class="x-rock">—</div></div>';
+      for(let k=0;k<(comp.n||2);k++) inner += '<div class="x-sock" style="top:'+(63+k*76)+'px" data-k="'+k+'"><i class="x-h" style="left:31px;top:20px"></i><i class="x-h" style="left:31px;top:41px"></i><i class="x-gnd" style="left:32px;top:31px"></i><i class="x-c" style="left:6px;top:31px"></i><i class="x-c" style="right:6px;top:31px"></i><div class="x-plug"><i></i></div></div>';
+    }
+    else if(comp.type==='ARDE') inner = '<div class="a-wire"></div><div class="a-rod"></div><div class="a-cap"></div><div class="a-clamp"><i class="a-screw"></i></div><div class="a-soil">ARDE</div>';
+    else if(comp.type==='SOCKET') inner = '<div class="s-plate"></div><div class="s-well"><i class="s-clip" style="top:2px"></i><i class="s-clip" style="bottom:2px"></i><i class="s-hole" style="left:18px"></i><i class="s-hole" style="left:43px"></i><i class="s-gnd"></i><div class="s-plug"><i></i></div></div>';
+    else if(comp.type==='SWITCH') inner = '<div class="lever"><i></i></div><div class="nm">SAKLAR</div>';
+    else inner = '<div class="ico">'+def.icon+'</div><div class="nm">'+def.label+'</div><span class="sublabel">'+def.watts+' W</span>';
+    el.innerHTML = inner;
+
+    const addPins = (dir, list)=>{
+      list.forEach((t,i)=>{
+        const yPct = (def.pinY && dir==='out') ? def.pinY[i]*100 : (i+1)*100/(list.length+1);
+        const p = document.createElement('div');
+        p.className = 'pin pin-'+dir+' '+t;
+        const fq = pinFrac(def,dir==='bi'?'in':dir,i,comp);
+        if(fq){ p.style.left = fq[0]*100+'%'; p.style.top = fq[1]*100+'%'; } else if(def.pinX){ p.style.left = def.pinX[i]*100+'%'; p.style.top = dir==='in' ? '0%' : '100%'; } else { p.style.left = dir==='in' ? '0%' : '100%'; p.style.top = yPct+'%'; }
+        p.dataset.comp = comp.id; p.dataset.pin = i; p.dataset.dir = dir; p.dataset.t = t;
+        el.appendChild(p);
+        if(def.strip) return;
+        const lbl = document.createElement('div');
+        lbl.className = 'pin-label '+t; const ov = (dir==='in'&&def.labelIn&&def.labelIn[i]) || (dir==='out'&&def.labelOut&&def.labelOut[i]); lbl.textContent = ov || ((t==='P') ? 'PLUG' : (t==='DP') ? 'D+' : (t==='DN') ? 'D-' : t);
+        if(def.sw){ lbl.textContent = dir==='in' ? 'IN' : ((comp.keys||1)===2 ? 'OUT'+(i+1) : 'OUT'); if(dir==='in') lbl.classList.add('in-mark'); } lbl.style.top = yPct+'%';
+        if(fq){
+          const q = fq;
+          if(q[1]===0){ lbl.style.left = q[0]*100+'%'; lbl.style.transform = 'translateX(-50%)'; lbl.style.top = '-16px'; }
+          else if(q[0]===0){ lbl.style.left = '10px'; lbl.style.top = q[1]*100+'%'; }
+          else if(q[0]===1){ lbl.style.right = '10px'; lbl.style.top = q[1]*100+'%'; }
+          else { lbl.style.left = q[0]*100+'%'; lbl.style.transform = 'translateX(-50%)'; lbl.style.top = (comp.h+4)+'px'; }
+        } else if(def.pinX){ lbl.style.left = def.pinX[i]*100+'%'; lbl.style.transform = 'translateX(-50%)'; lbl.style.top = dir==='in' ? '-16px' : (comp.h+4)+'px'; } else if(dir==='in') lbl.style.left = '8px'; else lbl.style.right = '8px';
+        el.appendChild(lbl);
+      });
+    };
+    if(def.bi) addPins('bi', def.ins); else { addPins('in', def.ins); addPins('out', def.strip ? def.outs.slice(0, comp.n||2) : def.sw ? def.outs.slice(0, comp.keys||1) : def.outs); }
+
+
+    const mcbEl = el.querySelector('.m-mcb'), keys = el.querySelector('.m-keys');
+    if(mcbEl){
+      mcbEl.addEventListener('pointerdown', e=>{ e.stopPropagation(); e.preventDefault(); });
+      mcbEl.addEventListener('click', e=>{
+        e.stopPropagation(); pushHistory();
+        comp.state = comp.state ? 0 : 1;
+        if(comp.state) comp.tripped = 0;
+        simulate(); updateVisuals();
+      });
+      keys.addEventListener('pointerdown', e=>{ e.stopPropagation(); e.preventDefault(); });
+      keys.addEventListener('click', e=>{ e.stopPropagation(); openComponentMenu(comp.id); });
+    }
+    el.querySelectorAll('.k-key').forEach(kk=>{
+      kk.addEventListener('pointerdown', e=>{ e.stopPropagation(); e.preventDefault(); });
+      kk.addEventListener('click', e=>{
+        e.stopPropagation(); pushHistory();
+        if(+kk.dataset.k===1) comp.state = comp.state ? 0 : 1; else comp.state2 = comp.state2 ? 0 : 1;
+        simulate(); updateVisuals();
+      });
+    });
+    const spw = el.querySelector('.sp-wthr');
+    if(spw){
+      spw.addEventListener('pointerdown', e=>{ e.stopPropagation(); e.preventDefault(); });
+      spw.addEventListener('click', e=>{
+        e.stopPropagation(); pushHistory();
+        comp.weather = ((comp.weather==null?2:comp.weather)+1)%3;
+        simulate(); updateVisuals();
+      });
+    }
+    const xr = el.querySelector('.x-rock');
+    if(xr){
+      xr.addEventListener('pointerdown', e=>{ e.stopPropagation(); e.preventDefault(); });
+      xr.addEventListener('click', e=>{ e.stopPropagation(); pushHistory(); comp.state = comp.state ? 0 : 1; simulate(); updateVisuals(); });
+    }
+    const renameBtn = document.createElement('div');
+    renameBtn.className = 'comp-rename-btn';
+    renameBtn.textContent = '\u270E';
+    renameBtn.title = 'Beri nama label / putar komponen';
+    if(comp.rotation) renameBtn.style.transform = 'rotate('+(-comp.rotation)+'deg)';
+    renameBtn.addEventListener('pointerdown', e=>{ e.stopPropagation(); e.preventDefault(); });
+    renameBtn.addEventListener('click', e=>{ e.stopPropagation(); openComponentMenu(comp.id); });
+    el.appendChild(renameBtn);
+
+    if(comp.name){
+      const tag = document.createElement('div');
+      tag.className = 'comp-name-tag'; tag.textContent = comp.name;
+      el.appendChild(tag);
+    }
+    if(selection && selection.type==='comp' && selection.id===comp.id) el.classList.add('selected');
+    return el;
+  }
+
+  function wirePath(p1,d1,p2,d2){
+    const V = {r:[1,0], l:[-1,0], d:[0,1], u:[0,-1]};
+    const k = Math.max(40, Math.hypot(p2.x-p1.x, p2.y-p1.y)/3);
+    const c1 = d1 ? [p1.x+V[d1][0]*k, p1.y+V[d1][1]*k] : [p1.x,p1.y];
+    const c2 = d2 ? [p2.x+V[d2][0]*k, p2.y+V[d2][1]*k] : [p2.x,p2.y];
+    return `M ${p1.x},${p1.y} C ${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${p2.x},${p2.y}`;
+  }
+  function drawWires(){
+    svg.innerHTML = '';
+    const hitW = 14 / (zoomScale || 1);
+    for(const w of wires){
+      const src = components.find(c=>c.id===w.from), dst = components.find(c=>c.id===w.to);
+      if(!src || !dst) continue;
+      const t = getDef(src.type).outs[w.fromPin], on = src.outputs[w.fromPin];
+      const d = wirePath(pinCoord(src,'out',w.fromPin), pinDir(src,'out',w.fromPin), pinCoord(dst,'in',w.toPin), pinDir(dst,'in',w.toPin));
+      const isSel = !!(selection && selection.type==='wire' && selection.id===w.id);
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', d);
+      path.setAttribute('class','wire'+(isSel ? ' selected':''));
+      path.setAttribute('fill','none');
+      path.setAttribute('stroke', t==='L' ? 'var(--L)' : t==='N' ? 'var(--N)' : t==='P' ? '#d5dbdf' : t==='DP' ? 'var(--DP)' : t==='DN' ? 'var(--DN)' : '#2fa552');
+      path.setAttribute('stroke-opacity', on ? '1' : '.4');
+      path.setAttribute('stroke-width', on ? '3.2' : '2');
+      path.style.pointerEvents = 'none';
+      svg.appendChild(path);
+
+      // invisible wide hit-area so wires stay easy to click/select even when zoomed out
+      const hit = document.createElementNS('http://www.w3.org/2000/svg','path');
+      hit.setAttribute('d', d);
+      hit.setAttribute('class','wire-hit'+(isSel ? ' selected':''));
+      hit.setAttribute('fill','none');
+      hit.setAttribute('stroke','#000');
+      hit.setAttribute('stroke-opacity', isSel ? '.12' : '0');
+      hit.setAttribute('stroke-width', String(hitW));
+      hit.setAttribute('stroke-linecap','round');
+      hit.style.pointerEvents = 'stroke';
+      hit.style.cursor = 'pointer';
+      hit.addEventListener('pointerenter', ()=>{ if(!(selection && selection.type==='wire' && selection.id===w.id)){ hit.setAttribute('stroke-opacity','.12'); path.setAttribute('stroke-width', on ? '4.4' : '3.2'); } });
+      hit.addEventListener('pointerleave', ()=>{ if(!(selection && selection.type==='wire' && selection.id===w.id)){ hit.setAttribute('stroke-opacity','0'); path.setAttribute('stroke-width', on ? '3.2' : '2'); } });
+      hit.addEventListener('pointerdown', e=>{ e.stopPropagation(); selection = {type:'wire', id:w.id}; drawWires(); });
+      svg.appendChild(hit);
+
+      if(t==='G'){
+        const st = document.createElementNS('http://www.w3.org/2000/svg','path');
+        st.setAttribute('d', d); st.setAttribute('fill','none'); st.setAttribute('stroke','#e6e03a');
+        st.setAttribute('stroke-width', on ? '3.2' : '2'); st.setAttribute('stroke-dasharray','7,7');
+        st.setAttribute('stroke-opacity', on ? '1' : '.4'); st.style.pointerEvents = 'none';
+        svg.appendChild(st);
+      }
+    }
+    if(wireDraft){
+      const src = components.find(c=>c.id===wireDraft.compId);
+      if(src){
+        const p1 = pinCoord(src,'out',wireDraft.pin);
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d', wirePath(p1, pinDir(src,'out',wireDraft.pin), wireDraft.mouse || p1, null));
+        path.setAttribute('fill','none'); path.setAttribute('stroke','var(--warn)');
+        path.setAttribute('stroke-width','2'); path.setAttribute('stroke-dasharray','5,4');
+        svg.appendChild(path);
+      }
+    }
+  }
+
+  function updateVisuals(){
+    for(const comp of components){
+      const el = canvas.querySelector('.comp[data-id="'+comp.id+'"]');
+      if(!el) continue;
+      el.classList.toggle('selected', !!(selection && selection.type==='comp' && selection.id===comp.id));
+      if(comp.type==='METER'){
+        const w = comp._w||0, cr = comp.credit==null ? 64.95 : comp.credit, va = comp.va||900;
+        el.querySelector('.m-lcd b').textContent = cr.toFixed(2);
+        el.querySelector('.va').textContent = va+' VA · '+Math.round(w)+' W';
+        el.querySelector('.rp').textContent = 'Sisa ≈ Rp '+Math.round(cr*TARIF).toLocaleString('id-ID');
+        el.querySelector('.l1').className = 'm-led l1 '+(cr<=0 ? 'empty' : cr<=5 ? 'low' : 'ok');
+        el.querySelector('.l3').className = 'm-led l3'+((w>0 && comp.state && cr>0) ? ' ok blink' : '');
+        const mm = el.querySelector('.m-mcb');
+        mm.classList.toggle('on', !!comp.state);
+        mm.classList.toggle('trip', !!comp.tripped && !comp.state);
+        el.querySelector('.mr').textContent = 'MCB '+mcbA(comp)+' A';
+        el.querySelector('.ms').textContent = (comp.tripped && !comp.state) ? 'TRIP!' : (comp.state ? 'ON · '+(w/VOLT).toFixed(1)+' A' : 'OFF');
+      }
+      if(isBrk(comp.type)){
+        el.classList.toggle('on', !!comp.state);
+        el.classList.toggle('trip', !!comp.tripped && !comp.state);
+        el.querySelector('.rate').textContent = 'C'+comp.rating;
+        el.querySelector('.bstat').textContent = (comp.tripped && !comp.state) ? 'TRIP!' : (comp.state ? 'ON · '+(comp._amps||0).toFixed(1)+' A' : 'OFF');
+        if(comp.type==='ATS'){
+          el.querySelector('.src-a').classList.toggle('active', comp._srcUsed==='A');
+          el.querySelector('.src-b').classList.toggle('active', comp._srcUsed==='B');
+          if(comp.state && !comp.tripped) el.querySelector('.bstat').textContent = 'Sumber '+(comp._srcUsed==='NONE'?'-':comp._srcUsed)+' · '+(comp._amps||0).toFixed(1)+' A';
+        }
+      }
+      if(comp.type==='SOLAR'){
+        el.querySelector('.sp-wp').textContent = (comp.voltage||12)+'V · '+(comp.wp||200)+' Wp · '+Math.round(comp._prodW||0)+' W';
+        el.querySelector('.sp-wthr').textContent = comp.weather===2?'☀':comp.weather===1?'⛅':'🌙';
+      }
+      if(comp.type==='MPPT'){
+        el.classList.toggle('chg', !!comp.outputs[0]);
+        el.querySelector('.mp-w').textContent = (comp.sysV||12)+'V · '+(comp.rating||500)+'W · isi '+Math.round(comp._chargeW||0)+'W';
+        const arrEl = el.querySelector('.mp-arr');
+        arrEl.textContent = 'Array '+(comp._arrayV||0)+'V · '+Math.round(comp._arrayW||0)+'W ('+(comp._arrayN||0)+' pnl)'+(comp._voltWarn?' ⚠ volt kurang':(comp._battMismatch?' ⚠ beda volt baterai':''));
+        arrEl.classList.toggle('warn', !!(comp._voltWarn || comp._battMismatch));
+      }
+      if(comp.type==='BATTERY'){
+        const soc = comp.soc==null?50:comp.soc;
+        const fill = el.querySelector('.bt-fill'); fill.style.width = soc+'%';
+        fill.style.background = soc<20 ? '#e53935' : soc<50 ? '#ffb020' : '#3ddc84';
+        el.querySelector('.bt-pct').textContent = (comp.sysV||12)+'V · '+Math.round(soc)+'%';
+        el.classList.toggle('on', !!comp.state);
+        const chg = (comp._chargeReq||0)>0, dis = (comp._drawW||0)>0;
+        const mppts = components.filter(cc=>cc.type==='MPPT' && cc._battMismatch && wires.some(w=>w.from===cc.id && w.to===comp.id));
+        el.querySelector('.bt-status').textContent = mppts.length ? '⚠ Volt beda dgn MPPT' : (!comp.state ? 'OFF' : (chg&&dis ? 'Cas & pakai' : chg ? 'Mengisi ⚡' : dis ? 'Memasok' : 'Standby'));
+      }
+      if(comp.type==='INVERTER' || comp.type==='HYBRID'){
+        el.classList.toggle('on', !!comp.state);
+        el.classList.toggle('trip', !!comp.tripped && !comp.state);
+        el.querySelector('.iv-w').textContent = (comp.rating||1000)+' W · '+Math.round(comp._outW||0)+' W';
+        el.querySelector('.iv-stat').textContent = (comp.tripped && !comp.state) ? 'OVERLOAD!' : (comp.state ? (comp.outputs[0] ? 'ON' : 'NO SUMBER') : 'OFF');
+        if(comp.type==='HYBRID'){
+          el.querySelector('.hy-solar').classList.toggle('active', comp._srcUsed==='SOLAR');
+          el.querySelector('.hy-batt').classList.toggle('active', comp._srcUsed==='BATT');
+          el.querySelector('.hy-grid').classList.toggle('active', comp._srcUsed==='GRID');
+        }
+      }
+      if(comp.type==='SWITCH') el.querySelectorAll('.k-key').forEach(k=>{ const on = (+k.dataset.k===1) ? comp.state : comp.state2; k.classList.toggle('on', !!on); k.textContent = on ? 'I' : 'O'; });
+      if(comp.type==='SOCKET'){ el.classList.toggle('on', !!comp.outputs[0]); const sw = el.querySelector('.s-well'); if(sw) sw.classList.toggle('plugged', wires.some(w=>w.from===comp.id && w.fromPin===0)); }
+      if(comp.type==='LAMP') el.querySelector('.lw').textContent = (comp.watts||10)+' W';
+      if(comp.type==='STRIP'){
+        el.classList.toggle('live', !!comp.outputs[0]);
+        const r = el.querySelector('.x-rock'); if(r) r.textContent = comp.state ? '—' : '○';
+        el.querySelectorAll('.x-sock').forEach(sk=>{ sk.classList.toggle('plugged', wires.some(w=>w.from===comp.id && w.fromPin===+sk.dataset.k)); });
+      }
+      if(getDef(comp.type).load) el.classList.toggle('run', !!comp._run);
+      el.querySelectorAll('.pin').forEach(p=>{
+        const i = +p.dataset.pin; let v;
+        if(p.dataset.dir==='out' || p.dataset.dir==='bi') v = comp.outputs[i];
+        else { const w = inWire(comp,i), s = w && components.find(c=>c.id===w.from); v = s ? s.outputs[w.fromPin] : 0; }
+        p.classList.toggle('hi', !!v);
+      });
+    }
+    drawWires();
+  }
+
+  function runFrame(){
+    components.forEach(c=>{
+      if(c.type==='METER' && c.state && c.credit>0){
+        const was = c.credit;
+        c.credit = Math.max(0, c.credit - ((c._w||0)/1000)*(TICK_MS/1000*timeScale)/3600);
+        if(c.credit===0){
+          simulate();
+          setStatus('<span class="bad">Pulsa habis!</span> Aliran listrik terputus. Isi pulsa lewat ikon ✎ atau keypad pada kWh Meter.');
+        } else if(was>5 && c.credit<=5) setStatus('<span class="bad">Pulsa hampir habis</span> (sisa ≤ 5 kWh). Segera isi pulsa.');
+      }
+      if(c.type==='BATTERY'){
+        const dtH = (TICK_MS/1000*timeScale)/3600, capWh = c.capWh||1000;
+        const net = (c._chargeReq||0) - (c._drawW||0);
+        let soc = (c.soc==null?50:c.soc) + (net*dtH/capWh)*100;
+        c.soc = Math.max(0, Math.min(100, soc));
+      }
+    });
+    updateVisuals();
+  }
+
+  // ---------- interaksi ----------
+  document.querySelectorAll('.palette-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.palette-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const t = btn.dataset.type;
+      placementType = (t==='__select') ? null : t;
+      setStatus(placementType
+        ? 'Klik area kerja untuk menempatkan <b>'+getDef(placementType).label+'</b>. Tekan Esc untuk kembali memilih.'
+        : 'Mode pilih/geser aktif. Klik komponen untuk memilih atau menggesernya.');
+    });
+  });
+
+  function toCanvasCoords(cx, cy){
+    const r = canvas.getBoundingClientRect();
+    return {x:(cx-r.left)/zoomScale, y:(cy-r.top)/zoomScale};
+  }
+
+  canvasWrap.addEventListener('pointerdown', e=>{
+    if(activeMenu && !e.target.closest('.comp-menu')) closeComponentMenu();
+    if(e.pointerType==='touch'){
+      if(e.isPrimary){ activePointers.clear(); pinchState = null; }
+      activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(activePointers.size===2){
+        const pts = Array.from(activePointers.values());
+        pinchState = {initialDist: Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y)||1, initialScale: zoomScale};
+        dragState = null; wireDraft = null; placePending = null;
+        return;
+      }
+      if(activePointers.size>2) return;
+    }
+    const pinEl = e.target.closest('.pin'), compEl = e.target.closest('.comp');
+    const pos = toCanvasCoords(e.clientX, e.clientY);
+
+    if(pinEl){
+      e.preventDefault();
+      const compId = pinEl.dataset.comp, pin = +pinEl.dataset.pin, dir = pinEl.dataset.dir, t = pinEl.dataset.t;
+      if(dir==='out' || dir==='bi'){
+        const oc = components.find(c=>c.id===compId), od = oc && getDef(oc.type);
+        if(od && od.singleOut && wires.some(w=>w.from===compId && w.fromPin===pin)){
+          setStatus('<span class="bad">Output sudah terpakai.</span> '+(oc.type==='SOCKET' ? 'Stop kontak hanya bisa disambung ke satu alat. Untuk banyak alat, gunakan stop kontak kabel.' : 'Setiap output stop kontak kabel hanya untuk satu alat.'));
+          return;
+        }
+      }
+      if(!wireDraft){
+        wireDraft = {compId, pin, dir, t, mouse:pos};
+        try{ pinEl.setPointerCapture(e.pointerId); }catch(err){}
+      } else {
+        const A = wireDraft, B = {compId, pin, dir, t};
+        if(A.compId === B.compId){
+          wireDraft = {compId, pin, dir, t, mouse:pos};
+        } else if(A.t !== B.t && !(isDCPin(A.t) && isDCPin(B.t))){
+          setStatus('<span class="bad">Salah sambung!</span> Fase (L) hanya ke pin L, netral (N) ke pin N, ground (G) ke pin G, kabel PLUG ke pin PLUG, D+ hanya ke D+, D- hanya ke D-.');
+          wireDraft = {compId, pin, dir, t, mouse:pos};
+        } else {
+          let from, to, ok = true;
+          if(A.dir==='out' && B.dir==='out') ok = false;
+          else if(A.dir==='in' && B.dir==='in') ok = false;
+          else if(A.dir==='out') { from = A; to = B; }
+          else if(B.dir==='out') { from = B; to = A; }
+          else if(A.dir==='bi' && B.dir==='in') { from = A; to = B; }
+          else if(B.dir==='bi' && A.dir==='in') { from = B; to = A; }
+          else { from = A; to = B; } // both bi
+          if(!ok){
+            setStatus('<span class="bad">Tidak bisa disambung.</span> Sambungkan pin keluaran ke pin masukan, bukan sesama pin keluaran atau sesama pin masukan.');
+            wireDraft = {compId, pin, dir, t, mouse:pos};
+          } else {
+            pushHistory();
+            if(to.dir !== 'bi') wires = wires.filter(w=>!(w.to===to.compId && w.toPin===to.pin));
+            wires.push({id:'w'+(idCounter++), from:from.compId, fromPin:from.pin, to:to.compId, toPin:to.pin});
+            wireDraft = null; simulate(); updateVisuals();
+            const fromC = components.find(cc=>cc.id===from.compId), toC = components.find(cc=>cc.id===to.compId);
+            if(fromC && toC && fromC.type==='SOLAR' && toC.type==='SOLAR'){
+              const rel = (from.t===to.t) ? 'PARALEL (daya bertambah, tegangan tetap 12V)' : 'SERI (tegangan bertambah, daya tetap)';
+              setStatus('Panel surya disambung <b>'+rel+'</b>.');
+            } else setStatus('Kabel tersambung.');
+          }
+        }
+      }
+      drawWires();
+      return;
+    }
+
+    if(compEl){
+      e.preventDefault();
+      const compId = compEl.dataset.id, comp = components.find(c=>c.id===compId);
+      selection = {type:'comp', id:compId};
+      dragState = {compId, startX:e.clientX, startY:e.clientY, origX:comp.x, origY:comp.y, moved:false, pointerId:e.pointerId, preSnapshot:snapshot()};
+      try{ compEl.setPointerCapture(e.pointerId); }catch(err){}
+      updateVisuals();
+      return;
+    }
+
+    if(placementType){
+      placePending = {canvasX:pos.x, canvasY:pos.y, clientX:e.clientX, clientY:e.clientY, pointerId:e.pointerId};
+      return;
+    }
+    selection = null; wireDraft = null; drawWires(); updateVisuals();
+  });
+
+  window.addEventListener('pointermove', e=>{
+    if(e.pointerType==='touch' && activePointers.has(e.pointerId)){
+      activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(pinchState && activePointers.size===2){
+        const pts = Array.from(activePointers.values());
+        const dist = Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+        zoomAt(pinchState.initialScale*(dist/pinchState.initialDist), (pts[0].x+pts[1].x)/2, (pts[0].y+pts[1].y)/2);
+        return;
+      }
+    }
+    const pos = toCanvasCoords(e.clientX, e.clientY);
+    if(placePending && e.pointerId===placePending.pointerId){
+      if(Math.hypot(e.clientX-placePending.clientX, e.clientY-placePending.clientY) > TAP_MOVE_THRESHOLD) placePending = null;
+    }
+    if(wireDraft){ wireDraft.mouse = pos; drawWires(); }
+    if(dragState){
+      const dx = (e.clientX-dragState.startX)/zoomScale, dy = (e.clientY-dragState.startY)/zoomScale;
+      if(Math.abs(dx)>3 || Math.abs(dy)>3) dragState.moved = true;
+      const comp = components.find(c=>c.id===dragState.compId);
+      comp.x = Math.max(0, dragState.origX+dx); comp.y = Math.max(0, dragState.origY+dy);
+      const el = canvas.querySelector('.comp[data-id="'+comp.id+'"]');
+      if(el){ el.style.left = comp.x+'px'; el.style.top = comp.y+'px'; }
+      drawWires();
+    }
+  });
+
+  function releaseTouchPointer(id){
+    activePointers.delete(id);
+    if(activePointers.size<2) pinchState = null;
+  }
+  function resetTouchState(){ activePointers.clear(); pinchState = null; }
+  window.addEventListener('blur', resetTouchState);
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden) resetTouchState(); });
+  function commitPlacement(){
+    if(!placePending || !placementType){ placePending = null; return; }
+    const def = getDef(placementType), pos = {x:placePending.canvasX, y:placePending.canvasY};
+    placePending = null;
+    pushHistory();
+    const nc = newComponent(placementType, pos.x-def.w/2, pos.y-def.h/2);
+    components.push(nc);
+    placementType = null;
+    document.querySelectorAll('.palette-btn').forEach(b=>b.classList.remove('active'));
+    const selBtn = document.querySelector('.palette-btn[data-type="__select"]');
+    if(selBtn) selBtn.classList.add('active');
+    selection = {type:'comp', id:nc.id};
+    refresh();
+    setStatus('<b>'+def.label+'</b> ditempatkan. Mode pilih/geser aktif. Pilih komponen lagi di palet untuk menambah.');
+  }
+
+  window.addEventListener('pointerup', e=>{
+    if(e.pointerType==='touch') releaseTouchPointer(e.pointerId);
+    if(placePending && e.pointerId===placePending.pointerId) commitPlacement();
+    if(dragState){
+      if(!dragState.moved){
+        const comp = components.find(c=>c.id===dragState.compId);
+        if(comp && TOGGLES.includes(comp.type)){
+          pushHistory();
+          comp.state = comp.state ? 0 : 1;
+          if(isBrk(comp.type) && comp.state) comp.tripped = 0;
+          simulate(); updateVisuals();
+        }
+      } else pushHistorySnapshot(dragState.preSnapshot);
+      dragState = null;
+    }
+  });
+  window.addEventListener('pointercancel', e=>{
+    if(e.pointerType==='touch') releaseTouchPointer(e.pointerId);
+    if(placePending && e.pointerId===placePending.pointerId) placePending = null;
+    dragState = null;
+  });
+
+  window.addEventListener('keydown', e=>{
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='z'){ e.preventDefault(); undo(); return; }
+    if(e.key==='Escape'){
+      wireDraft = null; placementType = null;
+      document.querySelectorAll('.palette-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelector('.palette-btn[data-type="__select"]').classList.add('active');
+      setStatus('Mode pilih/geser aktif.'); drawWires();
+    }
+    if(e.key==='Delete' || e.key==='Backspace'){
+      if(document.activeElement && document.activeElement.tagName==='INPUT') return;
+      e.preventDefault(); deleteSelection();
+    }
+  });
+
+  // ---------- toolbar ----------
+  const btnRun = document.getElementById('btnRun');
+  document.getElementById('btnUndo').addEventListener('click', undo);
+  document.getElementById('btnDelete').addEventListener('click', deleteSelection);
+  document.getElementById('btnToggleSettings').addEventListener('click', ()=>{
+    const g = document.getElementById('settingsGroup'), hidden = g.style.display==='none';
+    g.style.display = hidden ? 'flex' : 'none';
+    document.getElementById('btnToggleSettings').classList.toggle('open', hidden);
+  });
+  btnRun.addEventListener('click', ()=>{
+    running = !running;
+    if(running){ btnRun.textContent='⏸'; btnRun.title='Jeda kWh Meter'; btnRun.classList.remove('primary'); simTimer = setInterval(runFrame, TICK_MS); }
+    else { btnRun.textContent='▶'; btnRun.title='Jalankan kWh Meter'; btnRun.classList.add('primary'); clearInterval(simTimer); }
+  });
+  document.getElementById('timeScale').addEventListener('input', e=>{
+    timeScale = +e.target.value;
+    document.getElementById('timeLabel').textContent = timeScale+'×';
+  });
+  document.getElementById('btnZoomOut').addEventListener('click', ()=>zoomFromButton(-ZOOM_STEP));
+  (function(){
+    const swatches = document.querySelectorAll('.bg-swatch');
+    function applyBg(name){
+      canvasWrap.classList.remove('bg-blue','bg-dark','bg-light','bg-blueprint');
+      if(name && name!=='green') canvasWrap.classList.add('bg-'+name);
+      swatches.forEach(s=>s.classList.toggle('active', s.dataset.bg===(name||'green')));
+      try{ localStorage.setItem('simlistrik_bg', name||'green'); }catch(err){}
+    }
+    swatches.forEach(s=>s.addEventListener('click', ()=>applyBg(s.dataset.bg)));
+    let saved = 'green';
+    try{ saved = localStorage.getItem('simlistrik_bg') || 'green'; }catch(err){}
+    applyBg(saved);
+  })();
+  document.getElementById('btnZoomIn').addEventListener('click', ()=>zoomFromButton(ZOOM_STEP));
+  document.getElementById('btnZoomReset').addEventListener('click', ()=>zoomFromButton(1-zoomScale));
+  canvasWrap.addEventListener('wheel', e=>{
+    if(!(e.ctrlKey || e.metaKey)) return;
+    e.preventDefault();
+    zoomAt(zoomScale+(e.deltaY<0 ? ZOOM_STEP : -ZOOM_STEP), e.clientX, e.clientY);
+  }, {passive:false});
+
+  document.getElementById('btnClear').addEventListener('click', ()=>{
+    if(!confirm('Bersihkan seluruh instalasi di area kerja?')) return;
+    if(activeMenu){ activeMenu.el.remove(); activeMenu = null; }
+    pushHistory(); components = []; wires = []; selection = null; wireDraft = null;
+    refresh(); setStatus('Area kerja dikosongkan.');
+  });
+  document.getElementById('btnSave').addEventListener('click', ()=>{
+    try{ localStorage.setItem('simlistrik_rumah', snapshot()); setStatus('Instalasi disimpan ke penyimpanan lokal peramban.'); }
+    catch(err){ setStatus('Penyimpanan lokal tidak tersedia. Gunakan Ekspor .json.'); }
+  });
+  document.getElementById('btnLoad').addEventListener('click', ()=>{
+    let d = null; try{ d = localStorage.getItem('simlistrik_rumah'); }catch(err){}
+    if(!d){ setStatus('Belum ada instalasi tersimpan di peramban ini.'); return; }
+    loadFromJSON(d); setStatus('Instalasi tersimpan berhasil dimuat.');
+  });
+  document.getElementById('btnExport').addEventListener('click', ()=>{
+    const blob = new Blob([JSON.stringify({components, wires, idCounter}, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'instalasi-listrik-rumah.json'; a.click(); URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('btnImport2').addEventListener('click', ()=>{
+    document.getElementById('importAuthInput').value = '';
+    document.getElementById('importAuthError').style.display = 'none';
+    document.getElementById('importAuthModal').style.display = 'flex';
+    setTimeout(()=>document.getElementById('importAuthInput').focus(), 0);
+  });
+  const closeImportAuthModal = ()=>{ document.getElementById('importAuthModal').style.display = 'none'; };
+  document.getElementById('importAuthCancel').addEventListener('click', closeImportAuthModal);
+  document.getElementById('importAuthConfirm').addEventListener('click', ()=>{
+    const input = document.getElementById('importAuthInput');
+    if(input.value.trim() !== 'te.smknbansari'){
+      document.getElementById('importAuthError').style.display = '';
+      input.focus(); return;
+    }
+    closeImportAuthModal();
+    document.getElementById('fileInput').click();
+  });
+  document.getElementById('importAuthInput').addEventListener('keydown', e=>{
+    e.stopPropagation();
+    if(e.key==='Enter') document.getElementById('importAuthConfirm').click();
+    if(e.key==='Escape') closeImportAuthModal();
+  });
+  document.getElementById('importAuthModal').addEventListener('pointerdown', e=>{
+    if(e.target.id==='importAuthModal') closeImportAuthModal();
+  });
+  document.getElementById('fileInput').addEventListener('change', e=>{
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{ loadFromJSON(reader.result); setStatus('File instalasi berhasil diimpor.'); }
+      catch(err){ setStatus('Gagal membaca file: format tidak valid.'); }
+    };
+    reader.readAsText(file); e.target.value = '';
+  });
+
+  function loadFromJSON(json){
+    const data = JSON.parse(json);
+    if(activeMenu){ activeMenu.el.remove(); activeMenu = null; }
+    pushHistory();
+    components = data.components || []; wires = data.wires || [];
+    components.forEach(c=>{ const d = getDef(c.type); c.w = (c.type==='SWITCH' && c.keys===2) ? 130 : d.w; c.h = (c.type==='STRIP') ? stripH(c.n||2) : d.h; if(!c.outputs || c.outputs.length!==d.outputs) c.outputs = new Array(d.outputs).fill(0); });
+    wires = wires.filter(w=>{ const a = components.find(c=>c.id===w.from), b = components.find(c=>c.id===w.to);
+      return a && b && w.fromPin < (a.type==='STRIP' ? (a.n||2) : a.type==='SWITCH' ? (a.keys||1) : getDef(a.type).outputs) && w.toPin < getDef(b.type).inputs && getDef(a.type).outs[w.fromPin]===getDef(b.type).ins[w.toPin]; });
+    idCounter = data.idCounter || (components.length + wires.length + 1);
+    const used = new Set();
+    wires = wires.filter(w=>{
+      const a = components.find(c=>c.id===w.from);
+      if(a && getDef(a.type).singleOut){ const k = w.from+':'+w.fromPin; if(used.has(k)) return false; used.add(k); }
+      return true;
+    });
+    selection = null; wireDraft = null;
+    refresh();
+  }
+
+  document.getElementById('btnExample').addEventListener('click', ()=>{
+    pushHistory(); components = []; wires = []; selection = null; wireDraft = null;
+    const mk = (t,x,y,n,s)=>{ const c = newComponent(t,x,y); c.name = n||''; if(s!==undefined) c.state = s; components.push(c); return c; };
+    const wr = (a,ap,b,bp)=>wires.push({id:'w'+(idCounter++), from:a.id, fromPin:ap, to:b.id, toPin:bp});
+    const m = mk('METER',140,110), t = mk('TDUS',430,320), ar = mk('ARDE',20,440,'Arde');
+    const sw = mk('SWITCH',720,200,'Sakelar',1), lp = mk('LAMP',860,190,'Ruang tamu');
+    const so = mk('SOCKET',480,580,'Stop kontak dapur'), st = mk('STRIP',700,540,'Stop kontak kabel');
+    st.n = 3; st.h = stripH(3);
+    const tv = mk('TV',880,560), kl = mk('FRIDGE',880,670), rc = mk('COOKER',880,780,'',0);
+    wr(ar,0,m,0); wr(m,0,t,0); wr(m,1,t,1); wr(m,2,t,2);
+    wr(t,3,sw,0); wr(sw,0,lp,0); wr(t,4,lp,1);
+    wr(t,6,so,0); wr(t,7,so,1); wr(t,8,so,2);
+    wr(so,0,st,0); [tv,kl,rc].forEach((x,i)=>{ wr(st,i,x,0); });
+    refresh();
+    setStatus('Contoh dimuat. Klik <b>▶</b> untuk menjalankan kWh Meter, lalu nyalakan <b>Rice Cooker</b> dan tambahkan <b>Blender</b> &amp; <b>Mesin cuci</b> di colokan yang sama sampai MCB 6 A trip.');
+  });
+
+  pasangTugasRangkaian({
+    format: 'LISTRIK-RUMAH-1',
+    judul: 'Instalasi Listrik Rumah',
+    namaBerkas: 'instalasi-listrik-rumah.json',
+    tipeBawaan: Object.keys(DEFS),
+    ambil() {
+      return {components, wires, idCounter};
+    },
+    muat: loadFromJSON
+  });
+
+  // init
+  setStatus('Pasang <b>kWh Meter</b> (sudah ada MCB) → <b>Circuit breaker</b> (opsional) → <b>T‑dus</b> → sakelar/stop kontak → beban. Tarik kabel dari pin keluaran (kanan) ke pin masukan (kiri): <span style="color:var(--L)">L = fase</span>, <span style="color:var(--N)">N = netral</span>, <span style="color:#2fa552">G = ground</span>. Klik komponen untuk menyalakan/mematikan. Ikon <b>✎</b> untuk nama &amp; putar. Zoom: tombol −/+, cubit dua jari, atau Ctrl+scroll. Klik <b>Contoh</b> untuk memulai cepat.');
+  applyZoom(); buildDOM(); simulate(); updateVisuals();
+
+
+})();
+</script><dialog aria-labelledby="judulKirimRangkaian" style="width: min(420px, 100% - 32px); max-height: 90vh; overflow: auto; border: 1px solid rgb(100, 116, 139); border-radius: 14px; padding: 18px; background: rgb(24, 34, 47); color: white; font: inherit;">
+    <h2 id="judulKirimRangkaian" style="margin:0 0 12px">Kirim Tugas</h2>
+    <form style="display:grid;gap:10px">
+      <label>Judul tugas<input name="judul" class="modal-input" maxlength="100" required="" style="display:block;width:100%;box-sizing:border-box"></label>
+      <label>Kode guru<input name="kode" class="modal-input" maxlength="12" autocomplete="off" autocapitalize="characters" required="" style="display:block;width:100%;box-sizing:border-box"></label>
+      <label>Catatan (opsional)<textarea name="catatan" class="modal-input" maxlength="500" style="display:block;width:100%;box-sizing:border-box"></textarea></label>
+      <p role="status" style="margin:0"></p>
+      <a target="_blank" rel="noopener" hidden="" style="color:#bae6fd"></a>
+      <div><button type="submit" class="btn primary">Kirim</button> <button type="button" class="btn">Tutup</button></div>
+    </form></dialog>
+<script type="module" src="./Simulator Instalasi Listrik Rumah v0.1_files/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;aa1c918a41db4736b3d196f379e8cdd7&quot;,&quot;r&quot;:1,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+
+
+</body></html>

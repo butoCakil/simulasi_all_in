@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<!-- saved from url=(0072)https://belajar.iprime-bansari.online/simulasi/simulator-ic-digital.html -->
+<html lang="id"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Simulator IC Digital v0.1</title>
+<style>
+  :root{
+    --pcb-bg:#0d2b1c;
+    --pcb-bg-dark:#081f14;
+    --panel:#123322;
+    --panel-2:#0f2a1c;
+    --border:#1e4a30;
+    --copper:#c98a4b;
+    --copper-dim:#5a4630;
+    --silk:#eef0e6;
+    --silk-dim:#9fb3a7;
+    --gold:#d9b35c;
+    --hi:#6bffb0;
+    --hi-glow:rgba(107,255,176,.55);
+    --lo:#2c473a;
+    --warn:#ff6b4a;
+    --font-ui:'Segoe UI',system-ui,-apple-system,sans-serif;
+    --font-mono:'Consolas','SFMono-Regular','Courier New',monospace;
+  }
+  *{box-sizing:border-box;-webkit-touch-callout:none;}
+  input,textarea{-webkit-touch-callout:default;-webkit-user-select:text;}
+  html,body{height:100%;margin:0;}
+  body{
+    background:var(--pcb-bg-dark);
+    color:var(--silk);
+    font-family:var(--font-ui);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    padding-left:env(safe-area-inset-left,0px);
+    padding-right:env(safe-area-inset-right,0px);
+  }
+  header.toolbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 16px;
+    background:var(--panel);
+    border-bottom:2px solid var(--border);
+    flex-wrap:wrap;
+  }
+  header.toolbar h1{
+    font-family:var(--font-mono);
+    font-size:16px;
+    letter-spacing:.5px;
+    margin:0 16px 0 0;
+    color:var(--gold);
+    font-weight:600;
+    white-space:nowrap;
+  }
+  header.toolbar h1 span{color:var(--silk-dim);font-weight:400;font-size:12px;display:block;margin-top:1px;}
+  .btn{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    color:var(--silk);
+    padding:7px 12px;
+    border-radius:4px;
+    font-family:var(--font-ui);
+    font-size:13px;
+    cursor:pointer;
+    transition:background .12s, border-color .12s;
+  }
+  .btn:hover{background:#17402a;border-color:var(--copper);}
+  .btn.primary{background:#1c4a2d;border-color:var(--hi);color:var(--hi);}
+  .btn.primary:hover{background:#22572f;}
+  .btn.danger:hover{border-color:var(--warn);color:var(--warn);}
+  .spacer{flex:1;}
+  .speed-wrap{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--silk-dim);}
+  .speed-wrap input{accent-color:var(--copper);}
+  .zoom-wrap{display:flex;align-items:center;gap:4px;}
+  .zoom-wrap .btn{padding:7px 10px;min-width:32px;text-align:center;}
+  .settings-group{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  #btnToggleSettings{transition:transform .15s;}
+  #btnToggleSettings.open{transform:rotate(180deg);}
+  #btnSubIc.active-mode{background:#1c4a2d;border-color:var(--hi);color:var(--hi);}
+  #subIcBanner{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--gold);
+    background:var(--panel-2);
+    border:1px solid var(--copper);
+    border-radius:4px;
+    padding:6px 10px;
+    white-space:nowrap;
+  }
+  #btnZoomReset{font-family:var(--font-mono);font-size:11px;min-width:44px;}
+  .workspace{flex:1;display:flex;min-height:0;}
+  aside.palette{
+    width:190px;
+    background:var(--panel);
+    border-right:2px solid var(--border);
+    overflow-y:auto;
+    padding:10px;
+    flex-shrink:0;
+  }
+  aside.palette h2{
+    font-size:11px;
+    color:var(--silk-dim);
+    text-transform:none;
+    margin:14px 0 6px;
+    font-weight:600;
+    border-bottom:1px solid var(--border);
+    padding-bottom:4px;
+  }
+  aside.palette h2:first-child{margin-top:0;}
+  .palette-btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    width:100%;
+    text-align:left;
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    color:var(--silk);
+    padding:8px 10px;
+    margin-bottom:6px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:var(--font-mono);
+    font-size:12px;
+  }
+  .palette-btn:hover{border-color:var(--copper);}
+  .palette-btn.active{border-color:var(--hi);background:#173a26;color:var(--hi);}
+  #subIcPinSection{display:flex;flex-direction:column;gap:6px;}
+  #subIcPinSection .palette-btn{width:100%;flex:none;margin-bottom:0;justify-content:flex-start;white-space:nowrap;}
+  .palette-btn .swatch{
+    width:14px;height:14px;border-radius:3px;flex-shrink:0;
+    background:var(--copper-dim);border:1px solid var(--copper);
+  }
+  main.canvas-wrap{
+    flex:1;
+    position:relative;
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-x pan-y;
+    background:
+      radial-gradient(circle,rgba(255,255,255,.055) 1px,transparent 1.4px);
+    background-size:22px 22px;
+    background-color:var(--pcb-bg);
+    cursor:crosshair;
+  }
+  #canvasSizer{
+    position:relative;
+  }
+  #canvas{
+    position:absolute;
+    top:0;left:0;
+    width:2400px;
+    height:1500px;
+    transform-origin:0 0;
+  }
+  svg#wires{
+    position:absolute;top:0;left:0;
+    width:2400px;height:1500px;
+    pointer-events:none;
+  }
+  svg#wires path.wire{pointer-events:stroke;cursor:pointer;}
+  svg#wires path.wire.selected{filter:drop-shadow(0 0 3px var(--warn));}
+  .comp{
+    position:absolute;
+    background:var(--panel-2);
+    border:1.5px solid var(--copper);
+    border-radius:5px;
+    color:var(--silk);
+    font-family:var(--font-mono);
+    font-size:11px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    user-select:none;
+    box-shadow:0 2px 6px rgba(0,0,0,.35);
+  }
+  .comp.selected{border-color:var(--warn);box-shadow:0 0 0 2px rgba(255,107,74,.35);}
+  .comp .label{pointer-events:none;line-height:1.3;padding:2px 4px;}
+  .comp .sublabel{font-size:9px;color:var(--silk-dim);display:block;}
+  .comp{touch-action:none;}
+  .pin{
+    position:absolute;
+    width:11px;height:11px;
+    border-radius:50%;
+    background:var(--lo);
+    border:1.5px solid var(--copper);
+    transform:translate(-50%,-50%);
+    cursor:pointer;
+    z-index:5;
+    touch-action:none;
+  }
+  .pin::before{
+    /* invisible larger hit area so fingers can grab a pin accurately */
+    content:'';
+    position:absolute;
+    top:50%;left:50%;
+    width:30px;height:30px;
+    transform:translate(-50%,-50%);
+  }
+  .pin.hi{background:var(--hi);box-shadow:0 0 6px var(--hi-glow);border-color:var(--hi);}
+  .pin:hover{border-color:var(--warn);}
+  .pin-label{
+    position:absolute;
+    font-size:8px;
+    color:var(--silk-dim);
+    transform:translateY(-50%);
+    pointer-events:none;
+    white-space:nowrap;
+  }
+  /* input switch look */
+  .comp.INPUT{width:70px;height:44px;flex-direction:column;justify-content:center;}
+  .comp.INPUT .toggle-track{
+    width:34px;height:16px;background:var(--lo);border-radius:9px;position:relative;border:1px solid var(--copper-dim);margin-bottom:2px;
+  }
+  .comp.INPUT.on .toggle-track{background:#1c4a2d;border-color:var(--hi);}
+  .comp.INPUT .toggle-knob{
+    width:12px;height:12px;border-radius:50%;background:var(--silk-dim);position:absolute;top:1px;left:1px;transition:left .12s;
+  }
+  .comp.INPUT.on .toggle-knob{left:20px;background:var(--hi);}
+  .comp.CLOCK{width:70px;height:44px;flex-direction:column;}
+  .comp.CLOCK .clk-icon{font-family:var(--font-mono);font-size:14px;color:var(--copper);}
+  .comp.CLOCK.on .clk-icon{color:var(--hi);}
+  .comp.VCC{width:56px;height:50px;flex-direction:column;justify-content:center;gap:3px;}
+  .vcc-symbol{
+    width:22px;height:22px;border-radius:4px;
+    background:var(--hi);color:#052014;
+    font-family:var(--font-ui);font-weight:700;font-size:14px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 8px var(--hi-glow);
+  }
+  .comp.GND{width:56px;height:50px;flex-direction:column;justify-content:center;gap:5px;}
+  .gnd-symbol{display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .gnd-symbol span{display:block;background:var(--silk-dim);height:2px;border-radius:1px;}
+  .gnd-symbol span:nth-child(1){width:22px;}
+  .gnd-symbol span:nth-child(2){width:13px;}
+  .gnd-symbol span:nth-child(3){width:5px;}
+  .comp.LED{width:56px;height:56px;border-radius:50%;flex-direction:column;padding:0;}
+  .comp.LED .bulb{
+    width:26px;height:26px;border-radius:50%;background:var(--lo);border:2px solid var(--copper-dim);
+  }
+  .comp.LED.on .bulb{background:var(--hi);box-shadow:0 0 14px var(--hi-glow);border-color:var(--hi);}
+  .comp.PIN_IN,.comp.PIN_OUT{border-color:var(--gold);}
+  .comp.PIN_IN.selected,.comp.PIN_OUT.selected{border-color:var(--warn);}
+  .comp.PIN_IN{width:76px;height:44px;flex-direction:column;justify-content:center;}
+  .comp.PIN_IN .pin-io-track{
+    width:34px;height:16px;background:var(--lo);border-radius:9px;position:relative;border:1px solid var(--gold);margin-bottom:2px;
+  }
+  .comp.PIN_IN.on .pin-io-track{background:#1c4a2d;border-color:var(--hi);}
+  .comp.PIN_IN .toggle-knob{
+    width:12px;height:12px;border-radius:50%;background:var(--silk-dim);position:absolute;top:1px;left:1px;transition:left .12s;
+  }
+  .comp.PIN_IN.on .toggle-knob{left:20px;background:var(--hi);}
+  .comp.PIN_OUT{width:76px;height:44px;flex-direction:column;justify-content:center;}
+  .comp.PIN_OUT .pin-io-bulb{
+    width:22px;height:22px;border-radius:50%;background:var(--lo);border:2px solid var(--gold);margin-bottom:2px;
+  }
+  .comp.PIN_OUT.on .pin-io-bulb{background:var(--hi);box-shadow:0 0 12px var(--hi-glow);border-color:var(--hi);}
+  .ic-label{font-weight:600;font-size:12px;padding:2px 6px;text-align:center;line-height:1.3;word-break:break-word;}
+  .comp.SEVENSEG{background:#081f14;}
+  .sevenseg-box{position:absolute;inset:0;}
+  .seg{
+    position:absolute;
+    background:var(--lo);
+    transition:background .08s, box-shadow .08s;
+  }
+  .seg.on{background:var(--hi);box-shadow:0 0 6px var(--hi-glow);}
+  .seg-h{clip-path:polygon(10% 50%,25% 0%,75% 0%,90% 50%,75% 100%,25% 100%);}
+  .seg-v{clip-path:polygon(50% 10%,100% 25%,100% 75%,50% 90%,0% 75%,0% 25%);}
+  .sevenseg-caption{
+    position:absolute;
+    bottom:6px; left:0; right:0;
+    text-align:center;
+    line-height:1.5;
+    pointer-events:none;
+  }
+  .sevenseg-caption .sublabel{display:block;}
+  .sevenseg-caption .cc-tag{
+    display:block;
+    font-family:var(--font-mono);
+    font-size:8px;
+    letter-spacing:.4px;
+    color:var(--gold);
+  }
+  .comp-rename-btn{
+    position:absolute;
+    top:-9px; right:-9px;
+    width:18px;height:18px;
+    border-radius:50%;
+    background:var(--panel-2);
+    border:1px solid var(--copper);
+    color:var(--silk-dim);
+    font-size:10px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    z-index:8;
+    touch-action:manipulation;
+  }
+  .comp-rename-btn:hover{border-color:var(--warn);color:var(--warn);}
+  .comp-name-tag{
+    position:absolute;
+    left:50%;
+    top:-22px;
+    transform:translateX(-50%);
+    white-space:nowrap;
+    background:rgba(8,31,20,.9);
+    border:1px solid var(--copper-dim);
+    color:var(--gold);
+    font-size:10px;
+    font-family:var(--font-mono);
+    padding:1px 6px;
+    border-radius:3px;
+    pointer-events:none;
+    z-index:7;
+  }
+  .comp-menu{
+    position:absolute;
+    z-index:50;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:6px;
+    background:var(--panel);
+    border:1px solid var(--copper);
+    border-radius:5px;
+    padding:8px;
+    box-shadow:0 4px 12px rgba(0,0,0,.5);
+    touch-action:none;
+  }
+  .comp-menu-name{
+    background:var(--pcb-bg-dark);
+    border:1px solid var(--border);
+    color:var(--silk);
+    font-family:var(--font-mono);
+    font-size:12px;
+    padding:6px 8px;
+    border-radius:3px;
+    width:130px;
+  }
+  .comp-menu-name:focus{outline:none;border-color:var(--copper);}
+  .comp-menu-color-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    font-family:var(--font-ui);
+    font-size:11px;
+    color:var(--silk-dim);
+    cursor:pointer;
+  }
+  .comp-menu-color{
+    width:28px;height:24px;
+    padding:0;
+    border:1px solid var(--border);
+    border-radius:3px;
+    background:none;
+    cursor:pointer;
+  }
+  .comp-menu-color::-webkit-color-swatch-wrapper{padding:2px;}
+  .comp-menu-color::-webkit-color-swatch{border:none;border-radius:2px;}
+  .comp-menu-rotate,.comp-menu-close,.comp-menu-delete{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    color:var(--silk);
+    font-family:var(--font-ui);
+    font-size:12px;
+    padding:7px 8px;
+    border-radius:3px;
+    cursor:pointer;
+    white-space:nowrap;
+    touch-action:manipulation;
+    text-align:center;
+  }
+  .comp-menu-rotate:hover{border-color:var(--hi);color:var(--hi);}
+  .comp-menu-close:hover{border-color:var(--warn);color:var(--warn);}
+  .comp-menu-delete{border-color:#5a2a22;color:#ff9b85;}
+  .comp-menu-delete:hover{border-color:var(--warn);background:#3a1712;color:var(--warn);}
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.65);
+    display:flex;align-items:center;justify-content:center;
+    z-index:200;
+    padding:16px;
+  }
+  .modal-box{
+    background:var(--panel);
+    border:1px solid var(--copper);
+    border-radius:8px;
+    padding:18px;
+    width:100%;
+    max-width:280px;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);
+  }
+  .modal-box h3{margin:0 0 12px;font-size:14px;color:var(--gold);font-family:var(--font-mono);font-weight:600;}
+  .modal-input{
+    width:100%;
+    background:var(--pcb-bg-dark);
+    border:1px solid var(--border);
+    color:var(--silk);
+    font-family:var(--font-mono);
+    font-size:16px;
+    padding:9px 10px;
+    border-radius:4px;
+    box-sizing:border-box;
+  }
+  .modal-input:focus{outline:none;border-color:var(--copper);}
+  .modal-error{color:var(--warn);font-size:11px;margin-top:8px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
+  .comp.gate{min-width:64px;min-height:52px;font-weight:600;font-size:12px;letter-spacing:.5px;}
+  .gate-symbol{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+  .gate-body{fill:none;stroke:var(--copper);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;}
+  .gate-body-extra{fill:none;stroke:var(--copper);stroke-width:2;stroke-linecap:round;}
+  .gate-lead{stroke:var(--copper);stroke-width:2;}
+  .gate-bubble{fill:var(--panel-2);stroke:var(--copper);stroke-width:2;}
+  .comp.gate.selected .gate-body,
+  .comp.gate.selected .gate-body-extra{stroke:var(--warn);}
+  .comp.gate.selected .gate-bubble{stroke:var(--warn);}
+  .comp.DFF,.comp.SR{min-width:84px;min-height:76px;flex-direction:column;font-weight:600;}
+  .placing-hint{
+    position:absolute;
+    pointer-events:none;
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--hi);
+    background:rgba(0,0,0,.6);
+    padding:2px 6px;
+    border-radius:3px;
+    transform:translate(12px,12px);
+    z-index:20;
+  }
+  footer.statusbar{
+    background:var(--panel);
+    border-top:2px solid var(--border);
+    color:var(--silk-dim);
+    font-size:12px;
+    padding:7px 16px;
+    font-family:var(--font-mono);
+    min-height:16px;
+    display:flex;
+    align-items:baseline;
+    gap:16px;
+  }
+  footer.statusbar #status{flex:1;min-width:0;}
+  footer.statusbar .credit{
+    flex-shrink:0;
+    color:var(--copper-dim);
+    font-size:10px;
+    white-space:nowrap;
+  }
+  footer.statusbar b{color:var(--gold);}
+  ::-webkit-scrollbar{width:12px;height:12px;}
+  ::-webkit-scrollbar-track{background:var(--pcb-bg-dark);}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--copper-dim);}
+
+  @media (max-width:760px){
+    header.toolbar{padding:8px 10px;gap:6px;}
+    header.toolbar h1{font-size:12px;margin-right:4px;}
+    header.toolbar h1 span{display:none;}
+    .btn{padding:8px 10px;font-size:12px;touch-action:manipulation;}
+    .speed-wrap{font-size:11px;order:5;flex-basis:100%;}
+    .zoom-wrap{order:6;}
+    .speed-wrap input{flex:1;min-width:80px;}
+    .settings-group{flex-basis:100%;}
+
+    .workspace{flex-direction:column;}
+    aside.palette{
+      width:100%;
+      height:auto;
+      max-height:none;
+      overflow-x:auto;
+      overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;
+      display:flex;
+      flex-wrap:nowrap;
+      align-items:center;
+      gap:6px;
+      padding:8px;
+      border-right:none;
+      border-bottom:2px solid var(--border);
+      flex-shrink:0;
+    }
+    aside.palette h2{display:none;}
+    .palette-btn{
+      width:auto;
+      flex:0 0 auto;
+      margin-bottom:0;
+      white-space:nowrap;
+      padding:10px 12px;
+      font-size:12px;
+      touch-action:manipulation;
+    }
+    #subIcPinSection{
+      flex-direction:row;
+      flex:0 0 auto;
+      gap:4px;
+    }
+    #subIcPinSection .palette-btn{
+      width:auto;
+      flex:0 0 auto;
+      padding:6px 10px;
+    }
+
+    main.canvas-wrap{flex:1;min-height:0;}
+
+    .pin{width:16px;height:16px;}
+    footer.statusbar{font-size:11px;padding:6px 10px;flex-wrap:wrap;}
+    footer.statusbar .credit{flex-basis:100%;text-align:right;}
+  }
+  #btnKirimTugas{white-space:nowrap}
+  #btnKirimTugas[hidden]{display:none}
+  @media(max-width:700px){#btnKirimTugas{min-height:40px}}
+</style>
+</head>
+<body>
+
+<header class="toolbar">
+  <h1>SIM‑IC DIGITAL<span>rangkai &amp; uji gerbang logika</span></h1>
+  <button type="button" class="btn primary" id="btnKirimTugas" aria-haspopup="dialog">Kirim Tugas</button>
+  <button class="btn primary" id="btnRun" title="Jalankan">▶</button>
+  <button class="btn" id="btnStep" title="Langkah satu kali">⏯</button>
+  <button class="btn" id="btnUndo" title="Urungkan (Ctrl+Z)">↺</button>
+  <button class="btn danger" id="btnDelete" title="Hapus komponen/kabel terpilih (Delete)">🗑</button>
+  <button class="btn" id="btnSubIc" title="Buat Sub-IC baru">🧩</button>
+  <span id="subIcBanner" style="display:none;"></span>
+  <button class="btn danger" id="btnSubIcCancel" title="Batalkan pembuatan Sub-IC" style="display:none;">✕ Batal</button>
+  <button class="btn" id="btnToggleSettings" title="Tampilkan/sembunyikan pengaturan zoom &amp; clock">▼</button>
+  <div class="settings-group" id="settingsGroup" style="display:none;">
+    <div class="speed-wrap">
+      <span>Periode clock</span>
+      <input type="range" id="clkSpeed" min="150" max="3000" step="50" value="800">
+      <span id="clkSpeedLabel">800 ms</span>
+    </div>
+    <div class="zoom-wrap">
+      <button class="btn" id="btnZoomOut" title="Perkecil tampilan">−</button>
+      <button class="btn" id="btnZoomReset" title="Atur ulang ke 100%">100%</button>
+      <button class="btn" id="btnZoomIn" title="Perbesar tampilan">+</button>
+    </div>
+  </div>
+  <span class="spacer"></span>
+  <button class="btn" id="btnSave" title="Simpan ke penyimpanan lokal peramban">💾</button>
+  <button class="btn" id="btnLoad">Muat</button>
+  <button class="btn" id="btnExport">Ekspor .json</button>
+  <button class="btn" id="btnImport">Impor .json</button>
+  <button class="btn danger" id="btnClear">Bersihkan</button>
+  <input type="file" id="fileInput" accept=".json" style="display:none">
+
+  <div id="importAuthModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <h3>Kode Akses Impor</h3>
+      <input type="password" id="importAuthInput" class="modal-input" placeholder="Masukkan kode akses" autocomplete="off">
+      <div id="importAuthError" class="modal-error" style="display:none;">Kode akses salah. Coba lagi.</div>
+      <div class="modal-actions">
+        <button type="button" id="importAuthCancel" class="btn">Batal</button>
+        <button type="button" id="importAuthConfirm" class="btn primary">Konfirmasi</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+
+<div class="workspace">
+  <aside class="palette">
+    <h2>Alat</h2>
+    <button class="palette-btn active" data-type="__select">
+      <span class="swatch" style="background:transparent;border-color:var(--silk-dim)"></span> Pilih / geser
+    </button>
+
+    <h2>Masukan &amp; keluaran</h2>
+    <button class="palette-btn" data-type="INPUT"><span class="swatch"></span> Saklar</button>
+    <button class="palette-btn" data-type="CLOCK"><span class="swatch"></span> Clock</button>
+    <button class="palette-btn" data-type="VCC"><span class="swatch"></span> VCC (High)</button>
+    <button class="palette-btn" data-type="GND"><span class="swatch"></span> GND (Low)</button>
+    <button class="palette-btn" data-type="LED"><span class="swatch" style="border-radius:50%"></span> LED</button>
+    <button class="palette-btn" data-type="SEVENSEG" title="7-Segmen Common Cathode"><span class="swatch"></span> 7-Segmen</button>
+
+    <div id="subIcPinSection" style="display:none;">
+      <h2>Buat Sub-IC</h2>
+      <button class="palette-btn" data-type="PIN_IN" title="Penanda pin masukan Sub-IC"><span class="swatch"></span> Pin Input</button>
+      <button class="palette-btn" data-type="PIN_OUT" title="Penanda pin keluaran Sub-IC"><span class="swatch"></span> Pin Output</button>
+    </div>
+
+    <h2>Gerbang logika</h2>
+    <button class="palette-btn" data-type="NOT"><span class="swatch"></span> NOT</button>
+    <button class="palette-btn" data-type="AND"><span class="swatch"></span> AND</button>
+    <button class="palette-btn" data-type="OR"><span class="swatch"></span> OR</button>
+    <button class="palette-btn" data-type="NAND"><span class="swatch"></span> NAND</button>
+    <button class="palette-btn" data-type="NOR"><span class="swatch"></span> NOR</button>
+    <button class="palette-btn" data-type="XOR"><span class="swatch"></span> XOR</button>
+    <button class="palette-btn" data-type="XNOR"><span class="swatch"></span> XNOR</button>
+
+    <h2>Rangkaian sekuensial</h2>
+    <button class="palette-btn" data-type="DFF">D Flip‑Flop</button>
+    <button class="palette-btn" data-type="SR">SR Latch</button>
+
+    <h2 id="subIcSectionTitle" style="display:none;">Sub-IC Saya</h2>
+    <div id="customIcSection"></div>
+  </aside>
+
+  <main class="canvas-wrap" id="canvasWrap">
+    <div id="canvasSizer" style="width: 2400px; height: 1500px;">
+      <div id="canvas" style="transform: scale(1);">
+        <svg id="wires"></svg>
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer class="statusbar">
+  <span id="status">Klik komponen di panel kiri, lalu klik area kerja untuk menempatkannya. Klik pin keluaran lalu pin masukan untuk menyambung kabel. Klik saklar untuk mengubah nilainya. Klik ikon <b>✎</b> di pojok komponen untuk memberi nama label dan/atau memutar komponen 90°. Gunakan tombol <b>−/100%/+</b>, cubit dua jari, atau Ctrl+scroll untuk zoom. Pilih komponen/kabel lalu tekan <b>Hapus</b> untuk menghapusnya, atau <b>Urungkan</b> untuk membatalkan tindakan terakhir.</span>
+  <span class="credit">v0.1 · dani – SMKN Bansari 2026</span>
+</footer>
+
+<script>
+'use strict';
+
+function pasangTugasRangkaian({format, judul, namaBerkas, ambil, muat, tipeBawaan}) {
+  const API = '../pembayaran/backend/';
+  const batas = 262144;
+  const tombol = document.getElementById('btnKirimTugas');
+  const dialog = document.createElement('dialog');
+  dialog.setAttribute('aria-labelledby', 'judulKirimRangkaian');
+  dialog.style.cssText = 'width:min(420px,calc(100% - 32px));max-height:90vh;overflow:auto;border:1px solid #64748b;border-radius:14px;padding:18px;background:#18222f;color:white;font:inherit';
+  dialog.innerHTML = `
+    <h2 id="judulKirimRangkaian" style="margin:0 0 12px">Kirim Tugas</h2>
+    <form style="display:grid;gap:10px">
+      <label>Judul tugas<input name="judul" class="modal-input" maxlength="100" required style="display:block;width:100%;box-sizing:border-box"></label>
+      <label>Kode guru<input name="kode" class="modal-input" maxlength="12" autocomplete="off" autocapitalize="characters" required style="display:block;width:100%;box-sizing:border-box"></label>
+      <label>Catatan (opsional)<textarea name="catatan" class="modal-input" maxlength="500" style="display:block;width:100%;box-sizing:border-box"></textarea></label>
+      <p role="status" style="margin:0"></p>
+      <a target="_blank" rel="noopener" hidden style="color:#bae6fd"></a>
+      <div><button type="submit" class="btn primary">Kirim</button> <button type="button" class="btn">Tutup</button></div>
+    </form>`;
+  document.body.append(dialog);
+  const form = dialog.querySelector('form');
+  const status = form.querySelector('[role=status]');
+  const link = form.querySelector('a');
+  const kirim = form.querySelector('[type=submit]');
+  const tutup = form.querySelector('[type=button]');
+  let berkas, sibuk = false;
+
+  function pesan(teks, href = '', label = '') {
+    status.textContent = teks;
+    link.hidden = !href;
+    if (href) {
+      link.href = href;
+      link.textContent = label;
+    }
+  }
+
+  function validasi(data) {
+    const digital = format === 'IC-DIGITAL-1';
+    if (!data || typeof data !== 'object' || Array.isArray(data) || (data.format != null && data.format !== format) ||
+        (digital ? !Array.isArray(data.customICs) : 'customICs' in data)) {
+      throw new Error('Format rangkaian tidak sesuai dengan simulator ini.');
+    }
+    const ic = digital ? data.customICs : [];
+    const tipe = new Set(tipeBawaan);
+    const idValid = id => typeof id === 'string' && /^[a-z][a-z0-9_-]{0,39}$/i.test(id);
+    const angka = (n, min, max) => Number.isFinite(n) && n >= min && n <= max;
+    const indeks = n => Number.isInteger(n) && angka(n, 0, 127);
+    const pin = list => Array.isArray(list) && list.length <= 128 && list.every(s => typeof s === 'string');
+    const salah = () => { throw new Error('Komponen, kabel, atau Sub-IC pada proyek tidak valid.'); };
+    for (const sub of ic) {
+      if (!sub || !idValid(sub.id) || tipe.has(sub.id) || typeof sub.name !== 'string' ||
+          !pin(sub.inputs) || !pin(sub.outputs) || !angka(sub.w, 1, 5000) || !angka(sub.h, 1, 5000)) salah();
+      validasiRangkaian(sub);
+      tipe.add(sub.id);
+    }
+    validasiRangkaian(data);
+
+    // A Sub-IC can reference built-in components and earlier Sub-ICs.
+    function validasiRangkaian(rangkaian) {
+      if (!Array.isArray(rangkaian.components) || !Array.isArray(rangkaian.wires)) salah();
+      const ids = new Set();
+      for (const c of rangkaian.components) {
+        if (!c || !idValid(c.id) || ids.has(c.id) || !tipe.has(c.type) ||
+            !angka(c.x, -100000, 100000) || !angka(c.y, -100000, 100000) ||
+            !Array.isArray(c.outputs) || c.outputs.length > 128 ||
+            c.outputs.some(value => typeof value !== 'number' || !Number.isFinite(value))) salah();
+        if (digital && (!angka(c.w, 1, 5000) || !angka(c.h, 1, 5000))) salah();
+        if (!digital && ((c.n != null && (!Number.isInteger(c.n) || !angka(c.n, 1, 32))) ||
+            (c.keys != null && ![1, 2].includes(c.keys)))) salah();
+        ids.add(c.id);
+      }
+      for (const w of rangkaian.wires) {
+        if (!w || !idValid(w.id) || !ids.has(w.from) || !ids.has(w.to) ||
+            !indeks(w.fromPin) || !indeks(w.toPin)) salah();
+      }
+    }
+    return data;
+  }
+
+  tombol.addEventListener('click', () => {
+    form.reset();
+    form.elements.judul.value = judul;
+    try { form.elements.kode.value = localStorage.getItem('kodeGuru') || ''; } catch {}
+    berkas = null;
+    pesan('');
+    try {
+      const data = {format, ...ambil()};
+      const kandidat = new File([JSON.stringify(data)], namaBerkas, {type:'application/json'});
+      if (kandidat.size > batas) throw new Error('Proyek terlalu besar untuk dibuka lewat Periksa (maksimal 256 KB).');
+      validasi(data);
+      berkas = kandidat;
+    } catch (error) {
+      pesan(error.message);
+    }
+    kirim.disabled = !berkas;
+    dialog.showModal();
+  });
+  tutup.onclick = () => dialog.close();
+  dialog.addEventListener('cancel', event => { if (sibuk) event.preventDefault(); });
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (!berkas || sibuk) return;
+    const data = new FormData(form);
+    const kode = String(data.get('kode')).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (![6, 8].includes(kode.length) || !String(data.get('judul')).trim()) {
+      pesan('Isi judul dan kode guru 6 atau 8 karakter.');
+      return;
+    }
+    data.set('kode', kode);
+    data.set('berkas', berkas);
+    sibuk = kirim.disabled = tutup.disabled = true;
+    pesan('Sedang mengirim…');
+    try {
+      const response = await fetch(API + 'kirim_tugas.php', {method:'POST', credentials:'same-origin', body:data});
+      const hasil = await response.json().catch(() => null);
+      if (response.ok && hasil?.sukses) {
+        berkas = null;
+        try { localStorage.setItem('kodeGuru', kode); } catch {}
+        pesan('Tugas berhasil dikirim.', '../kirim-tugas.html', 'Lihat riwayat');
+      } else if (response.status === 401) {
+        pesan('Masuk di tab baru, lalu kembali ke sini untuk mengirim.', '../pembayaran/masuk.html?kembali=/kirim-tugas.html', 'Masuk dengan Google');
+      } else if (hasil?.perluProfil) {
+        pesan(hasil.pesan, '../profil.html', 'Lengkapi profil');
+      } else {
+        pesan(hasil?.pesan || 'Pengiriman gagal. Coba lagi.');
+      }
+    } catch {
+      pesan('Pengiriman belum terkonfirmasi. Periksa riwayat sebelum mencoba lagi.', '../kirim-tugas.html', 'Lihat riwayat');
+    } finally {
+      sibuk = tutup.disabled = false;
+      kirim.disabled = !berkas;
+    }
+  });
+
+  async function bukaKiriman(id) {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'padding:10px 14px;background:#233349;color:white;font:inherit';
+    const teks = document.createElement('span');
+    teks.setAttribute('role', 'status');
+    teks.textContent = 'Memuat rangkaian siswa…';
+    const kembali = document.createElement('a');
+    kembali.href = '../kirim-tugas.html';
+    kembali.textContent = 'Kembali ke Kirim Tugas';
+    kembali.style.color = '#bae6fd';
+    banner.append(teks, ' · ', kembali);
+    document.body.prepend(banner);
+    tombol.hidden = true;
+    try {
+      if (!/^[1-9][0-9]*$/.test(id)) throw new Error('Nomor kiriman tidak valid.');
+      const response = await fetch(API + 'unduh_tugas.php?id=' + encodeURIComponent(id), {credentials:'same-origin', cache:'no-store'});
+      if (response.status === 401) throw new Error('Sesi masuk berakhir. Masuk kembali lewat Kirim Tugas.');
+      if (!response.ok) throw new Error('Kiriman tidak tersedia untuk akun ini.');
+      const blob = await response.blob();
+      if (blob.size > batas) throw new Error('Ukuran proyek melebihi 256 KB.');
+      const data = validasi(JSON.parse(await blob.text()));
+      muat(JSON.stringify(data));
+      teks.textContent = 'Rangkaian siswa sudah dimuat.';
+    } catch (error) {
+      teks.textContent = 'Gagal memuat kiriman. ' + error.message;
+    }
+  }
+
+  const id = new URLSearchParams(location.search).get('tugas');
+  if (id !== null) bukaKiriman(id);
+}
+</script>
+<script>
+(function(){
+  "use strict";
+
+  const DEFS = {
+    INPUT:{label:'Saklar', inputs:0, outputs:1, w:70,h:44, outLabels:['']},
+    CLOCK:{label:'Clock', inputs:0, outputs:1, w:70,h:44, outLabels:['']},
+    VCC:{label:'VCC (High)', inputs:0, outputs:1, w:56,h:50, outLabels:['']},
+    GND:{label:'GND (Low)', inputs:0, outputs:1, w:56,h:50, outLabels:['']},
+    PIN_IN:{label:'Pin Input', inputs:0, outputs:1, w:76,h:44, outLabels:['']},
+    PIN_OUT:{label:'Pin Output', inputs:1, outputs:0, w:76,h:44, inLabels:['']},
+    LED:{label:'LED', inputs:1, outputs:0, w:56,h:56, inLabels:['']},
+    SEVENSEG:{label:'7-Segmen (Common Cathode)', inputs:7, outputs:0, w:100,h:139, inLabels:['a','b','c','d','e','f','g'], inLabelOffset:10},
+    NOT:{label:'NOT', inputs:1, outputs:1, w:82,h:52},
+    AND:{label:'AND', inputs:2, outputs:1, w:82,h:52},
+    OR:{label:'OR', inputs:2, outputs:1, w:82,h:52},
+    NAND:{label:'NAND', inputs:2, outputs:1, w:82,h:52},
+    NOR:{label:'NOR', inputs:2, outputs:1, w:82,h:52},
+    XOR:{label:'XOR', inputs:2, outputs:1, w:82,h:52},
+    XNOR:{label:'XNOR', inputs:2, outputs:1, w:82,h:52},
+    DFF:{label:'D Flip-Flop', inputs:2, outputs:2, w:116,h:76, inLabels:['D','CLK'], outLabels:['Q',"Q'"], inLabelOffset:12, outLabelOffset:16},
+    SR:{label:'SR Latch', inputs:2, outputs:2, w:116,h:76, inLabels:['S','R'], outLabels:['Q',"Q'"], inLabelOffset:12, outLabelOffset:16},
+  };
+
+  // posisi tiap segmen (a..g) dalam px, relatif terhadap kotak komponen 7-segmen (dipusatkan, kotak w:100 h:139)
+  const SEG_GEOM = [
+    {name:'a', cls:'seg-h', left:37, top:31,   w:26, h:8},
+    {name:'b', cls:'seg-v', left:62, top:40,   w:8,  h:25},
+    {name:'c', cls:'seg-v', left:62, top:69,   w:8,  h:25},
+    {name:'d', cls:'seg-h', left:37, top:96,   w:26, h:8},
+    {name:'e', cls:'seg-v', left:28, top:69,   w:8,  h:25},
+    {name:'f', cls:'seg-v', left:28, top:40,   w:8,  h:25},
+    {name:'g', cls:'seg-h', left:37, top:62.5, w:26, h:8},
+  ];
+
+  let components = [];
+  let wires = [];
+  let idCounter = 1;
+  let historyStack = [];
+  const HISTORY_LIMIT = 50;
+  let customICs = []; // pustaka Sub-IC tersimpan: {id,name,inputs:[],outputs:[],w,h,components,wires}
+  let subIcMode = null; // saat membuat Sub-IC: {name, backupComponents, backupWires, backupIdCounter, backupHistory}
+  let icCounter = 1;
+
+  function getDef(type){
+    if(DEFS[type]) return DEFS[type];
+    const ic = customICs.find(c=>c.id===type);
+    if(ic) return {label:ic.name, inputs:ic.inputs.length, outputs:ic.outputs.length, w:ic.w, h:ic.h, inLabels:ic.inputs, outLabels:ic.outputs, inLabelOffset:12, outLabelOffset:16, isCustomIC:true};
+    return {label:'?', inputs:0, outputs:0, w:60, h:40};
+  }
+
+  function deepClone(obj){
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  let placementType = null;
+  let selection = null; // {type:'comp'|'wire', id}
+  let wireDraft = null; // {compId, pin}
+  let dragState = null; // {compId, offsetX, offsetY, moved}
+  let placePending = null; // {canvasX, canvasY, clientX, clientY, pointerId} — nunggu konfirmasi ketuk singkat sebelum menempatkan komponen
+  const TAP_MOVE_THRESHOLD = 6; // px di layar; lebih dari ini dianggap gestur geser, bukan ketuk
+  let activeMenu = null; // {el, compId} popup nama & putar
+
+  let running = false;
+  let simTimer = null;
+  const TICK_MS = 60;
+  let clockPeriod = 800;
+
+  const canvas = document.getElementById('canvas');
+  const canvasSizer = document.getElementById('canvasSizer');
+  const svg = document.getElementById('wires');
+  const canvasWrap = document.getElementById('canvasWrap');
+  const status = document.getElementById('status');
+
+  const BASE_W = 2400, BASE_H = 1500;
+  const ZOOM_MIN = 0.3, ZOOM_MAX = 2.5, ZOOM_STEP = 0.1;
+  let zoomScale = 1;
+  const activePointers = new Map(); // untuk cubit (pinch) zoom di layar sentuh
+  let pinchState = null; // {initialDist, initialScale}
+
+  function applyZoom(){
+    canvas.style.transform = 'scale('+zoomScale+')';
+    canvasSizer.style.width = (BASE_W*zoomScale)+'px';
+    canvasSizer.style.height = (BASE_H*zoomScale)+'px';
+    const label = document.getElementById('btnZoomReset');
+    if(label) label.textContent = Math.round(zoomScale*100)+'%';
+  }
+
+  function zoomAt(newScale, clientX, clientY){
+    newScale = Math.round(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, newScale))*100)/100;
+    if(newScale === zoomScale) return;
+    const wrapRect = canvasWrap.getBoundingClientRect();
+    const oldScale = zoomScale;
+    const canvasX = (clientX - wrapRect.left + canvasWrap.scrollLeft) / oldScale;
+    const canvasY = (clientY - wrapRect.top + canvasWrap.scrollTop) / oldScale;
+    zoomScale = newScale;
+    applyZoom();
+    canvasWrap.scrollLeft = canvasX*zoomScale - (clientX - wrapRect.left);
+    canvasWrap.scrollTop = canvasY*zoomScale - (clientY - wrapRect.top);
+    if(activeMenu) closeComponentMenu();
+  }
+
+  function zoomFromButton(delta){
+    const wrapRect = canvasWrap.getBoundingClientRect();
+    zoomAt(zoomScale+delta, wrapRect.left+wrapRect.width/2, wrapRect.top+wrapRect.height/2);
+  }
+
+  function teksHtml(value){
+    return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function setStatus(html){ status.innerHTML = html; }
+
+  function snapshot(){
+    return JSON.stringify({components, wires, idCounter});
+  }
+
+  function pushHistory(){
+    historyStack.push(snapshot());
+    if(historyStack.length > HISTORY_LIMIT) historyStack.shift();
+  }
+
+  function pushHistorySnapshot(snap){
+    historyStack.push(snap);
+    if(historyStack.length > HISTORY_LIMIT) historyStack.shift();
+  }
+
+  function undo(){
+    if(historyStack.length === 0){
+      setStatus('Tidak ada tindakan yang bisa diurungkan.');
+      return;
+    }
+    if(activeMenu){ activeMenu.el.remove(); activeMenu = null; }
+    const prev = JSON.parse(historyStack.pop());
+    components = prev.components;
+    wires = prev.wires;
+    idCounter = prev.idCounter;
+    selection = null;
+    wireDraft = null;
+    buildDOM();
+    simulate();
+    updateVisuals();
+    setStatus('Tindakan terakhir diurungkan.');
+  }
+
+  function deleteSelection(){
+    if(!selection){
+      setStatus('Tidak ada komponen atau kabel yang dipilih untuk dihapus.');
+      return;
+    }
+    if(activeMenu){ activeMenu.el.remove(); activeMenu = null; }
+    pushHistory();
+    if(selection.type === 'comp'){
+      const id = selection.id;
+      components = components.filter(c=>c.id!==id);
+      wires = wires.filter(w=>w.from!==id && w.to!==id);
+      selection = null;
+      buildDOM(); simulate(); updateVisuals();
+      setStatus('Komponen dihapus.');
+    } else if(selection.type === 'wire'){
+      wires = wires.filter(w=>w.id!==selection.id);
+      selection = null;
+      drawWires(); simulate(); updateVisuals();
+      setStatus('Kabel dihapus.');
+    }
+  }
+
+  function newComponent(type, x, y){
+    const def = getDef(type);
+    const comp = {
+      id: 'c'+(idCounter++),
+      type, x, y, w:def.w, h:def.h,
+      state: 0,
+      name: '',
+      rotation: 0,
+      outputs: new Array(def.outputs).fill(0),
+      _prevClk: 0,
+      _q: 0,
+      _lastToggle: performance.now(),
+    };
+    return comp;
+  }
+
+  function getInputValues(comp, compList, wireList){
+    const def = getDef(comp.type);
+    const vals = [];
+    for(let i=0;i<def.inputs;i++){
+      const w = wireList.find(w=>w.to===comp.id && w.toPin===i);
+      if(!w){ vals.push(0); continue; }
+      const src = compList.find(c=>c.id===w.from);
+      vals.push(src ? (src.outputs[w.fromPin]||0) : 0);
+    }
+    return vals;
+  }
+  function inputValues(comp){ return getInputValues(comp, components, wires); }
+
+  function simulateCustomInstance(comp, def, compList, wireList, depth){
+    if(depth > 6 || !comp.__internal){
+      comp.outputs.fill(0);
+      return;
+    }
+    const inVals = getInputValues(comp, compList, wireList);
+    const internal = comp.__internal;
+    def.inLabels.forEach((name,i)=>{
+      const pinComp = internal.components.find(c=>c.type==='PIN_IN' && c.name===name);
+      if(pinComp) pinComp.state = inVals[i] ? 1 : 0;
+    });
+    simulateCircuit(internal.components, internal.wires, depth+1);
+    def.outLabels.forEach((name,i)=>{
+      const pinComp = internal.components.find(c=>c.type==='PIN_OUT' && c.name===name);
+      comp.outputs[i] = pinComp ? (pinComp._in ? 1 : 0) : 0;
+    });
+  }
+
+  function simulateCircuit(compList, wireList, depth){
+    for(let pass=0; pass<6; pass++){
+      for(const comp of compList){
+        if(comp.type==='INPUT' || comp.type==='CLOCK' || comp.type==='PIN_IN'){
+          comp.outputs[0] = comp.state;
+          continue;
+        }
+        if(comp.type==='VCC'){ comp.outputs[0] = 1; continue; }
+        if(comp.type==='GND'){ comp.outputs[0] = 0; continue; }
+        const def = getDef(comp.type);
+        if(def.isCustomIC){
+          simulateCustomInstance(comp, def, compList, wireList, depth);
+          continue;
+        }
+        const inVals = getInputValues(comp, compList, wireList);
+        switch(comp.type){
+          case 'NOT': comp.outputs[0] = inVals[0] ? 0 : 1; break;
+          case 'AND': comp.outputs[0] = (inVals[0] && inVals[1]) ? 1 : 0; break;
+          case 'OR': comp.outputs[0] = (inVals[0] || inVals[1]) ? 1 : 0; break;
+          case 'NAND': comp.outputs[0] = (inVals[0] && inVals[1]) ? 0 : 1; break;
+          case 'NOR': comp.outputs[0] = (inVals[0] || inVals[1]) ? 0 : 1; break;
+          case 'XOR': comp.outputs[0] = (!!inVals[0] !== !!inVals[1]) ? 1 : 0; break;
+          case 'XNOR': comp.outputs[0] = (!!inVals[0] === !!inVals[1]) ? 1 : 0; break;
+          case 'LED': comp._in = inVals[0]; break;
+          case 'PIN_OUT': comp._in = inVals[0]; break;
+          case 'SEVENSEG': comp._segs = inVals; break;
+          case 'DFF': {
+            const d = inVals[0], clk = inVals[1];
+            if(clk===1 && comp._prevClk===0){ comp._q = d; }
+            comp._prevClk = clk;
+            comp.outputs[0] = comp._q ? 1 : 0;
+            comp.outputs[1] = comp._q ? 0 : 1;
+            break;
+          }
+          case 'SR': {
+            const s = inVals[0], r = inVals[1];
+            if(s===1 && r===0) comp._q = 1;
+            else if(s===0 && r===1) comp._q = 0;
+            comp.outputs[0] = comp._q ? 1 : 0;
+            comp.outputs[1] = comp._q ? 0 : 1;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  function simulate(){ simulateCircuit(components, wires, 0); }
+
+  function tickClocks(){
+    const now = performance.now();
+    for(const comp of components){
+      if(comp.type!=='CLOCK') continue;
+      if(now - comp._lastToggle >= clockPeriod){
+        comp.state = comp.state ? 0 : 1;
+        comp._lastToggle = now;
+      }
+    }
+  }
+
+  // ---------- rendering ----------
+
+  function pinCoord(comp, dir, i){
+    const def = getDef(comp.type);
+    const count = dir==='in' ? def.inputs : def.outputs;
+    const localY = (i+1)*comp.h/(count+1);
+    const localX = dir==='in' ? 0 : comp.w;
+    const cx = comp.w/2, cy = comp.h/2;
+    let dx = localX - cx, dy = localY - cy;
+    const rot = comp.rotation || 0;
+    if(rot===90){ const ndx=-dy, ndy=dx; dx=ndx; dy=ndy; }
+    else if(rot===180){ dx=-dx; dy=-dy; }
+    else if(rot===270){ const ndx=dy, ndy=-dx; dx=ndx; dy=ndy; }
+    return {x: comp.x+cx+dx, y: comp.y+cy+dy};
+  }
+
+  function closeComponentMenu(){
+    if(!activeMenu) return;
+    const comp = components.find(c=>c.id===activeMenu.compId);
+    const input = activeMenu.el.querySelector('.comp-menu-name');
+    if(comp && input){
+      const val = input.value.trim();
+      if(val !== (comp.name || '')){
+        pushHistory();
+        comp.name = val;
+      }
+    }
+    activeMenu.el.remove();
+    activeMenu = null;
+    buildDOM(); simulate(); updateVisuals();
+  }
+
+  function openComponentMenu(compId){
+    closeComponentMenu();
+    const comp = components.find(c=>c.id===compId);
+    if(!comp) return;
+    const menu = document.createElement('div');
+    menu.className = 'comp-menu';
+    menu.style.left = ((comp.x + comp.w)*zoomScale + 8) + 'px';
+    menu.style.top = (comp.y*zoomScale - 6) + 'px';
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.className = 'comp-menu-name';
+    nameInput.placeholder = 'Nama label';
+    nameInput.value = comp.name || '';
+    nameInput.addEventListener('keydown', (e)=>{
+      e.stopPropagation();
+      if(e.key === 'Enter') closeComponentMenu();
+    });
+
+    let colorWrap = null;
+    if(comp.type === 'LED'){
+      const preColorSnapshot = snapshot();
+      colorWrap = document.createElement('label');
+      colorWrap.className = 'comp-menu-color-wrap';
+      const colorText = document.createElement('span');
+      colorText.textContent = 'Warna LED';
+      const colorInput = document.createElement('input');
+      colorInput.type = 'color';
+      colorInput.className = 'comp-menu-color';
+      colorInput.value = comp.color || '#6bffb0';
+      colorInput.addEventListener('pointerdown', (e)=>e.stopPropagation());
+      colorInput.addEventListener('input', (e)=>{
+        e.stopPropagation();
+        comp.color = colorInput.value;
+        updateVisuals();
+      });
+      colorInput.addEventListener('change', (e)=>{
+        e.stopPropagation();
+        pushHistorySnapshot(preColorSnapshot);
+      });
+      colorWrap.appendChild(colorText);
+      colorWrap.appendChild(colorInput);
+    }
+
+    const rotateBtn = document.createElement('button');
+    rotateBtn.type = 'button';
+    rotateBtn.className = 'comp-menu-rotate';
+    rotateBtn.textContent = '\u27F3 Putar 90\u00B0';
+    rotateBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      pushHistory();
+      comp.rotation = ((comp.rotation || 0) + 90) % 360;
+      const el = canvas.querySelector('.comp[data-id="'+comp.id+'"]');
+      if(el) el.style.transform = comp.rotation ? 'rotate('+comp.rotation+'deg)' : '';
+      simulate(); updateVisuals();
+    });
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'comp-menu-delete';
+    deleteBtn.textContent = '\u{1F5D1} Hapus Komponen';
+    deleteBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      pushHistory();
+      const id = comp.id;
+      components = components.filter(c=>c.id!==id);
+      wires = wires.filter(w=>w.from!==id && w.to!==id);
+      if(selection && selection.type==='comp' && selection.id===id) selection = null;
+      activeMenu.el.remove();
+      activeMenu = null;
+      buildDOM(); simulate(); updateVisuals();
+      setStatus('Komponen dihapus.');
+    });
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'comp-menu-close';
+    closeBtn.textContent = '\u2715';
+    closeBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      closeComponentMenu();
+    });
+
+    menu.appendChild(nameInput);
+    if(colorWrap) menu.appendChild(colorWrap);
+    menu.appendChild(rotateBtn);
+    menu.appendChild(deleteBtn);
+    menu.appendChild(closeBtn);
+    menu.addEventListener('pointerdown', (e)=>e.stopPropagation());
+    canvasSizer.appendChild(menu);
+    activeMenu = {el: menu, compId};
+  }
+
+  function buildDOM(){
+    canvas.querySelectorAll('.comp').forEach(el=>el.remove());
+    for(const comp of components){
+      canvas.appendChild(renderComponent(comp));
+    }
+    drawWires();
+    updateVisuals();
+  }
+
+  const GATE_TYPES = ['NOT','AND','OR','NAND','NOR','XOR','XNOR'];
+
+  function gateLeadLines(count, bodyEdgeX){
+    let s = '';
+    for(let i=0;i<count;i++){
+      const y = (i+1)*52/(count+1);
+      s += '<line x1="0" y1="'+y+'" x2="'+bodyEdgeX+'" y2="'+y+'" class="gate-lead"/>';
+    }
+    return s;
+  }
+
+  function gateSymbolSVG(type){
+    const inverted = (type==='NAND' || type==='NOR' || type==='XNOR');
+    const isXor = (type==='XOR' || type==='XNOR');
+    const isNot = (type==='NOT');
+    const isAndFamily = (type==='AND' || type==='NAND');
+    const M = 9; // margin tambahan kiri & kanan supaya simbol tidak mepet tepi kotak
+    const VIEW_W = 64 + M*2;
+
+    let body, tipX, leadsIn, bodyEdgeX;
+    if(isNot){
+      body = '<path d="M'+(10+M)+',8 L'+(10+M)+',44 L'+(48+M)+',26 Z" class="gate-body"/>';
+      tipX = 48+M; leadsIn = 1; bodyEdgeX = 10+M;
+    } else if(isAndFamily){
+      body = '<path d="M'+(12+M)+',6 H'+(30+M)+' A20,20 0 0 1 '+(30+M)+',46 H'+(12+M)+' Z" class="gate-body"/>';
+      tipX = 50+M; leadsIn = 2; bodyEdgeX = 12+M;
+    } else {
+      body = '<path d="M'+(10+M)+',6 Q'+(20+M)+',26 '+(10+M)+',46 Q'+(35+M)+',46 '+(52+M)+',26 Q'+(35+M)+',6 '+(10+M)+',6 Z" class="gate-body"/>';
+      tipX = 52+M; leadsIn = 2; bodyEdgeX = 10+M;
+      if(isXor){
+        body += '<path d="M'+(4+M)+',6 Q'+(14+M)+',26 '+(4+M)+',46" class="gate-body-extra"/>';
+      }
+    }
+
+    const bubbleR = 4;
+    const bubbleCx = tipX + bubbleR;
+    const outLeadStartX = inverted ? bubbleCx + bubbleR : tipX;
+
+    let svg = '<svg class="gate-symbol" viewBox="0 0 '+VIEW_W+' 52" preserveAspectRatio="none">';
+    svg += gateLeadLines(leadsIn, bodyEdgeX);
+    svg += body;
+    if(inverted) svg += '<circle cx="'+bubbleCx+'" cy="26" r="'+bubbleR+'" class="gate-bubble"/>';
+    svg += '<line x1="'+outLeadStartX+'" y1="26" x2="'+VIEW_W+'" y2="26" class="gate-lead"/>';
+    svg += '</svg>';
+    return svg;
+  }
+
+  function renderComponent(comp){
+    const def = getDef(comp.type);
+    const el = document.createElement('div');
+    el.className = 'comp '+comp.type+(def.inputs+def.outputs<=1 && comp.type!=='LED' && comp.type!=='INPUT' && comp.type!=='CLOCK' ? ' gate':'')+(GATE_TYPES.includes(comp.type)?' gate':'');
+    el.style.left = comp.x+'px';
+    el.style.top = comp.y+'px';
+    el.style.width = comp.w+'px';
+    el.style.height = comp.h+'px';
+    if(comp.rotation) el.style.transform = 'rotate('+comp.rotation+'deg)';
+    el.dataset.id = comp.id;
+
+    let inner = '';
+    if(comp.type==='INPUT'){
+      inner = '<div class="toggle-track"><div class="toggle-knob"></div></div><span class="sublabel">SAKLAR</span>';
+    } else if(comp.type==='CLOCK'){
+      inner = '<div class="clk-icon">⏱</div><span class="sublabel">CLOCK</span>';
+    } else if(comp.type==='VCC'){
+      inner = '<div class="vcc-symbol">+</div><span class="sublabel">VCC</span>';
+    } else if(comp.type==='GND'){
+      inner = '<div class="gnd-symbol"><span></span><span></span><span></span></div><span class="sublabel">GND</span>';
+    } else if(comp.type==='PIN_IN'){
+      inner = '<div class="toggle-track pin-io-track"><div class="toggle-knob"></div></div><span class="sublabel">PIN IN</span>';
+    } else if(comp.type==='PIN_OUT'){
+      inner = '<div class="bulb pin-io-bulb"></div><span class="sublabel">PIN OUT</span>';
+    } else if(comp.type==='LED'){
+      inner = '<div class="bulb"></div>';
+    } else if(comp.type==='SEVENSEG'){
+      let segsHtml = '';
+      SEG_GEOM.forEach((seg,i)=>{
+        segsHtml += '<div class="seg '+seg.cls+'" data-idx="'+i+'" style="left:'+seg.left+'px;top:'+seg.top+'px;width:'+seg.w+'px;height:'+seg.h+'px;"></div>';
+      });
+      inner = '<div class="sevenseg-box">'+segsHtml+'</div><div class="sevenseg-caption"><span class="sublabel">7‑SEGMEN</span><span class="cc-tag">COMMON CATHODE</span></div>';
+    } else if(comp.type==='DFF' || comp.type==='SR'){
+      inner = '<div class="label">'+teksHtml(def.label)+'</div>';
+    } else if(def.isCustomIC){
+      inner = '<div class="label ic-label">'+teksHtml(def.label)+'</div>';
+    } else if(GATE_TYPES.includes(comp.type)){
+      inner = gateSymbolSVG(comp.type);
+    } else {
+      inner = '<div class="label">'+teksHtml(comp.type)+'</div>';
+    }
+    el.innerHTML = inner;
+
+    // pins
+    for(let i=0;i<def.inputs;i++){
+      const p = document.createElement('div');
+      p.className='pin pin-in';
+      const yPct = (i+1)*100/(def.inputs+1);
+      p.style.left='0%'; p.style.top=yPct+'%';
+      p.dataset.comp = comp.id; p.dataset.pin=i; p.dataset.dir='in';
+      el.appendChild(p);
+      if(def.inLabels && def.inLabels[i]){
+        const lbl = document.createElement('div');
+        lbl.className='pin-label';
+        lbl.style.left=(def.inLabelOffset || 6)+'px'; lbl.style.top=yPct+'%';
+        lbl.textContent = def.inLabels[i];
+        el.appendChild(lbl);
+      }
+    }
+    for(let i=0;i<def.outputs;i++){
+      const p = document.createElement('div');
+      p.className='pin pin-out';
+      const yPct = (i+1)*100/(def.outputs+1);
+      p.style.left='100%'; p.style.top=yPct+'%';
+      p.dataset.comp = comp.id; p.dataset.pin=i; p.dataset.dir='out';
+      el.appendChild(p);
+      if(def.outLabels && def.outLabels[i]){
+        const lbl = document.createElement('div');
+        lbl.className='pin-label';
+        lbl.style.right=(def.outLabelOffset || 6)+'px'; lbl.style.left='auto'; lbl.style.top=yPct+'%';
+        lbl.textContent = def.outLabels[i];
+        el.appendChild(lbl);
+      }
+    }
+
+    // tombol untuk memberi nama label & memutar komponen
+    const renameBtn = document.createElement('div');
+    renameBtn.className = 'comp-rename-btn';
+    renameBtn.textContent = '\u270E';
+    renameBtn.title = 'Beri nama label / putar komponen';
+    if(comp.rotation) renameBtn.style.transform = 'rotate('+(-comp.rotation)+'deg)';
+    renameBtn.addEventListener('pointerdown', (e)=>{
+      e.stopPropagation();
+      e.preventDefault();
+    });
+    renameBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      openComponentMenu(comp.id);
+    });
+    el.appendChild(renameBtn);
+
+    if(comp.name){
+      const tag = document.createElement('div');
+      tag.className = 'comp-name-tag';
+      tag.textContent = comp.name;
+      el.appendChild(tag);
+    }
+
+    if(selection && selection.type==='comp' && selection.id===comp.id) el.classList.add('selected');
+    return el;
+  }
+
+  function drawWires(){
+    svg.innerHTML = '';
+    for(const w of wires){
+      const src = components.find(c=>c.id===w.from);
+      const dst = components.find(c=>c.id===w.to);
+      if(!src || !dst) continue;
+      const p1 = pinCoord(src,'out',w.fromPin);
+      const p2 = pinCoord(dst,'in',w.toPin);
+      const midX = (p1.x+p2.x)/2;
+      const d = `M ${p1.x},${p1.y} C ${midX},${p1.y} ${midX},${p2.y} ${p2.x},${p2.y}`;
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', d);
+      path.setAttribute('class','wire'+(selection && selection.type==='wire' && selection.id===w.id ? ' selected':''));
+      path.setAttribute('fill','none');
+      const on = src.outputs[w.fromPin];
+      path.setAttribute('stroke', on ? 'var(--hi)' : 'var(--copper-dim)');
+      path.setAttribute('stroke-width', on ? '2.6' : '2');
+      path.style.pointerEvents='stroke';
+      path.addEventListener('pointerdown', (e)=>{
+        e.stopPropagation();
+        selection = {type:'wire', id:w.id};
+        drawWires();
+      });
+      svg.appendChild(path);
+    }
+    if(wireDraft){
+      const src = components.find(c=>c.id===wireDraft.compId);
+      if(src){
+        const p1 = pinCoord(src, wireDraft.dir, wireDraft.pin);
+        const p2 = wireDraft.mouse || p1;
+        const midX = (p1.x+p2.x)/2;
+        const d = `M ${p1.x},${p1.y} C ${midX},${p1.y} ${midX},${p2.y} ${p2.x},${p2.y}`;
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d', d);
+        path.setAttribute('fill','none');
+        path.setAttribute('stroke','var(--warn)');
+        path.setAttribute('stroke-width','2');
+        path.setAttribute('stroke-dasharray','5,4');
+        svg.appendChild(path);
+      }
+    }
+  }
+
+  function updateVisuals(){
+    for(const comp of components){
+      const el = canvas.querySelector('.comp[data-id="'+comp.id+'"]');
+      if(!el) continue;
+      el.classList.toggle('selected', !!(selection && selection.type==='comp' && selection.id===comp.id));
+      if(comp.type==='INPUT') el.classList.toggle('on', !!comp.state);
+      if(comp.type==='CLOCK') el.classList.toggle('on', !!comp.state);
+      if(comp.type==='LED'){
+        el.classList.toggle('on', !!comp._in);
+        const bulb = el.querySelector('.bulb');
+        if(bulb){
+          if(comp.color){
+            bulb.style.borderColor = comp.color;
+            if(comp._in){
+              bulb.style.background = comp.color;
+              bulb.style.boxShadow = '0 0 14px '+comp.color;
+            } else {
+              bulb.style.background = '';
+              bulb.style.boxShadow = '';
+            }
+          } else {
+            bulb.style.borderColor = '';
+            bulb.style.background = '';
+            bulb.style.boxShadow = '';
+          }
+        }
+      }
+      if(comp.type==='PIN_IN') el.classList.toggle('on', !!comp.state);
+      if(comp.type==='PIN_OUT') el.classList.toggle('on', !!comp._in);
+      if(comp.type==='SEVENSEG'){
+        const segs = comp._segs || [0,0,0,0,0,0,0];
+        el.querySelectorAll('.seg').forEach(s=>{
+          s.classList.toggle('on', !!segs[+s.dataset.idx]);
+        });
+      }
+      el.querySelectorAll('.pin-in').forEach(p=>{
+        const i = +p.dataset.pin;
+        const w = wires.find(w=>w.to===comp.id && w.toPin===i);
+        const src = w ? components.find(c=>c.id===w.from) : null;
+        const val = src ? src.outputs[w.fromPin] : 0;
+        p.classList.toggle('hi', !!val);
+      });
+      el.querySelectorAll('.pin-out').forEach(p=>{
+        const i = +p.dataset.pin;
+        p.classList.toggle('hi', !!comp.outputs[i]);
+      });
+    }
+    drawWires();
+  }
+
+  function runFrame(){
+    tickClocks();
+    simulate();
+    updateVisuals();
+  }
+
+  // ---------- interaction ----------
+
+  function attachPaletteButton(btn){
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.palette-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const t = btn.dataset.type;
+      placementType = (t==='__select') ? null : t;
+      if(placementType){
+        setStatus('Klik area kerja untuk menempatkan <b>'+teksHtml(getDef(placementType).label)+'</b>. Tekan Esc untuk kembali memilih.');
+      } else {
+        setStatus('Mode pilih/geser aktif. Klik komponen untuk memilih atau menggesernya.');
+      }
+    });
+  }
+  document.querySelectorAll('.palette-btn').forEach(attachPaletteButton);
+
+  function rebuildCustomIcPalette(){
+    const section = document.getElementById('customIcSection');
+    const title = document.getElementById('subIcSectionTitle');
+    section.innerHTML = '';
+    title.style.display = customICs.length ? '' : 'none';
+    customICs.forEach(ic=>{
+      const btn = document.createElement('button');
+      btn.className = 'palette-btn';
+      btn.dataset.type = ic.id;
+      btn.title = ic.name+' ('+ic.inputs.length+' in / '+ic.outputs.length+' out)';
+      btn.innerHTML = '<span class="swatch" style="border-radius:2px;border-style:double;"></span> '+teksHtml(ic.name);
+      attachPaletteButton(btn);
+      section.appendChild(btn);
+    });
+  }
+
+  function toCanvasCoords(clientX, clientY){
+    const rect = canvas.getBoundingClientRect();
+    return {x: (clientX-rect.left)/zoomScale, y: (clientY-rect.top)/zoomScale};
+  }
+
+  canvasWrap.addEventListener('pointerdown', (e)=>{
+    if(activeMenu && !e.target.closest('.comp-menu')) closeComponentMenu();
+
+    if(e.pointerType==='touch'){
+      activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(activePointers.size===2){
+        const pts = Array.from(activePointers.values());
+        pinchState = { initialDist: Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y) || 1, initialScale: zoomScale };
+        dragState = null;
+        wireDraft = null;
+        placePending = null;
+        return;
+      }
+      if(activePointers.size>2) return;
+    }
+
+    const pinEl = e.target.closest('.pin');
+    const compEl = e.target.closest('.comp');
+    const pos = toCanvasCoords(e.clientX, e.clientY);
+
+    if(pinEl){
+      e.preventDefault();
+      const compId = pinEl.dataset.comp;
+      const pin = +pinEl.dataset.pin;
+      const dir = pinEl.dataset.dir;
+      if(!wireDraft){
+        if(dir==='out'){
+          wireDraft = {compId, pin, dir:'out', mouse:pos};
+          try{ pinEl.setPointerCapture(e.pointerId); }catch(err){}
+        } else {
+          // start from an input: treat as picking the wire's other end if exists, else ignore
+        }
+      } else {
+        if(dir==='in' && wireDraft.dir==='out'){
+          // remove existing wire into this input, then connect
+          pushHistory();
+          wires = wires.filter(w=>!(w.to===compId && w.toPin===pin));
+          wires.push({id:'w'+(idCounter++), from:wireDraft.compId, fromPin:wireDraft.pin, to:compId, toPin:pin});
+          wireDraft = null;
+          simulate(); updateVisuals();
+        } else if(dir==='out'){
+          wireDraft = {compId, pin, dir:'out', mouse:pos};
+        }
+      }
+      drawWires();
+      return;
+    }
+
+    if(compEl){
+      e.preventDefault();
+      const compId = compEl.dataset.id;
+      selection = {type:'comp', id:compId};
+      const comp = components.find(c=>c.id===compId);
+      dragState = {compId, startX:e.clientX, startY:e.clientY, origX:comp.x, origY:comp.y, moved:false, pointerId:e.pointerId, preSnapshot:snapshot()};
+      try{ compEl.setPointerCapture(e.pointerId); }catch(err){}
+      updateVisuals();
+      return;
+    }
+
+    // clicked empty canvas
+    if(placementType){
+      placePending = {canvasX: pos.x, canvasY: pos.y, clientX: e.clientX, clientY: e.clientY, pointerId: e.pointerId};
+      return;
+    }
+    selection = null;
+    wireDraft = null;
+    drawWires();
+    updateVisuals();
+  });
+
+  window.addEventListener('pointermove', (e)=>{
+    if(e.pointerType==='touch' && activePointers.has(e.pointerId)){
+      activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(pinchState && activePointers.size===2){
+        const pts = Array.from(activePointers.values());
+        const dist = Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+        const midX = (pts[0].x+pts[1].x)/2, midY = (pts[0].y+pts[1].y)/2;
+        zoomAt(pinchState.initialScale * (dist/pinchState.initialDist), midX, midY);
+        return;
+      }
+    }
+    const pos = toCanvasCoords(e.clientX, e.clientY);
+    if(placePending && e.pointerId===placePending.pointerId){
+      const dx = e.clientX - placePending.clientX;
+      const dy = e.clientY - placePending.clientY;
+      if(Math.hypot(dx,dy) > TAP_MOVE_THRESHOLD) placePending = null;
+    }
+    if(wireDraft){
+      wireDraft.mouse = pos;
+      drawWires();
+    }
+    if(dragState){
+      const dx = (e.clientX - dragState.startX)/zoomScale;
+      const dy = (e.clientY - dragState.startY)/zoomScale;
+      if(Math.abs(dx)>3 || Math.abs(dy)>3) dragState.moved = true;
+      const comp = components.find(c=>c.id===dragState.compId);
+      comp.x = Math.max(0, dragState.origX + dx);
+      comp.y = Math.max(0, dragState.origY + dy);
+      const el = canvas.querySelector('.comp[data-id="'+comp.id+'"]');
+      if(el){ el.style.left=comp.x+'px'; el.style.top=comp.y+'px'; }
+      drawWires();
+    }
+  });
+
+  function releaseTouchPointer(pointerId){
+    activePointers.delete(pointerId);
+    if(activePointers.size<2) pinchState = null;
+  }
+
+  function returnToSelectMode(){
+    placementType = null;
+    document.querySelectorAll('.palette-btn').forEach(b=>b.classList.remove('active'));
+    const selectBtn = document.querySelector('.palette-btn[data-type="__select"]');
+    if(selectBtn) selectBtn.classList.add('active');
+  }
+
+  function commitPlacement(){
+    if(!placePending || !placementType) { placePending = null; return; }
+    const def = getDef(placementType);
+    const pos = {x: placePending.canvasX, y: placePending.canvasY};
+    placePending = null;
+    pushHistory();
+    const comp = newComponent(placementType, pos.x-def.w/2, pos.y-def.h/2);
+    if(def.isCustomIC){
+      const ic = customICs.find(c=>c.id===placementType);
+      if(ic) comp.__internal = deepClone({components: ic.components, wires: ic.wires});
+    }
+    components.push(comp);
+    buildDOM();
+    selection = {type:'comp', id: comp.id};
+    simulate(); updateVisuals();
+    returnToSelectMode();
+    setStatus('<b>'+teksHtml(def.label)+'</b> ditempatkan. Mode pilih/geser aktif — seret untuk memindahkannya.');
+  }
+
+  window.addEventListener('pointerup', (e)=>{
+    if(e.pointerType==='touch') releaseTouchPointer(e.pointerId);
+    if(placePending && e.pointerId===placePending.pointerId){
+      commitPlacement();
+    }
+    if(dragState){
+      if(!dragState.moved){
+        const comp = components.find(c=>c.id===dragState.compId);
+        if(comp && (comp.type==='INPUT' || comp.type==='PIN_IN')){
+          comp.state = comp.state ? 0 : 1;
+          simulate(); updateVisuals();
+        }
+      } else {
+        pushHistorySnapshot(dragState.preSnapshot);
+      }
+      dragState = null;
+    }
+  });
+
+  window.addEventListener('pointercancel', (e)=>{
+    if(e.pointerType==='touch') releaseTouchPointer(e.pointerId);
+    if(placePending && e.pointerId===placePending.pointerId) placePending = null;
+    dragState = null;
+  });
+
+  window.addEventListener('keydown', (e)=>{
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='z'){
+      e.preventDefault();
+      undo();
+      return;
+    }
+    if(e.key==='Escape'){
+      wireDraft = null;
+      placementType = null;
+      document.querySelectorAll('.palette-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelector('.palette-btn[data-type="__select"]').classList.add('active');
+      setStatus('Mode pilih/geser aktif.');
+      drawWires();
+    }
+    if(e.key==='Delete' || e.key==='Backspace'){
+      if(document.activeElement && document.activeElement.tagName==='INPUT') return;
+      e.preventDefault();
+      deleteSelection();
+    }
+  });
+
+  // ---------- toolbar actions ----------
+
+  const btnRun = document.getElementById('btnRun');
+  document.getElementById('btnUndo').addEventListener('click', undo);
+  document.getElementById('btnDelete').addEventListener('click', deleteSelection);
+
+  function updateSubIcUI(){
+    const banner = document.getElementById('subIcBanner');
+    const btn = document.getElementById('btnSubIc');
+    const cancelBtn = document.getElementById('btnSubIcCancel');
+    const pinSection = document.getElementById('subIcPinSection');
+    if(subIcMode){
+      banner.style.display = '';
+      banner.textContent = '🧩 Mode Edit Sub-IC: ' + subIcMode.name;
+      btn.textContent = '✔';
+      btn.title = 'Simpan Sub-IC ini';
+      btn.classList.add('active-mode');
+      cancelBtn.style.display = '';
+      pinSection.style.display = '';
+    } else {
+      banner.style.display = 'none';
+      btn.textContent = '🧩';
+      btn.title = 'Buat Sub-IC baru';
+      btn.classList.remove('active-mode');
+      cancelBtn.style.display = 'none';
+      pinSection.style.display = 'none';
+    }
+  }
+
+  function startSubIc(){
+    const name = prompt('Nama Sub-IC baru:');
+    if(!name || !name.trim()) return;
+    if(activeMenu){ activeMenu.el.remove(); activeMenu = null; }
+    if(running){ running=false; clearInterval(simTimer); btnRun.textContent='▶'; btnRun.title='Jalankan'; btnRun.classList.add('primary'); }
+    subIcMode = {
+      name: name.trim(),
+      backupComponents: components,
+      backupWires: wires,
+      backupIdCounter: idCounter,
+      backupHistory: historyStack,
+      backupSelection: selection,
+    };
+    components = [];
+    wires = [];
+    historyStack = [];
+    selection = null; wireDraft = null; dragState = null;
+    buildDOM(); simulate(); updateVisuals();
+    updateSubIcUI();
+    setStatus('Mode Edit Sub-IC: <b>'+teksHtml(subIcMode.name)+'</b>. Rangkai gerbang seperti biasa, tambahkan <b>Pin Input</b>/<b>Pin Output</b> untuk menandai kaki luar, lalu beri nama tiap pin lewat ikon ✎. Klik ✔ untuk menyimpan.');
+  }
+
+  function restoreMainFromSubIc(){
+    components = subIcMode.backupComponents;
+    wires = subIcMode.backupWires;
+    idCounter = subIcMode.backupIdCounter;
+    historyStack = subIcMode.backupHistory;
+    selection = subIcMode.backupSelection;
+    subIcMode = null;
+    wireDraft = null; dragState = null; placePending = null;
+    placementType = null;
+    document.querySelectorAll('.palette-btn').forEach(b=>b.classList.remove('active'));
+    const selectBtn = document.querySelector('.palette-btn[data-type="__select"]');
+    if(selectBtn) selectBtn.classList.add('active');
+    if(activeMenu){ activeMenu.el.remove(); activeMenu = null; }
+    buildDOM(); simulate(); updateVisuals();
+    updateSubIcUI();
+  }
+
+  function cancelSubIc(){
+    if(!subIcMode) return;
+    if(!confirm('Batalkan pembuatan Sub-IC "'+subIcMode.name+'"? Rangkaian yang sedang dibuat akan hilang.')) return;
+    restoreMainFromSubIc();
+    setStatus('Pembuatan Sub-IC dibatalkan.');
+  }
+
+  function finishSubIc(){
+    const pinIns = components.filter(c=>c.type==='PIN_IN').sort((a,b)=>a.y-b.y);
+    const pinOuts = components.filter(c=>c.type==='PIN_OUT').sort((a,b)=>a.y-b.y);
+    if(pinIns.length===0 && pinOuts.length===0){
+      alert('Tambahkan minimal satu Pin Input atau Pin Output sebelum menyimpan Sub-IC.');
+      return;
+    }
+    const usedNames = new Set();
+    function ensureName(c, prefix, idx){
+      let nm = (c.name||'').trim();
+      if(!nm) nm = prefix+(idx+1);
+      let base = nm, n = 1;
+      while(usedNames.has(nm)){ nm = base+'_'+(++n); }
+      usedNames.add(nm);
+      c.name = nm;
+      return nm;
+    }
+    const inputNames = pinIns.map((c,i)=>ensureName(c,'IN',i));
+    const outputNames = pinOuts.map((c,i)=>ensureName(c,'OUT',i));
+
+    const pinCount = Math.max(inputNames.length, outputNames.length, 1);
+    const ic = {
+      id: 'IC'+(icCounter++),
+      name: subIcMode.name,
+      inputs: inputNames,
+      outputs: outputNames,
+      w: 150,
+      h: Math.max(60, (pinCount+1)*22),
+      components: deepClone(components),
+      wires: deepClone(wires),
+    };
+    customICs.push(ic);
+    rebuildCustomIcPalette();
+
+    const icName = ic.name, inCount = inputNames.length, outCount = outputNames.length;
+    restoreMainFromSubIc();
+    setStatus('Sub-IC <b>'+teksHtml(icName)+'</b> berhasil disimpan ('+inCount+' input, '+outCount+' output). Lihat panel kiri, grup "Sub-IC Saya".');
+  }
+
+  document.getElementById('btnSubIc').addEventListener('click', ()=>{
+    if(subIcMode) finishSubIc(); else startSubIc();
+  });
+  document.getElementById('btnSubIcCancel').addEventListener('click', cancelSubIc);
+
+  document.getElementById('btnToggleSettings').addEventListener('click', ()=>{
+    const group = document.getElementById('settingsGroup');
+    const btn = document.getElementById('btnToggleSettings');
+    const isHidden = group.style.display === 'none';
+    group.style.display = isHidden ? 'flex' : 'none';
+    btn.classList.toggle('open', isHidden);
+  });
+  btnRun.addEventListener('click', ()=>{
+    running = !running;
+    if(running){
+      btnRun.textContent = '⏸';
+      btnRun.title = 'Jeda';
+      btnRun.classList.remove('primary');
+      simTimer = setInterval(runFrame, TICK_MS);
+    } else {
+      btnRun.textContent = '▶';
+      btnRun.title = 'Jalankan';
+      btnRun.classList.add('primary');
+      clearInterval(simTimer);
+    }
+  });
+
+  document.getElementById('btnStep').addEventListener('click', ()=>{
+    runFrame();
+  });
+
+  const clkSpeed = document.getElementById('clkSpeed');
+  const clkSpeedLabel = document.getElementById('clkSpeedLabel');
+  clkSpeed.addEventListener('input', ()=>{
+    clockPeriod = +clkSpeed.value;
+    clkSpeedLabel.textContent = clockPeriod+' ms';
+  });
+
+  document.getElementById('btnZoomOut').addEventListener('click', ()=>zoomFromButton(-ZOOM_STEP));
+  document.getElementById('btnZoomIn').addEventListener('click', ()=>zoomFromButton(ZOOM_STEP));
+  document.getElementById('btnZoomReset').addEventListener('click', ()=>zoomFromButton(1 - zoomScale));
+
+  canvasWrap.addEventListener('wheel', (e)=>{
+    if(!(e.ctrlKey || e.metaKey)) return;
+    e.preventDefault();
+    zoomAt(zoomScale + (e.deltaY<0 ? ZOOM_STEP : -ZOOM_STEP), e.clientX, e.clientY);
+  }, {passive:false});
+
+  document.getElementById('btnClear').addEventListener('click', ()=>{
+    if(!confirm('Bersihkan seluruh rangkaian di area kerja?')) return;
+    if(activeMenu){ activeMenu.el.remove(); activeMenu = null; }
+    pushHistory();
+    components = []; wires = []; selection=null; wireDraft=null;
+    buildDOM();
+    setStatus('Area kerja dikosongkan.');
+  });
+
+  document.getElementById('btnSave').addEventListener('click', ()=>{
+    const data = JSON.stringify({components, wires, idCounter, customICs, icCounter});
+    localStorage.setItem('simicdigital_circuit', data);
+    setStatus('Rangkaian disimpan ke penyimpanan lokal peramban.');
+  });
+
+  document.getElementById('btnLoad').addEventListener('click', ()=>{
+    const data = localStorage.getItem('simicdigital_circuit');
+    if(!data){ setStatus('Belum ada rangkaian tersimpan di peramban ini.'); return; }
+    loadFromJSON(data);
+    setStatus('Rangkaian tersimpan berhasil dimuat.');
+  });
+
+  document.getElementById('btnExport').addEventListener('click', ()=>{
+    const data = JSON.stringify({components, wires, idCounter, customICs, icCounter}, null, 2);
+    const blob = new Blob([data], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'rangkaian-ic-digital.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('btnImport').addEventListener('click', ()=>{
+    const modal = document.getElementById('importAuthModal');
+    const input = document.getElementById('importAuthInput');
+    const err = document.getElementById('importAuthError');
+    input.value = '';
+    err.style.display = 'none';
+    modal.style.display = 'flex';
+    input.focus();
+  });
+
+  function closeImportAuthModal(){
+    document.getElementById('importAuthModal').style.display = 'none';
+  }
+
+  document.getElementById('importAuthCancel').addEventListener('click', closeImportAuthModal);
+
+  document.getElementById('importAuthConfirm').addEventListener('click', ()=>{
+    const IMPORT_CODE = 'te.smknbansari';
+    const input = document.getElementById('importAuthInput');
+    const err = document.getElementById('importAuthError');
+    if(input.value.trim() !== IMPORT_CODE){
+      err.style.display = '';
+      input.focus();
+      return;
+    }
+    closeImportAuthModal();
+    document.getElementById('fileInput').click();
+  });
+
+  document.getElementById('importAuthInput').addEventListener('keydown', (e)=>{
+    e.stopPropagation();
+    if(e.key === 'Enter') document.getElementById('importAuthConfirm').click();
+    if(e.key === 'Escape') closeImportAuthModal();
+  });
+
+  document.getElementById('importAuthModal').addEventListener('pointerdown', (e)=>{
+    if(e.target.id === 'importAuthModal') closeImportAuthModal();
+  });
+  document.getElementById('fileInput').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{ loadFromJSON(reader.result); setStatus('File rangkaian berhasil diimpor.'); }
+      catch(err){ setStatus('Gagal membaca file: format tidak valid.'); }
+    };
+    reader.readAsText(file);
+    e.target.value='';
+  });
+
+  function loadFromJSON(json){
+    const data = JSON.parse(json);
+    if(activeMenu){ activeMenu.el.remove(); activeMenu = null; }
+    pushHistory();
+    components = data.components || [];
+    wires = data.wires || [];
+    idCounter = data.idCounter || (components.length + wires.length + 1);
+    customICs = data.customICs || [];
+    icCounter = data.icCounter || (customICs.length + 1);
+    rebuildCustomIcPalette();
+    selection = null; wireDraft = null;
+    buildDOM();
+    simulate(); updateVisuals();
+  }
+
+  pasangTugasRangkaian({
+    format: 'IC-DIGITAL-1',
+    judul: 'Rangkaian IC Digital',
+    namaBerkas: 'rangkaian-ic-digital.json',
+    tipeBawaan: Object.keys(DEFS),
+    ambil() {
+      if (subIcMode) throw new Error('Selesaikan atau batalkan pengeditan Sub-IC sebelum mengirim.');
+      return {components, wires, idCounter, customICs, icCounter};
+    },
+    muat: loadFromJSON
+  });
+
+  // init
+  applyZoom();
+  buildDOM();
+  simulate();
+  updateVisuals();
+
+
+
+})();
+</script><dialog aria-labelledby="judulKirimRangkaian" style="width: min(420px, 100% - 32px); max-height: 90vh; overflow: auto; border: 1px solid rgb(100, 116, 139); border-radius: 14px; padding: 18px; background: rgb(24, 34, 47); color: white; font: inherit;">
+    <h2 id="judulKirimRangkaian" style="margin:0 0 12px">Kirim Tugas</h2>
+    <form style="display:grid;gap:10px">
+      <label>Judul tugas<input name="judul" class="modal-input" maxlength="100" required="" style="display:block;width:100%;box-sizing:border-box"></label>
+      <label>Kode guru<input name="kode" class="modal-input" maxlength="12" autocomplete="off" autocapitalize="characters" required="" style="display:block;width:100%;box-sizing:border-box"></label>
+      <label>Catatan (opsional)<textarea name="catatan" class="modal-input" maxlength="500" style="display:block;width:100%;box-sizing:border-box"></textarea></label>
+      <p role="status" style="margin:0"></p>
+      <a target="_blank" rel="noopener" hidden="" style="color:#bae6fd"></a>
+      <div><button type="submit" class="btn primary">Kirim</button> <button type="button" class="btn">Tutup</button></div>
+    </form></dialog>
+<script type="module" src="./Simulator IC Digital v0.1_files/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;aa1c918a41db4736b3d196f379e8cdd7&quot;,&quot;r&quot;:1,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+
+</body></html>
