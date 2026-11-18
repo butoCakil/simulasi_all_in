@@ -1310,4 +1310,120 @@ const taskId=new URLSearchParams(location.search).get('tugas');
 if(taskId!==null) openSubmission(taskId);
 
 </script>
+<!-- SEMATAN-SUPERAPP:MULAI -->
+<style></style>
+<script>
+/* ==========================================================================
+   SEMATAN SUPER APP — ditambahkan untuk Super APP Jurusan TE (SIMBioTE).
+   Logika simulator tidak diubah. Bagian ini dibuat oleh sematan/pasang.py dari
+   sematan/inti.js + sematan/<simulator>.js; ubah di sana, jangan di sini.
+   Aktif hanya dengan ?sematan=1 di dalam iframe. Pesan {alat, v:1, tipe, ...}:
+     induk → alat   muat {berkas}   minta   soal {soal}
+     alat → induk   siap {versiApp, versiBerkas}   dimuat {galat}   berkas {berkas}
+                    berubah {berkas} (ditunda 0,6 dtk setelah pengguna mengubah isi)
+   ?pratinjau=1: guru melihat hasil siswa; tidak ada pesan "berubah".
+   ========================================================================== */
+(function () {
+  var prm = new URLSearchParams(location.search);
+  if (prm.get('sematan') !== '1' || window.parent === window) return;
+  var PRATINJAU = prm.get('pratinjau') === '1';
+  var ALAT = 'simmeter';
+  var A = (function (PRATINJAU) {
+  // Berkas = data kiriman tugas bawaan (format MULTIMETER-1 versi 4 + penilaian lima ronde);
+  // kosong sebelum job selesai.
+  return {
+    versi: 'multimeter-tmg+sematan1',
+    ambil: function () {
+      if (!exam || !exam.done) return '';
+      var answer = state.mode === 'continuity'
+        ? exam.rounds.reduce(function (mask, round, i) { return mask + (round.answer << i); }, 0)
+        : exam.rounds[exam.rounds.length - 1].answer;
+      return JSON.stringify(Object.assign({ format: format, version: 4 }, state, {
+        answer: answer,
+        assessment: { rounds: exam.rounds, errors: exam.errors },
+      }));
+    },
+    muat: function (teks) {
+      var d = JSON.parse(teks);
+      if (PRATINJAU) {
+        reviewing = true;
+        document.querySelectorAll('[data-mode],[data-probe],.controls button,#answer,#wireAnswers select,#dial,#zeroDial,#coverHandle')
+          .forEach(function (el) { el.disabled = true; });
+        $('examReview').replaceChildren();
+        applySubmission(d);
+        statusOverride = 'Kiriman siswa dimuat. Jawaban tertera di bawah.';
+        refresh();
+        return;
+      }
+      exam = null;
+      applySubmission(d);
+      // Siswa membuka lagi hasil job yang sudah selesai (acuan tidak ditampilkan).
+      $('examReview').replaceChildren();
+      var a = d.assessment;
+      if (a && Array.isArray(a.rounds) && a.rounds.length === 5)
+        exam = { rounds: a.rounds, errors: Array.isArray(a.errors) ? a.errors : [], pool: [],
+          previous: practiceSnapshot(), done: true, sent: false, target: a.rounds[4] };
+      drawRack(); drawBoard(); refresh();
+    },
+    // Pengaturan tugas dari guru: {mode} = praktikum yang wajib dikerjakan; mode lain disembunyikan.
+    soal: function (s) {
+      var mode = s && s.mode;
+      if (!mode || !Object.prototype.hasOwnProperty.call(modes, mode)) return;
+      document.querySelectorAll('[data-mode]').forEach(function (b) { b.hidden = b.dataset.mode !== mode; });
+      if (!exam && !reviewing) setMode(mode);
+    },
+  };
+})(PRATINJAU);
+  document.documentElement.classList.add('sematan');
+  if (PRATINJAU) document.documentElement.classList.add('pratinjau');
+  var asal = location.origin;
+  try { if (document.referrer) asal = new URL(document.referrer).origin; } catch (e) {}
+  var izin = [location.origin, asal];
+  function kirim(tipe, isi) {
+    try { parent.postMessage(Object.assign({ alat: ALAT, v: 1, tipe: tipe }, isi || {}), asal); } catch (e) {}
+  }
+  function isi() {
+    try { return A.ambil() || ''; } catch (e) { return ''; }
+  }
+  var terakhir = '', jam = null;
+  function periksa() {
+    if (PRATINJAU) return;
+    var b = isi();
+    if (b && b !== terakhir) { terakhir = b; kirim('berubah', { berkas: b }); }
+  }
+  function tunda() { clearTimeout(jam); jam = setTimeout(periksa, 600); }
+  ['input', 'change', 'pointerup', 'keyup', 'click', 'drop'].forEach(function (t) {
+    document.addEventListener(t, tunda, true);
+  });
+  setInterval(periksa, 3000);
+  addEventListener('message', function (e) {
+    var m = e.data;
+    if (e.source !== parent || izin.indexOf(e.origin) < 0) return;
+    if (!m || m.alat !== ALAT || m.v !== 1) return;
+    if (m.tipe === 'muat') {
+      if (typeof m.berkas !== 'string') { kirim('dimuat', { galat: 'Isi berkas tidak ada' }); return; }
+      clearTimeout(jam);
+      Promise.resolve()
+        .then(function () { return m.berkas.trim() ? A.muat(m.berkas) : null; })
+        .then(
+          function () { terakhir = isi(); kirim('dimuat', { galat: null }); },
+          function (err) {
+            kirim('dimuat', { galat: err instanceof SyntaxError ? 'Berkas bukan JSON yang sah' : String((err && err.message) || err) });
+          }
+        );
+    } else if (m.tipe === 'minta') {
+      clearTimeout(jam);
+      var b = isi();
+      if (b) terakhir = b;
+      kirim('berkas', { berkas: b });
+    } else if (m.tipe === 'soal' && A.soal) {
+      try { A.soal(m.soal); } catch (err) {}
+      terakhir = isi();
+    }
+  });
+  terakhir = isi();
+  kirim('siap', { versiApp: A.versi, versiBerkas: 1 });
+})();
+</script>
+<!-- SEMATAN-SUPERAPP:SELESAI -->
 </body></html>
