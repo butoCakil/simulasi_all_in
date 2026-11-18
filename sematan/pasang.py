@@ -9,6 +9,9 @@ import pathlib, re
 
 AKAR = pathlib.Path(__file__).resolve().parent.parent
 INTI = (AKAR / 'sematan/inti.js').read_text(encoding='utf8')
+# Kenop besar di layar sentuh (selalu aktif, juga di luar Super APP).
+KENOP = (AKAR / 'sematan/kenop-besar.js').read_text(encoding='utf8')
+BERKENOP = {'simosk', 'simmeter'}
 MULAI, SELESAI = '<!-- SEMATAN-SUPERAPP:MULAI -->', '<!-- SEMATAN-SUPERAPP:SELESAI -->'
 
 SEM = 'html.sematan'
@@ -76,7 +79,8 @@ for nama, (alat, adapter, versi, css) in SIM.items():
     a = (AKAR / 'sematan' / adapter).read_text(encoding='utf8').strip()
     if versi: a = a.replace('%VERSI%', versi)
     js = INTI.replace("'%ALAT%'", repr(alat)).replace('(%ADAPTER%)', '(' + a + ')')
-    blok = f'{MULAI}\n<style>{css}</style>\n<script>\n{js}</script>\n{SELESAI}\n'
+    kenop = f'<script>\n{KENOP}</script>\n' if alat in BERKENOP else ''
+    blok = f'{MULAI}\n<style>{css}</style>\n<script>\n{js}</script>\n{kenop}{SELESAI}\n'
     s = re.sub(re.escape(MULAI) + r'[\s\S]*?' + re.escape(SELESAI) + r'\n?', '', s)
     i = s.rindex('</body>')
     s = s[:i] + blok + s[i:]
