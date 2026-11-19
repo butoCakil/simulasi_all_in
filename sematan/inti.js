@@ -6,6 +6,7 @@
      induk → alat   muat {berkas}   minta   soal {soal}
      alat → induk   siap {versiApp, versiBerkas}   dimuat {galat}   berkas {berkas}
                     berubah {berkas} (ditunda 0,6 dtk setelah pengguna mengubah isi)
+                    selesai (semua soal tugas selesai; induk mengarahkan ke tombol Kirim)
    ?pratinjau=1: guru melihat hasil siswa; tidak ada pesan "berubah".
    ========================================================================== */
 (function () {
@@ -26,6 +27,14 @@
     try { return A.ambil() || ''; } catch (e) { return ''; }
   }
   var terakhir = '', jam = null;
+  // Adaptor boleh memberi tahu induk bahwa semua soal selesai (induk mengarahkan ke tombol Kirim).
+  if (A.pasangSelesai)
+    A.pasangSelesai(function () {
+      clearTimeout(jam);
+      var b = isi();
+      if (b) { terakhir = b; kirim('berubah', { berkas: b }); }
+      kirim('selesai');
+    });
   function periksa() {
     if (PRATINJAU) return;
     var b = isi();
