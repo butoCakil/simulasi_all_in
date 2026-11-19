@@ -37,6 +37,12 @@ dibuka biasa (termasuk di iprime) simulator berjalan seperti semula.
 - Isi berkas yang dikirim sama dengan data *Kirim Tugas* bawaan: laporan lima ronde (Osiloskop,
   Multimeter), proyek rangkaian (Instalasi Listrik, IC Digital), dan gabungan proyek keempat tab
   (RAM & Dot Matrix).
+- Osiloskop dan Multimeter di tugas: guru bisa meminta beberapa job berurutan. Siswa melihat
+  bilah soal (`sematan/bilah-job.js`) di atas tab, mengerjakan job satu per satu (tombol *Kembali
+  ke Latihan* disembunyikan agar hasil job tidak hilang), dan berkas berisi
+  `{format: "TERAPAN-GABUNGAN-1", jobs: [laporan job, ...]}`. Data ronde (sinyal, baterai,
+  resistor, …) dikirim server per siswa. Guru di pratinjau bisa memilih tiap job dan tiap ronde;
+  tampilan alat disusun ulang dari setelan yang tersimpan di ronde itu.
 - Logika simulator tidak diubah. Instalasi Listrik dan IC Digital mendapat satu baris
   `window.tugasRangkaian = …` dan RAM & Dot Matrix satu blok `window.simTugasRam = …` (bertanda
   `SEMATAN-SUPERAPP`) supaya fungsi simpan/muat yang ada bisa dipanggil dari luar.

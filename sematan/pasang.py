@@ -12,9 +12,9 @@ INTI = (AKAR / 'sematan/inti.js').read_text(encoding='utf8')
 # Kenop besar di layar sentuh (selalu aktif, juga di luar Super APP).
 KENOP = (AKAR / 'sematan/kenop-besar.js').read_text(encoding='utf8')
 BERKENOP = {'simosk', 'simmeter'}
-# Tombol zoom melayang di kanvas (selalu aktif).
-ZOOM = (AKAR / 'sematan/zoom-melayang.js').read_text(encoding='utf8')
-BERZOOM = {'simlistrik', 'simic'}
+# Bilah soal tugas (urutan job, pratinjau per ronde) untuk simulator terapan; dipakai adaptornya.
+BILAH = (AKAR / 'sematan/bilah-job.js').read_text(encoding='utf8')
+BERBILAH = {'simosk', 'simmeter'}
 LAYAR_OSK = (AKAR / 'sematan/layar-osiloskop.js').read_text(encoding='utf8')
 MULAI, SELESAI = '<!-- SEMATAN-SUPERAPP:MULAI -->', '<!-- SEMATAN-SUPERAPP:SELESAI -->'
 
@@ -86,9 +86,8 @@ for nama, (alat, adapter, versi, css) in SIM.items():
     kenop = f'<script>\n{KENOP}</script>\n' if alat in BERKENOP else ''
     if alat == 'simosk':
         kenop += f'<script>\n{LAYAR_OSK}</script>\n'
-    if alat in BERZOOM:
-        kenop += f'<script>\n{ZOOM}</script>\n'
-    blok = f'{MULAI}\n<style>{css}</style>\n<script>\n{js}</script>\n{kenop}{SELESAI}\n'
+    bilah = f'<script>\n{BILAH}</script>\n' if alat in BERBILAH else ''
+    blok = f'{MULAI}\n<style>{css}</style>\n{bilah}<script>\n{js}</script>\n{kenop}{SELESAI}\n'
     s = re.sub(re.escape(MULAI) + r'[\s\S]*?' + re.escape(SELESAI) + r'\n?', '', s)
     i = s.rindex('</body>')
     s = s[:i] + blok + s[i:]
